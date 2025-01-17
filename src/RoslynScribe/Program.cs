@@ -38,7 +38,6 @@ namespace RoslynScribe
         private static async Task ScribeAnalyze(MSBuildWorkspace workspace, Solution solution)
         {
             var result = new List<ScribeNode>();
-            var keeper = GetKeeper(solution);
 
             foreach (var project in solution.Projects)
             {
@@ -62,9 +61,12 @@ namespace RoslynScribe
                         result.Add(scribeNode);
                         Console.WriteLine(scribeNode);
 
-                        Traverse(rootNode, scribeNode, semanticModel, keeper);
+                        Traverse(rootNode, scribeNode, semanticModel);
                         //SyntaxTreePrinter.Print(rootNode);
                         ScribeTreePrinter.Print(scribeNode);
+
+                        Console.WriteLine();
+                        Console.WriteLine();
                     }
                 }
 
@@ -76,28 +78,7 @@ namespace RoslynScribe
             }
         }
 
-        private static Dictionary<string, Dictionary<string, Document>> GetKeeper(Solution solution)
-        {
-            var keeper = new Dictionary<string, Dictionary<string, Document>>();
-
-            foreach (var project in solution.Projects)
-            {
-                var documentKeeper = new Dictionary<string, Document>();
-                keeper.Add(project.AssemblyName, documentKeeper);
-
-                if (project.Name == "RoslynScribe.TestProject")
-                {
-                    foreach (var document in project.Documents)
-                    {
-                        documentKeeper.Add(document.Name, document);
-                    }
-                }
-            }
-
-            return keeper;
-        }
-
-        private static void Traverse(SyntaxNode node, ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Dictionary<string, Document>> keeper)
+        private static void Traverse(SyntaxNode node, ScribeNode parentNode, SemanticModel semanticModel)
         {
             var nodes = node.ChildNodes();
             foreach (var syntaxNode in nodes)
@@ -108,11 +89,11 @@ namespace RoslynScribe
                     continue;
                 }
 
-                ProcessNode(parentNode, semanticModel, keeper, syntaxNode, kind);
+                ProcessNode(syntaxNode, parentNode, semanticModel, kind);
             }
         }
 
-        private static void ProcessNode(ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Dictionary<string, Document>> keeper, SyntaxNode syntaxNode, SyntaxKind kind)
+        private static void ProcessNode(SyntaxNode syntaxNode, ScribeNode parentNode, SemanticModel semanticModel, SyntaxKind kind)
         {
             var lTrivias = syntaxNode.GetLeadingTrivia();
             var childNode = FindCommentTrivia(syntaxNode, parentNode, lTrivias);
@@ -126,7 +107,7 @@ namespace RoslynScribe
                     foreach (var syntaxReference in syntaxReferences)
                     {
                         var methodNode = syntaxReference.GetSyntax();
-                        ProcessNode(childNode ?? parentNode, semanticModel, keeper, methodNode, methodNode.Kind());
+                        ProcessNode(methodNode, childNode ?? parentNode, semanticModel, methodNode.Kind());
                     }
                 }
             }
@@ -138,7 +119,7 @@ namespace RoslynScribe
                 return;
             }
 
-            Traverse(syntaxNode, childNode ?? parentNode, semanticModel, keeper);
+            Traverse(syntaxNode, childNode ?? parentNode, semanticModel);
         }
 
         private static bool IsCommentType(SyntaxKind kind)
@@ -184,7 +165,7 @@ namespace RoslynScribe
         {
             var childNode = new ScribeNode { Kind = syntaxNode.Kind().ToString(), Value = value };
             parentNode.ChildNodes.Add(childNode);
-            Console.WriteLine(childNode);
+            // Console.WriteLine(childNode);
             return childNode;
         }
 
