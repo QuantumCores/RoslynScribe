@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RoslynScribe
@@ -21,7 +22,7 @@ namespace RoslynScribe
                 workspace.LoadMetadataForReferencedProjects = true;
 
                 // var solutionPath = "D:\\Source\\TheGame\\TheGame.Town.Api\\TheGame.Town.Api.sln";//args[0];
-                var solutionPath = "D:\\Source\\Scribe\\RoslynScribe\\RoslynScribe.sln";//args[0];
+                var solutionPath = "D:\\Source\\RoslynScribe\\RoslynScribe.sln";//args[0];
                 Console.WriteLine($"Loading solution '{solutionPath}'");
 
                 // Attach progress reporter so we print projects as they are loaded.
@@ -47,7 +48,8 @@ namespace RoslynScribe
                     foreach (var document in project.Documents)
                     {
                         if (document.Name == project.Name + ".AssemblyInfo.cs" ||
-                            document.Name == project.Name + ".GlobalUsings.g.cs")
+                            document.Name == project.Name + ".GlobalUsings.g.cs" ||
+                            document.Name.EndsWith("AssemblyAttributes.cs"))
                         {
                             continue;
                         }
@@ -61,8 +63,11 @@ namespace RoslynScribe
                         result.Add(scribeNode);
                         Console.WriteLine(scribeNode);
 
-                        Traverse(rootNode, scribeNode, semanticModel);
-                        //SyntaxTreePrinter.Print(rootNode);
+                        ProcessNode(rootNode, rootNode.Kind(), scribeNode, semanticModel);
+                        if (document.Name == "S007_CallLambda.cs")
+                        {
+                            //SyntaxTreePrinter.Print(rootNode);
+                        }
                         ScribeTreePrinter.Print(scribeNode);
 
                         Console.WriteLine();
@@ -78,6 +83,35 @@ namespace RoslynScribe
             }
         }
 
+        private static void ProcessNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel)
+        {
+            var lTrivias = syntaxNode.GetLeadingTrivia();
+            var childNode = FindCommentTrivia(syntaxNode, parentNode, lTrivias);
+
+            if (syntaxKind == SyntaxKind.InvocationExpression)
+            {
+                var invokedMethod = GetMethodInfo(syntaxNode as InvocationExpressionSyntax, semanticModel);
+                if (invokedMethod != null)
+                {
+                    var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
+                    foreach (var syntaxReference in syntaxReferences)
+                    {
+                        var methodNode = syntaxReference.GetSyntax();
+                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, semanticModel);
+                    }
+                }
+            }
+            //var tTrivias = syntaxNode.GetTrailingTrivia();
+            //FindCommentTrivia(syntaxNode, parentNode, tTrivias);
+
+            if (KindSkipTraverse(syntaxNode, syntaxKind))
+            {
+                return;
+            }
+
+            Traverse(syntaxNode, childNode ?? parentNode, semanticModel);
+        }
+
         private static void Traverse(SyntaxNode node, ScribeNode parentNode, SemanticModel semanticModel)
         {
             var nodes = node.ChildNodes();
@@ -89,43 +123,8 @@ namespace RoslynScribe
                     continue;
                 }
 
-                ProcessNode(syntaxNode, parentNode, semanticModel, kind);
+                ProcessNode(syntaxNode, kind, parentNode, semanticModel);
             }
-        }
-
-        private static void ProcessNode(SyntaxNode syntaxNode, ScribeNode parentNode, SemanticModel semanticModel, SyntaxKind kind)
-        {
-            var lTrivias = syntaxNode.GetLeadingTrivia();
-            var childNode = FindCommentTrivia(syntaxNode, parentNode, lTrivias);
-
-            if (kind == SyntaxKind.InvocationExpression)
-            {
-                var invokedMethod = GetMethodInfo(syntaxNode as InvocationExpressionSyntax, semanticModel);
-                if (invokedMethod != null)
-                {
-                    var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
-                    foreach (var syntaxReference in syntaxReferences)
-                    {
-                        var methodNode = syntaxReference.GetSyntax();
-                        ProcessNode(methodNode, childNode ?? parentNode, semanticModel, methodNode.Kind());
-                    }
-                }
-            }
-            //var tTrivias = syntaxNode.GetTrailingTrivia();
-            //FindCommentTrivia(syntaxNode, parentNode, tTrivias);
-
-            if (KindToNotTraverse(kind))
-            {
-                return;
-            }
-
-            Traverse(syntaxNode, childNode ?? parentNode, semanticModel);
-        }
-
-        private static bool IsCommentType(SyntaxKind kind)
-        {
-            return kind == SyntaxKind.SingleLineCommentTrivia
-                || kind == SyntaxKind.MultiLineCommentTrivia;
         }
 
         private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias)
@@ -147,6 +146,12 @@ namespace RoslynScribe
             return null;
         }
 
+        private static bool IsCommentType(SyntaxKind kind)
+        {
+            return kind == SyntaxKind.SingleLineCommentTrivia
+                || kind == SyntaxKind.MultiLineCommentTrivia;
+        }
+
         private static bool KindToSkip(SyntaxKind kind)
         {
             return kind == SyntaxKind.Attribute ||
@@ -156,9 +161,42 @@ namespace RoslynScribe
                 kind == SyntaxKind.AttributeTargetSpecifier;
         }
 
-        private static bool KindToNotTraverse(SyntaxKind kind)
+        private static bool KindSkipTraverse(SyntaxNode syntaxNode, SyntaxKind kind)
         {
-            return kind == SyntaxKind.LocalDeclarationStatement;
+            return kind == SyntaxKind.ExpressionStatement ||
+                kind == SyntaxKind.LocalDeclarationStatement && !IsMultiline(syntaxNode);
+        }
+
+        private static bool IsMultiline(SyntaxNode syntaxNode)
+        {
+            var location = syntaxNode.GetLocation();
+            var treeText = syntaxNode.SyntaxTree.GetText();
+            var text = syntaxNode.GetText();
+            var first = text.Lines.First();
+            var last = text.Lines.Last();
+
+            var start = 0;
+            foreach (var line in text.Lines)
+            {
+                if (!line.ToString().Trim().StartsWith("//"))
+                {
+                    break;
+                }
+                start++;
+            }
+
+            var stop = text.Lines.Count - 1;
+            for (int i = text.Lines.Count-1; i >= 0; i--)
+            {
+                var line = text.Lines[i];
+                if (!string.IsNullOrWhiteSpace(line.ToString()))
+                {
+                    break;
+                }
+                stop--;
+            }
+            
+            return start != stop;
         }
 
         private static ScribeNode AddChildNode(SyntaxNode syntaxNode, ScribeNode parentNode, string[] value)
