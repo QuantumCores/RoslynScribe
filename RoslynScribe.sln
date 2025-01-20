@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe", "src\RoslynScribe\RoslynScribe.csproj", "{E319ED67-CF7C-4802-8ED0-5DE447E70C2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynScribe.TestProject", "src\RoslynScribe.TestProject\RoslynScribe.TestProject.csproj", "{A21D7AFF-CEED-4BBD-9183-F3DD57680064}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe.TestProject", "src\RoslynScribe.TestProject\RoslynScribe.TestProject.csproj", "{A21D7AFF-CEED-4BBD-9183-F3DD57680064}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynScribe.Domain.Tests", "tests\RoslynScribe.Domain.Tests\RoslynScribe.Domain.Tests.csproj", "{A4749D54-A7E1-494F-A10A-F29E924AA3B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{A21D7AFF-CEED-4BBD-9183-F3DD57680064}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A21D7AFF-CEED-4BBD-9183-F3DD57680064}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A21D7AFF-CEED-4BBD-9183-F3DD57680064}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4749D54-A7E1-494F-A10A-F29E924AA3B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4749D54-A7E1-494F-A10A-F29E924AA3B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4749D54-A7E1-494F-A10A-F29E924AA3B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4749D54-A7E1-494F-A10A-F29E924AA3B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
