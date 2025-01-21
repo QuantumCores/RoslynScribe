@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RoslynScribe
+namespace RoslynScribe.Domain.Models
 {
     public class ScribeNode
     {

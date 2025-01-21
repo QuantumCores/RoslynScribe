@@ -1,8 +1,9 @@
-﻿using System;
+﻿using RoslynScribe.Domain.Models;
+using System;
 
-namespace RoslynScribe
+namespace RoslynScribe.Domain.ScribeConsole
 {
-    internal class ScribeTreePrinter
+    public class ScribeTreePrinter
     {
         public static void Print(ScribeNode root)
         {
@@ -12,7 +13,7 @@ namespace RoslynScribe
         private static void Traverse(ScribeNode node, int level)
         {
             var name = node.ToString();
-            Console.WriteLine(new String(' ', level) + name);
+            Console.WriteLine(new string(' ', level) + name);
             foreach (var child in node.ChildNodes)
             {
                 Traverse(child, level + 1);

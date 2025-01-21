@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 
-namespace RoslynScribe
+namespace RoslynScribe.Domain.ScribeConsole
 {
-    internal class ConsoleProgressReporter : IProgress<ProjectLoadProgress>
+    public class ConsoleProgressReporter : IProgress<ProjectLoadProgress>
     {
         public void Report(ProjectLoadProgress loadProgress)
         {
