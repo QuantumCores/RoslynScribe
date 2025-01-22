@@ -18,6 +18,11 @@ namespace RoslynScribe.Domain.Extensions
 
             if (leftNode.Value != null && rightNode.Value != null)
             {
+                if (leftNode.Value.Length != rightNode.Value.Length)
+                {
+                    return false;
+                }
+
                 for (int i = 0; i < leftNode.Value.Length; i++)
                 {
                     if (leftNode.Value[i] != rightNode.Value[i])

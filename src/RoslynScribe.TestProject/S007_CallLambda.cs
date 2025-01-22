@@ -4,6 +4,7 @@
     {
         internal void S007_CallLambdaExpression()
         {
+            // S007 prepare lambda
             var colleaction = Enumerable.Range(0, 10);
             var result = colleaction.Select(x =>
             {

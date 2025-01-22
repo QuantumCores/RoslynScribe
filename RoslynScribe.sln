@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe", "src\RoslynS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe.TestProject", "src\RoslynScribe.TestProject\RoslynScribe.TestProject.csproj", "{A21D7AFF-CEED-4BBD-9183-F3DD57680064}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynScribe.Domain.Tests", "tests\RoslynScribe.Domain.Tests\RoslynScribe.Domain.Tests.csproj", "{A4749D54-A7E1-494F-A10A-F29E924AA3B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe.Domain.Tests", "tests\RoslynScribe.Domain.Tests\RoslynScribe.Domain.Tests.csproj", "{A4749D54-A7E1-494F-A10A-F29E924AA3B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynScribe.Domain", "src\RoslynScribe.Domain\RoslynScribe.Domain.csproj", "{678D98CC-7587-4DAE-BFBB-9C72CA3258CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe.Domain", "src\RoslynScribe.Domain\RoslynScribe.Domain.csproj", "{678D98CC-7587-4DAE-BFBB-9C72CA3258CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynScribe.OtherTestProject", "tests\RoslynScribe.OtherTestProject\RoslynScribe.OtherTestProject.csproj", "{A19D572C-1966-4B34-B31A-FDEEED7016D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{678D98CC-7587-4DAE-BFBB-9C72CA3258CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{678D98CC-7587-4DAE-BFBB-9C72CA3258CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{678D98CC-7587-4DAE-BFBB-9C72CA3258CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A19D572C-1966-4B34-B31A-FDEEED7016D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A19D572C-1966-4B34-B31A-FDEEED7016D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A19D572C-1966-4B34-B31A-FDEEED7016D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A19D572C-1966-4B34-B31A-FDEEED7016D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

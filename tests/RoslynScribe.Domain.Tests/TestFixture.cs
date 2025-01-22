@@ -42,6 +42,11 @@ namespace RoslynScribe.Domain.Tests
 
         public void Dispose()
         {
+            StaticDispose();
+        }
+
+        public static void StaticDispose()
+        {
             _workspace?.Dispose();
             _solution = null;
         }
