@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace RoslynScribe.Domain.Services
 {
@@ -41,6 +42,13 @@ namespace RoslynScribe.Domain.Services
             return result;
         }
 
+        public static Task<ScribeNode> Analyze(Solution solution, string projectName, string documentName)
+        {
+            var project = solution.Projects.Single(x => x.Name == projectName);
+            var document = project.Documents.Single(x => x.Name == documentName);
+            return Analyze(solution, project, document);
+        }
+
         public static async Task<ScribeNode> Analyze(Solution solution, Project project, Microsoft.CodeAnalysis.Document document)
         {
             if (document.Name == project.Name + ".AssemblyInfo.cs" ||
@@ -50,36 +58,35 @@ namespace RoslynScribe.Domain.Services
                 return null;
             }
 
-            Console.WriteLine($"{document.Name}");
+            // Console.WriteLine($"{document.Name}");
             var semanticModel = await document.GetSemanticModelAsync();
             var tree = await document.GetSyntaxTreeAsync();
             var rootNode = await tree.GetRootAsync();
 
-            var scribeNode = new ScribeNode() { Kind = document.Name };
-            Console.WriteLine(scribeNode);
+            var scribeNode = new ScribeNode()
+            {
+                Kind = "Docuemnt",
+                MetaInfo = new MetaInfo
+                {
+                    ProjectName = project.Name,
+                    DocumentName = document.Name
+                }
+            };
 
             Traverse(rootNode, scribeNode, semanticModel);
 
-            //SyntaxTreePrinter.Print(rootNode);            
-            ScribeTreePrinter.Print(scribeNode);
-
-            Console.WriteLine();
-            Console.WriteLine();
+            // SyntaxTreePrinter.Print(rootNode);            
+            // ScribeTreePrinter.Print(scribeNode);
+            // Console.WriteLine();
+            // Console.WriteLine();
 
             return scribeNode;
-        }
-
-        public static Task<ScribeNode> Analyze(Solution solution, string projectName, string documentName)
-        {
-            var project = solution.Projects.Single(x => x.Name == projectName);
-            var document = project.Documents.Single(x => x.Name == documentName);
-            return Analyze(solution, project, document);
         }
 
         private static void ProcessNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel)
         {
             var lTrivias = syntaxNode.GetLeadingTrivia();
-            var childNode = FindCommentTrivia(syntaxNode, parentNode, lTrivias);
+            var childNode = FindCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel);
 
             if (syntaxKind == SyntaxKind.InvocationExpression)
             {
@@ -87,8 +94,10 @@ namespace RoslynScribe.Domain.Services
                 if (invokedMethod != null)
                 {
                     var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
-                    foreach (var syntaxReference in syntaxReferences)
+                    for (int i = 0; i < syntaxReferences.Length; i++)
                     {
+                        var location = Path.GetFileName(invokedMethod.Locations[i].GetLineSpan().Path);
+                        var syntaxReference = syntaxReferences[i];
                         var methodNode = syntaxReference.GetSyntax();
                         ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, semanticModel);
                     }
@@ -120,7 +129,7 @@ namespace RoslynScribe.Domain.Services
             }
         }
 
-        private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias)
+        private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel)
         {
             var comments = new List<string>();
             foreach (var trivia in syntaxTrivias)
@@ -133,7 +142,7 @@ namespace RoslynScribe.Domain.Services
 
             if (comments.Count != 0)
             {
-                return AddChildNode(syntaxNode, parentNode, comments.ToArray());
+                return AddChildNode(syntaxNode, syntaxKind, parentNode, comments.ToArray(), semanticModel);
             }
 
             return null;
@@ -163,11 +172,7 @@ namespace RoslynScribe.Domain.Services
 
         private static bool IsMultiline(SyntaxNode syntaxNode)
         {
-            var location = syntaxNode.GetLocation();
-            var treeText = syntaxNode.SyntaxTree.GetText();
             var text = syntaxNode.GetText();
-            var first = text.Lines.First();
-            var last = text.Lines.Last();
 
             var start = 0;
             foreach (var line in text.Lines)
@@ -193,12 +198,68 @@ namespace RoslynScribe.Domain.Services
             return start != stop;
         }
 
-        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, ScribeNode parentNode, string[] value)
+        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, SemanticModel semanticModel)
         {
-            var childNode = new ScribeNode { Kind = syntaxNode.Kind().ToString(), Value = value };
+            var childNode = new ScribeNode
+            {
+                ParentNode = parentNode,
+                MetaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel),
+                Kind = syntaxKind.ToString(),
+                Value = value
+            };
+
             parentNode.ChildNodes.Add(childNode);
-            // Console.WriteLine(childNode);
+
             return childNode;
+        }
+
+        private static MetaInfo GetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel)
+        {
+            var metaInfo = new MetaInfo();
+
+            switch (syntaxKind)
+            {
+                case SyntaxKind.NamespaceDeclaration:
+                    var namespaceSyntax = (syntaxNode as NamespaceDeclarationSyntax);
+
+                    metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
+                    metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
+
+                    metaInfo.NameSpace = namespaceSyntax.Name.ToString();
+                    metaInfo.Identifier = namespaceSyntax.Name.ToString();
+                    break;
+                case SyntaxKind.ClassDeclaration:
+                    var classSyntax = (syntaxNode as ClassDeclarationSyntax);
+
+                    metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
+                    metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
+                    metaInfo.NameSpace = parentNode.MetaInfo.NameSpace;
+
+                    metaInfo.TypeName = classSyntax.Identifier.ValueText;
+                    metaInfo.Identifier = classSyntax.Identifier.ValueText;
+                    break;
+                case SyntaxKind.MethodDeclaration:
+                    var methodSyntax = (syntaxNode as MethodDeclarationSyntax);
+
+                    metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
+                    metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
+                    metaInfo.NameSpace = parentNode.MetaInfo.NameSpace;
+                    metaInfo.TypeName = parentNode.MetaInfo.TypeName;
+
+                    metaInfo.MemberName = methodSyntax.Identifier.ValueText;
+                    metaInfo.Identifier = methodSyntax.Identifier.ValueText;
+
+                    break;
+                default:
+                    metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
+                    metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
+                    metaInfo.NameSpace = parentNode.MetaInfo.NameSpace;
+                    metaInfo.TypeName = parentNode.MetaInfo.TypeName;
+                    metaInfo.MemberName = parentNode.MetaInfo.MemberName;
+                    break;
+            }
+
+            return metaInfo;
         }
 
         private static ISymbol GetMethodInfo(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)

@@ -119,7 +119,13 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { "// S003 basic result" },
+                        Value = new string[]{ "// S003 basicMethod" },
+                        ChildNodes = new List<ScribeNode> {
+                            new ScribeNode
+                            {
+                                Value = new string[]{ "// S003 basic result" },
+                            },
+                        },
                     },
                     new ScribeNode
                     {
@@ -128,11 +134,17 @@ namespace RoslynScribe.Domain.Tests
                         {
                             new ScribeNode
                             {
-                                Value = new string[]{ "// S003 call basic method" },
+                                Value = new string[]{ "// S003 call basicMethod" },                                
                                 ChildNodes = new List<ScribeNode> {
                                     new ScribeNode
                                     {
-                                        Value = new string[]{ "// S003 basic result" },
+                                        Value = new string[]{ "// S003 basicMethod" },
+                                        ChildNodes = new List<ScribeNode> {
+                                            new ScribeNode
+                                            {
+                                                Value = new string[]{ "// S003 basic result" },
+                                            },
+                                        },
                                     },
                                 },
                             },

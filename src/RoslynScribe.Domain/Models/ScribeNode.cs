@@ -4,13 +4,13 @@ namespace RoslynScribe.Domain.Models
 {
     public class ScribeNode
     {
+        public ScribeNode ParentNode { get; set; }
+
         public List<ScribeNode> ChildNodes { get; set; } = new List<ScribeNode>();
 
-        public string NameSpace { get; set; }
+        public MetaInfo MetaInfo { get; set; }
 
         public string Kind { get; set; }
-
-        public string MethodName { get; set; }
 
         public string[] Value { get; set; }
 
