@@ -6,6 +6,8 @@
 
         public string DocumentName { get; set; }
 
+        public string DocumentPath { get; set; }
+
         public string NameSpace { get; set; }
 
         public string TypeName { get; set; }

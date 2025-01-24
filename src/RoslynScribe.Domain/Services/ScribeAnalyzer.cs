@@ -1,14 +1,13 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
-using Microsoft.CodeAnalysis;
 using RoslynScribe.Domain.Models;
-using RoslynScribe.Domain.ScribeConsole;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace RoslynScribe.Domain.Services
 {
@@ -16,6 +15,7 @@ namespace RoslynScribe.Domain.Services
     {
         public static async Task<List<ScribeNode>> Analyze(MSBuildWorkspace workspace, Solution solution)
         {
+            var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
             var result = new List<ScribeNode>();
 
             foreach (var project in solution.Projects)
@@ -24,7 +24,7 @@ namespace RoslynScribe.Domain.Services
                 {
                     foreach (var document in project.Documents)
                     {
-                        var node = await Analyze(solution, project, document);
+                        var node = await Analyze(solution, project, documents, document);
                         if (node != null)
                         {
                             result.Add(node);
@@ -45,11 +45,12 @@ namespace RoslynScribe.Domain.Services
         public static Task<ScribeNode> Analyze(Solution solution, string projectName, string documentName)
         {
             var project = solution.Projects.Single(x => x.Name == projectName);
+            var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
             var document = project.Documents.Single(x => x.Name == documentName);
-            return Analyze(solution, project, document);
+            return Analyze(solution, project, documents, document);
         }
 
-        public static async Task<ScribeNode> Analyze(Solution solution, Project project, Microsoft.CodeAnalysis.Document document)
+        public static async Task<ScribeNode> Analyze(Solution solution, Project project, Dictionary<string, Document> documents, Document document)
         {
             if (document.Name == project.Name + ".AssemblyInfo.cs" ||
                                 document.Name == project.Name + ".GlobalUsings.g.cs" ||
@@ -69,11 +70,12 @@ namespace RoslynScribe.Domain.Services
                 MetaInfo = new MetaInfo
                 {
                     ProjectName = project.Name,
-                    DocumentName = document.Name
+                    DocumentName = document.Name,
+                    DocumentPath = document.FilePath,
                 }
             };
 
-            Traverse(rootNode, scribeNode, semanticModel);
+            Traverse(rootNode, scribeNode, semanticModel, documents);
 
             // SyntaxTreePrinter.Print(rootNode);            
             // ScribeTreePrinter.Print(scribeNode);
@@ -83,7 +85,7 @@ namespace RoslynScribe.Domain.Services
             return scribeNode;
         }
 
-        private static void ProcessNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel)
+        private static void ProcessNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Document> documents)
         {
             var lTrivias = syntaxNode.GetLeadingTrivia();
             var childNode = FindCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel);
@@ -96,10 +98,12 @@ namespace RoslynScribe.Domain.Services
                     var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
                     for (int i = 0; i < syntaxReferences.Length; i++)
                     {
-                        var location = Path.GetFileName(invokedMethod.Locations[i].GetLineSpan().Path);
+                        var location = invokedMethod.Locations[i].GetLineSpan().Path;
+                        var isLocal = location == parentNode.MetaInfo.DocumentPath;
+                        var contextSemanticModel = isLocal ? semanticModel : documents[location].GetSemanticModelAsync().Result;
                         var syntaxReference = syntaxReferences[i];
                         var methodNode = syntaxReference.GetSyntax();
-                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, semanticModel);
+                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, contextSemanticModel, documents);
                     }
                 }
             }
@@ -111,10 +115,10 @@ namespace RoslynScribe.Domain.Services
                 return;
             }
 
-            Traverse(syntaxNode, childNode ?? parentNode, semanticModel);
+            Traverse(syntaxNode, childNode ?? parentNode, semanticModel, documents);
         }
 
-        private static void Traverse(SyntaxNode node, ScribeNode parentNode, SemanticModel semanticModel)
+        private static void Traverse(SyntaxNode node, ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Document> documents)
         {
             var nodes = node.ChildNodes();
             foreach (var syntaxNode in nodes)
@@ -125,7 +129,7 @@ namespace RoslynScribe.Domain.Services
                     continue;
                 }
 
-                ProcessNode(syntaxNode, kind, parentNode, semanticModel);
+                ProcessNode(syntaxNode, kind, parentNode, semanticModel, documents);
             }
         }
 
@@ -213,6 +217,13 @@ namespace RoslynScribe.Domain.Services
             return childNode;
         }
 
+        private static ISymbol GetMethodInfo(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)
+        {
+            var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
+            var methodSymbol = symbolInfo.Symbol as IMethodSymbol;
+            return methodSymbol;
+        }
+
         private static MetaInfo GetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel)
         {
             var metaInfo = new MetaInfo();
@@ -224,6 +235,7 @@ namespace RoslynScribe.Domain.Services
 
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
+                    metaInfo.DocumentPath = parentNode.MetaInfo.DocumentPath;
 
                     metaInfo.NameSpace = namespaceSyntax.Name.ToString();
                     metaInfo.Identifier = namespaceSyntax.Name.ToString();
@@ -233,26 +245,22 @@ namespace RoslynScribe.Domain.Services
 
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
+                    metaInfo.DocumentPath = parentNode.MetaInfo.DocumentPath;
                     metaInfo.NameSpace = parentNode.MetaInfo.NameSpace;
 
                     metaInfo.TypeName = classSyntax.Identifier.ValueText;
                     metaInfo.Identifier = classSyntax.Identifier.ValueText;
                     break;
-                case SyntaxKind.MethodDeclaration:
+                case SyntaxKind.MethodDeclaration:                    
                     var methodSyntax = (syntaxNode as MethodDeclarationSyntax);
 
-                    metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
-                    metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
-                    metaInfo.NameSpace = parentNode.MetaInfo.NameSpace;
-                    metaInfo.TypeName = parentNode.MetaInfo.TypeName;
-
-                    metaInfo.MemberName = methodSyntax.Identifier.ValueText;
-                    metaInfo.Identifier = methodSyntax.Identifier.ValueText;
-
-                    break;
+                    // methods can be called from other project thus copying data from parent won't work
+                    var symbolInfo = semanticModel.GetDeclaredSymbol(methodSyntax);
+                    return GetMetaInfo(symbolInfo);
                 default:
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
+                    metaInfo.DocumentPath = parentNode.MetaInfo.DocumentPath;
                     metaInfo.NameSpace = parentNode.MetaInfo.NameSpace;
                     metaInfo.TypeName = parentNode.MetaInfo.TypeName;
                     metaInfo.MemberName = parentNode.MetaInfo.MemberName;
@@ -262,11 +270,20 @@ namespace RoslynScribe.Domain.Services
             return metaInfo;
         }
 
-        private static ISymbol GetMethodInfo(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)
+        private static MetaInfo GetMetaInfo(IMethodSymbol symbolInfo)
         {
-            var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
-            var methodSymbol = symbolInfo.Symbol as IMethodSymbol;
-            return methodSymbol;
+            var metaInfo = new MetaInfo();
+            metaInfo.ProjectName = symbolInfo.ContainingAssembly.Name;
+
+            var location = symbolInfo.Locations[0].GetLineSpan().Path;
+            metaInfo.DocumentName = Path.GetFileName(location);
+            metaInfo.DocumentPath = location;
+            metaInfo.NameSpace = symbolInfo.ContainingNamespace.ToString();
+            metaInfo.TypeName = symbolInfo.ContainingType.ToString();
+            metaInfo.MemberName = symbolInfo.Name;
+            metaInfo.Identifier = symbolInfo.OriginalDefinition.ToString();
+
+            return metaInfo;
         }
     }
 }

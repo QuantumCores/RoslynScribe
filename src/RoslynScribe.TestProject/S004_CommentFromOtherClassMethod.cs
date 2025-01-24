@@ -1,6 +1,6 @@
 ﻿namespace RoslynScribe.TestProject
 {
-    internal class S004_CommentFromOtherClassMethod
+    internal class S004_TestClass
     {
         // S004 return addition
         public int S004_SecondMethod(int start)

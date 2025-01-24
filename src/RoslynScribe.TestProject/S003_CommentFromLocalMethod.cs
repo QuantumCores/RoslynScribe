@@ -1,6 +1,6 @@
 ﻿namespace RoslynScribe.TestProject
 {
-    internal class S003_CallLocalMethod
+    internal class S003_TestClass
     {
         // S003 basicMethod
         public int S003_BasicMethod(int start)
