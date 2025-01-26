@@ -4,6 +4,7 @@ using RoslynScribe.Domain.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RoslynScribe.Domain.Extensions;
+using System.Text.Json;
 
 namespace RoslynScribe.Domain.Tests
 {
@@ -58,9 +59,10 @@ namespace RoslynScribe.Domain.Tests
                 },
             };
 
-            // Act
+            // Act            
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs");
 
+            var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -104,6 +106,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs");
 
+            var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -317,6 +320,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs");
 
+            var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }

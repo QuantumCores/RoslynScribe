@@ -1,0 +1,86 @@
+{
+  "Value": null,
+  "Kind": "Document",
+  "MetaInfo": {
+    "ProjectName": "RoslynScribe.TestProject",
+    "DocumentName": "S002_MultiLineComments.cs",
+    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
+    "NameSpace": null,
+    "TypeName": null,
+    "MemberName": null,
+    "Identifier": null
+  },
+  "ChildNodes": [
+    {
+      "Value": [
+        "// S002 namespace comment",
+        "// S002 second namespace comment"
+      ],
+      "Kind": "NamespaceDeclaration",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S002_MultiLineComments.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": null,
+        "MemberName": null,
+        "Identifier": "RoslynScribe.TestProject"
+      },
+      "ChildNodes": [
+        {
+          "Value": [
+            "// S002 class comment",
+            "// S002 second class comment"
+          ],
+          "Kind": "ClassDeclaration",
+          "MetaInfo": {
+            "ProjectName": "RoslynScribe.TestProject",
+            "DocumentName": "S002_MultiLineComments.cs",
+            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "RoslynScribe.TestProject.S002_MultiLineComments",
+            "MemberName": null,
+            "Identifier": "S002_MultiLineComments"
+          },
+          "ChildNodes": [
+            {
+              "Value": [
+                "// S002 BasicMethod",
+                "// S002 second method comment"
+              ],
+              "Kind": "MethodDeclaration",
+              "MetaInfo": {
+                "ProjectName": "RoslynScribe.TestProject",
+                "DocumentName": "S002_MultiLineComments.cs",
+                "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
+                "NameSpace": "RoslynScribe.TestProject",
+                "TypeName": "RoslynScribe.TestProject.S002_MultiLineComments",
+                "MemberName": "S002_BasicMethod",
+                "Identifier": "RoslynScribe.TestProject.S002_MultiLineComments.S002_BasicMethod(int)"
+              },
+              "ChildNodes": [
+                {
+                  "Value": [
+                    "// S002 result",
+                    "// S002 seconod result"
+                  ],
+                  "Kind": "ReturnStatement",
+                  "MetaInfo": {
+                    "ProjectName": "RoslynScribe.TestProject",
+                    "DocumentName": "S002_MultiLineComments.cs",
+                    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
+                    "NameSpace": "RoslynScribe.TestProject",
+                    "TypeName": "RoslynScribe.TestProject.S002_MultiLineComments",
+                    "MemberName": "S002_BasicMethod",
+                    "Identifier": null
+                  },
+                  "ChildNodes": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

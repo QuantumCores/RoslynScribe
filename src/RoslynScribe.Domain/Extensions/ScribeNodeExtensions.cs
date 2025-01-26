@@ -9,7 +9,12 @@ namespace RoslynScribe.Domain.Extensions
             return Traverse(leftNode, rightNode);
         }
 
-        private static bool Traverse(ScribeNode leftNode, ScribeNode rightNode)
+        public static bool IsTheSame(this ScribeNode leftNode, ScribeNode rightNode)
+        {
+            return Traverse(leftNode, rightNode, true);
+        }
+
+        private static bool Traverse(ScribeNode leftNode, ScribeNode rightNode, bool compareMetaInfo = false)
         {
             if (leftNode.ChildNodes.Count != rightNode.ChildNodes.Count)
             {
@@ -38,10 +43,17 @@ namespace RoslynScribe.Domain.Extensions
                 return false;
             }
 
+            if (compareMetaInfo)
+            {
+                if (!leftNode.MetaInfo.Equals(rightNode.MetaInfo))
+                {
+                    return false;
+                }
+            }
 
             for (int i = 0; i < leftNode.ChildNodes.Count; i++)
             {
-                if (!Traverse(leftNode.ChildNodes[i], rightNode.ChildNodes[i]))
+                if (!Traverse(leftNode.ChildNodes[i], rightNode.ChildNodes[i], compareMetaInfo))
                 {
                     return false;
                 }

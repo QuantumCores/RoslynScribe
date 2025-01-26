@@ -66,7 +66,7 @@ namespace RoslynScribe.Domain.Services
 
             var scribeNode = new ScribeNode()
             {
-                Kind = "Docuemnt",
+                Kind = "Document",
                 MetaInfo = new MetaInfo
                 {
                     ProjectName = project.Name,
@@ -279,7 +279,7 @@ namespace RoslynScribe.Domain.Services
             metaInfo.DocumentName = Path.GetFileName(location);
             metaInfo.DocumentPath = location;
             metaInfo.NameSpace = symbolInfo.ContainingNamespace.ToString();
-            metaInfo.TypeName = symbolInfo.ContainingType.ToString();
+            metaInfo.TypeName = symbolInfo.ContainingType.Name;
             metaInfo.MemberName = symbolInfo.Name;
             metaInfo.Identifier = symbolInfo.OriginalDefinition.ToString();
 

@@ -1,6 +1,6 @@
 ﻿namespace RoslynScribe.Domain.Models
 {
-    public class MetaInfo
+    public struct  MetaInfo
     {
         public string ProjectName { get; set; }
 

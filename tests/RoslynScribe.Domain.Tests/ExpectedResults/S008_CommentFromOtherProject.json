@@ -1,0 +1,64 @@
+{
+  "Value": null,
+  "Kind": "Document",
+  "MetaInfo": {
+    "ProjectName": "RoslynScribe.TestProject",
+    "DocumentName": "S008_CommentFromOtherProject.cs",
+    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S008_CommentFromOtherProject.cs",
+    "NameSpace": null,
+    "TypeName": null,
+    "MemberName": null,
+    "Identifier": null
+  },
+  "ChildNodes": [
+    {
+      "Value": [
+        "// S008 Nodes shared comment"
+      ],
+      "Kind": "LocalDeclarationStatement",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S008_CommentFromOtherProject.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S008_CommentFromOtherProject.cs",
+        "NameSpace": null,
+        "TypeName": null,
+        "MemberName": null,
+        "Identifier": null
+      },
+      "ChildNodes": []
+    },
+    {
+      "Value": [
+        "// OtherLogic Multiply two numbers"
+      ],
+      "Kind": "MethodDeclaration",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.OtherTestProject",
+        "DocumentName": "OtherLogic.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\tests\\RoslynScribe.OtherTestProject\\OtherLogic.cs",
+        "NameSpace": "RoslynScribe.OtherTestProject",
+        "TypeName": "RoslynScribe.OtherTestProject.OtherLogic",
+        "MemberName": "Multiply",
+        "Identifier": "RoslynScribe.OtherTestProject.OtherLogic.Multiply(int, int)"
+      },
+      "ChildNodes": [
+        {
+          "Value": [
+            "// OtherLogic This is multiplication result"
+          ],
+          "Kind": "ReturnStatement",
+          "MetaInfo": {
+            "ProjectName": "RoslynScribe.OtherTestProject",
+            "DocumentName": "OtherLogic.cs",
+            "DocumentPath": "D:\\Source\\RoslynScribe\\tests\\RoslynScribe.OtherTestProject\\OtherLogic.cs",
+            "NameSpace": "RoslynScribe.OtherTestProject",
+            "TypeName": "RoslynScribe.OtherTestProject.OtherLogic",
+            "MemberName": "Multiply",
+            "Identifier": null
+          },
+          "ChildNodes": []
+        }
+      ]
+    }
+  ]
+}

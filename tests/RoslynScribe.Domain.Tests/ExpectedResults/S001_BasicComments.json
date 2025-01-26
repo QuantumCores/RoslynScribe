@@ -1,0 +1,82 @@
+{
+  "Value": null,
+  "Kind": "Docuemnt",
+  "MetaInfo": {
+    "ProjectName": "RoslynScribe.TestProject",
+    "DocumentName": "S001_BasicComments.cs",
+    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+    "NameSpace": null,
+    "TypeName": null,
+    "MemberName": null,
+    "Identifier": null
+  },
+  "ChildNodes": [
+    {
+      "Value": [
+        "// S001 namespace comment"
+      ],
+      "Kind": "NamespaceDeclaration",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S001_BasicComments.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": null,
+        "MemberName": null,
+        "Identifier": "RoslynScribe.TestProject"
+      },
+      "ChildNodes": [
+        {
+          "Value": [
+            "// S001 BasicTestClass"
+          ],
+          "Kind": "ClassDeclaration",
+          "MetaInfo": {
+            "ProjectName": "RoslynScribe.TestProject",
+            "DocumentName": "S001_BasicComments.cs",
+            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "RoslynScribe.TestProject.S001_BasicComments",
+            "MemberName": null,
+            "Identifier": "S001_BasicComments"
+          },
+          "ChildNodes": [
+            {
+              "Value": [
+                "// S001 BasicMethod"
+              ],
+              "Kind": "MethodDeclaration",
+              "MetaInfo": {
+                "ProjectName": "RoslynScribe.TestProject",
+                "DocumentName": "S001_BasicComments.cs",
+                "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+                "NameSpace": "RoslynScribe.TestProject",
+                "TypeName": "RoslynScribe.TestProject.S001_BasicComments",
+                "MemberName": "S001_BasicMethod",
+                "Identifier": "RoslynScribe.TestProject.S001_BasicComments.S001_BasicMethod(int)"
+              },
+              "ChildNodes": [
+                {
+                  "Value": [
+                    "// S001 result"
+                  ],
+                  "Kind": "ReturnStatement",
+                  "MetaInfo": {
+                    "ProjectName": "RoslynScribe.TestProject",
+                    "DocumentName": "S001_BasicComments.cs",
+                    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+                    "NameSpace": "RoslynScribe.TestProject",
+                    "TypeName": "RoslynScribe.TestProject.S001_BasicComments",
+                    "MemberName": "S001_BasicMethod",
+                    "Identifier": null
+                  },
+                  "ChildNodes": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
