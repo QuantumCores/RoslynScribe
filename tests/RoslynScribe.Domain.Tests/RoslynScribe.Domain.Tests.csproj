@@ -8,18 +8,38 @@
   <ItemGroup>
     <None Remove="ExpectedResults\S001_BasicComments.json" />
     <None Remove="ExpectedResults\S002_MultiLineComments.json" />
+    <None Remove="ExpectedResults\S003_CommentFromLocalMethod.json" />
+    <None Remove="ExpectedResults\S004_CommentFromOtherClassMethod.json" />
+    <None Remove="ExpectedResults\S005_IfStatementBlockComment.json" />
+    <None Remove="ExpectedResults\S006_ThirdPartyLibrary.json" />
+    <None Remove="ExpectedResults\S007_CallLambda.json" />
     <None Remove="ExpectedResults\S008_CommentFromOtherProject.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="ExpectedResults\S001_BasicComments.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ExpectedResults\S002_MultiLineComments.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExpectedResults\S003_CommentFromLocalMethod.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExpectedResults\S004_CommentFromOtherClassMethod.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExpectedResults\S005_IfStatementBlockComment.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExpectedResults\S006_ThirdPartyLibrary.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExpectedResults\S007_CallLambda.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ExpectedResults\S008_CommentFromOtherProject.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

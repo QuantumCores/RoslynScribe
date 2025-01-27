@@ -37,7 +37,7 @@
         "DocumentName": "OtherLogic.cs",
         "DocumentPath": "D:\\Source\\RoslynScribe\\tests\\RoslynScribe.OtherTestProject\\OtherLogic.cs",
         "NameSpace": "RoslynScribe.OtherTestProject",
-        "TypeName": "RoslynScribe.OtherTestProject.OtherLogic",
+        "TypeName": "OtherLogic",
         "MemberName": "Multiply",
         "Identifier": "RoslynScribe.OtherTestProject.OtherLogic.Multiply(int, int)"
       },
@@ -52,7 +52,7 @@
             "DocumentName": "OtherLogic.cs",
             "DocumentPath": "D:\\Source\\RoslynScribe\\tests\\RoslynScribe.OtherTestProject\\OtherLogic.cs",
             "NameSpace": "RoslynScribe.OtherTestProject",
-            "TypeName": "RoslynScribe.OtherTestProject.OtherLogic",
+            "TypeName": "OtherLogic",
             "MemberName": "Multiply",
             "Identifier": null
           },

@@ -1,0 +1,115 @@
+{
+  "Value": null,
+  "Kind": "Document",
+  "MetaInfo": {
+    "ProjectName": "RoslynScribe.TestProject",
+    "DocumentName": "S003_CommentFromLocalMethod.cs",
+    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+    "NameSpace": null,
+    "TypeName": null,
+    "MemberName": null,
+    "Identifier": null
+  },
+  "ChildNodes": [
+    {
+      "Value": [
+        "// S003 basicMethod"
+      ],
+      "Kind": "MethodDeclaration",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S003_CommentFromLocalMethod.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": "S003_TestClass",
+        "MemberName": "S003_BasicMethod",
+        "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)"
+      },
+      "ChildNodes": [
+        {
+          "Value": [
+            "// S003 basic result"
+          ],
+          "Kind": "ReturnStatement",
+          "MetaInfo": {
+            "ProjectName": "RoslynScribe.TestProject",
+            "DocumentName": "S003_CommentFromLocalMethod.cs",
+            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "S003_TestClass",
+            "MemberName": "S003_BasicMethod",
+            "Identifier": null
+          },
+          "ChildNodes": []
+        }
+      ]
+    },
+    {
+      "Value": [
+        "// S003 second method"
+      ],
+      "Kind": "MethodDeclaration",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S003_CommentFromLocalMethod.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": "S003_TestClass",
+        "MemberName": "S003_SecondMethod",
+        "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_SecondMethod(int)"
+      },
+      "ChildNodes": [
+        {
+          "Value": [
+            "// S003 call basicMethod"
+          ],
+          "Kind": "ReturnStatement",
+          "MetaInfo": {
+            "ProjectName": "RoslynScribe.TestProject",
+            "DocumentName": "S003_CommentFromLocalMethod.cs",
+            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "S003_TestClass",
+            "MemberName": "S003_SecondMethod",
+            "Identifier": null
+          },
+          "ChildNodes": [
+            {
+              "Value": [
+                "// S003 basicMethod"
+              ],
+              "Kind": "MethodDeclaration",
+              "MetaInfo": {
+                "ProjectName": "RoslynScribe.TestProject",
+                "DocumentName": "S003_CommentFromLocalMethod.cs",
+                "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+                "NameSpace": "RoslynScribe.TestProject",
+                "TypeName": "S003_TestClass",
+                "MemberName": "S003_BasicMethod",
+                "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)"
+              },
+              "ChildNodes": [
+                {
+                  "Value": [
+                    "// S003 basic result"
+                  ],
+                  "Kind": "ReturnStatement",
+                  "MetaInfo": {
+                    "ProjectName": "RoslynScribe.TestProject",
+                    "DocumentName": "S003_CommentFromLocalMethod.cs",
+                    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+                    "NameSpace": "RoslynScribe.TestProject",
+                    "TypeName": "S003_TestClass",
+                    "MemberName": "S003_BasicMethod",
+                    "Identifier": null
+                  },
+                  "ChildNodes": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

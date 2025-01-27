@@ -53,10 +53,76 @@ namespace RoslynScribe.Domain.Tests
             Assert.IsTrue(result.IsTheSame(expected));
         }
 
+        [Test]
+        public async Task S003_returns_valid_tree()
+        {
+            // Arrange
+            var json = File.ReadAllText(Path.Combine(_expectedDirectory, "ExpectedResults", "S003_CommentFromLocalMethod.json"));
+            var expected = JsonSerializer.Deserialize<ScribeNode>(json);
+
+            // Act            
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs");
+
+            // Assert
+            Assert.IsTrue(result.IsTheSame(expected));
+        }
+
+        [Test]
+        public async Task S004_returns_valid_tree()
+        {
+            // Arrange
+            var json = File.ReadAllText(Path.Combine(_expectedDirectory, "ExpectedResults", "S004_CommentFromOtherClassMethod.json"));
+            var expected = JsonSerializer.Deserialize<ScribeNode>(json);
+
+            // Act            
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs");
+
+            // Assert
+            Assert.IsTrue(result.IsTheSame(expected));
+        }
 
 
+        [Test]
+        public async Task S005_returns_valid_tree()
+        {
+            // Arrange
+            var json = File.ReadAllText(Path.Combine(_expectedDirectory, "ExpectedResults", "S005_IfStatementBlockComment.json"));
+            var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
+            // Act            
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs");
 
+            // Assert
+            Assert.IsTrue(result.IsTheSame(expected));
+        }
+
+        [Test]
+        public async Task S006_returns_valid_tree()
+        {
+            // Arrange
+            var json = File.ReadAllText(Path.Combine(_expectedDirectory, "ExpectedResults", "S006_ThirdPartyLibrary.json"));
+            var expected = JsonSerializer.Deserialize<ScribeNode>(json);
+
+            // Act            
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs");
+
+            // Assert
+            Assert.IsTrue(result.IsTheSame(expected));
+        }
+
+        [Test]
+        public async Task S007_returns_valid_tree()
+        {
+            // Arrange
+            var json = File.ReadAllText(Path.Combine(_expectedDirectory, "ExpectedResults", "S007_CallLambda.json"));
+            var expected = JsonSerializer.Deserialize<ScribeNode>(json);
+
+            // Act            
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs");
+
+            // Assert
+            Assert.IsTrue(result.IsTheSame(expected));
+        }
 
 
         [Test]

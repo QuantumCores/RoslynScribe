@@ -1,0 +1,47 @@
+{
+  "Value": null,
+  "Kind": "Document",
+  "MetaInfo": {
+    "ProjectName": "RoslynScribe.TestProject",
+    "DocumentName": "S007_CallLambda.cs",
+    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
+    "NameSpace": null,
+    "TypeName": null,
+    "MemberName": null,
+    "Identifier": null
+  },
+  "ChildNodes": [
+    {
+      "Value": [
+        "// S007 prepare lambda"
+      ],
+      "Kind": "LocalDeclarationStatement",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S007_CallLambda.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
+        "NameSpace": null,
+        "TypeName": null,
+        "MemberName": null,
+        "Identifier": null
+      },
+      "ChildNodes": []
+    },
+    {
+      "Value": [
+        "// S007 add one in lambda expression"
+      ],
+      "Kind": "LocalDeclarationStatement",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S007_CallLambda.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
+        "NameSpace": null,
+        "TypeName": null,
+        "MemberName": null,
+        "Identifier": null
+      },
+      "ChildNodes": []
+    }
+  ]
+}

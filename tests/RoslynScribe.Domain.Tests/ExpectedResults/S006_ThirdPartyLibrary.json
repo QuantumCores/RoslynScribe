@@ -1,0 +1,31 @@
+{
+  "Value": null,
+  "Kind": "Document",
+  "MetaInfo": {
+    "ProjectName": "RoslynScribe.TestProject",
+    "DocumentName": "S006_ThirdPartyLibrary.cs",
+    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
+    "NameSpace": null,
+    "TypeName": null,
+    "MemberName": null,
+    "Identifier": null
+  },
+  "ChildNodes": [
+    {
+      "Value": [
+        "// S006 call external method to add days"
+      ],
+      "Kind": "ExpressionStatement",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S006_ThirdPartyLibrary.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
+        "NameSpace": null,
+        "TypeName": null,
+        "MemberName": null,
+        "Identifier": null
+      },
+      "ChildNodes": []
+    }
+  ]
+}

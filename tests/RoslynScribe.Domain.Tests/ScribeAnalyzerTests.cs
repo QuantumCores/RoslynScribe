@@ -62,7 +62,7 @@ namespace RoslynScribe.Domain.Tests
             // Act            
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs");
 
-            var json = JsonSerializer.Serialize(result);
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -106,7 +106,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs");
 
-            var json = JsonSerializer.Serialize(result);
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -159,6 +159,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs");
 
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -199,6 +200,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs");
 
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -237,6 +239,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs");
 
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -260,6 +263,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs");
 
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -287,6 +291,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs");
 
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
@@ -320,7 +325,7 @@ namespace RoslynScribe.Domain.Tests
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs");
 
-            var json = JsonSerializer.Serialize(result);
+            // var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }

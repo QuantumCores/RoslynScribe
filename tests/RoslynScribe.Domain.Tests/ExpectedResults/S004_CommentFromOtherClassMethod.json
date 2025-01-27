@@ -1,0 +1,81 @@
+{
+  "Value": null,
+  "Kind": "Document",
+  "MetaInfo": {
+    "ProjectName": "RoslynScribe.TestProject",
+    "DocumentName": "S004_CommentFromOtherClassMethod.cs",
+    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
+    "NameSpace": null,
+    "TypeName": null,
+    "MemberName": null,
+    "Identifier": null
+  },
+  "ChildNodes": [
+    {
+      "Value": [
+        "// S004 return addition"
+      ],
+      "Kind": "MethodDeclaration",
+      "MetaInfo": {
+        "ProjectName": "RoslynScribe.TestProject",
+        "DocumentName": "S004_CommentFromOtherClassMethod.cs",
+        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": "S004_TestClass",
+        "MemberName": "S004_SecondMethod",
+        "Identifier": "RoslynScribe.TestProject.S004_TestClass.S004_SecondMethod(int)"
+      },
+      "ChildNodes": [
+        {
+          "Value": [
+            "// S004 Nodes shared comment get logic data "
+          ],
+          "Kind": "LocalDeclarationStatement",
+          "MetaInfo": {
+            "ProjectName": "RoslynScribe.TestProject",
+            "DocumentName": "S004_CommentFromOtherClassMethod.cs",
+            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "S004_TestClass",
+            "MemberName": "S004_SecondMethod",
+            "Identifier": null
+          },
+          "ChildNodes": []
+        },
+        {
+          "Value": [
+            "// Logic Add two numbers"
+          ],
+          "Kind": "MethodDeclaration",
+          "MetaInfo": {
+            "ProjectName": "RoslynScribe.TestProject",
+            "DocumentName": "Logic.cs",
+            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\Logic.cs",
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "Logic",
+            "MemberName": "Add",
+            "Identifier": "RoslynScribe.TestProject.Logic.Add(int, int)"
+          },
+          "ChildNodes": [
+            {
+              "Value": [
+                "// Logic This is add result"
+              ],
+              "Kind": "ReturnStatement",
+              "MetaInfo": {
+                "ProjectName": "RoslynScribe.TestProject",
+                "DocumentName": "Logic.cs",
+                "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\Logic.cs",
+                "NameSpace": "RoslynScribe.TestProject",
+                "TypeName": "Logic",
+                "MemberName": "Add",
+                "Identifier": null
+              },
+              "ChildNodes": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

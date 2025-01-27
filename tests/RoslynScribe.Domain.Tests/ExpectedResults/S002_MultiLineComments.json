@@ -38,7 +38,7 @@
             "DocumentName": "S002_MultiLineComments.cs",
             "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
             "NameSpace": "RoslynScribe.TestProject",
-            "TypeName": "RoslynScribe.TestProject.S002_MultiLineComments",
+            "TypeName": "S002_MultiLineComments",
             "MemberName": null,
             "Identifier": "S002_MultiLineComments"
           },
@@ -54,7 +54,7 @@
                 "DocumentName": "S002_MultiLineComments.cs",
                 "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
                 "NameSpace": "RoslynScribe.TestProject",
-                "TypeName": "RoslynScribe.TestProject.S002_MultiLineComments",
+                "TypeName": "S002_MultiLineComments",
                 "MemberName": "S002_BasicMethod",
                 "Identifier": "RoslynScribe.TestProject.S002_MultiLineComments.S002_BasicMethod(int)"
               },
@@ -70,7 +70,7 @@
                     "DocumentName": "S002_MultiLineComments.cs",
                     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
                     "NameSpace": "RoslynScribe.TestProject",
-                    "TypeName": "RoslynScribe.TestProject.S002_MultiLineComments",
+                    "TypeName": "S002_MultiLineComments",
                     "MemberName": "S002_BasicMethod",
                     "Identifier": null
                   },

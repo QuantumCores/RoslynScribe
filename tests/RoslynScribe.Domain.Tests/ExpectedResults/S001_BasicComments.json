@@ -36,7 +36,7 @@
             "DocumentName": "S001_BasicComments.cs",
             "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
             "NameSpace": "RoslynScribe.TestProject",
-            "TypeName": "RoslynScribe.TestProject.S001_BasicComments",
+            "TypeName": "S001_BasicComments",
             "MemberName": null,
             "Identifier": "S001_BasicComments"
           },
@@ -51,7 +51,7 @@
                 "DocumentName": "S001_BasicComments.cs",
                 "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
                 "NameSpace": "RoslynScribe.TestProject",
-                "TypeName": "RoslynScribe.TestProject.S001_BasicComments",
+                "TypeName": "S001_BasicComments",
                 "MemberName": "S001_BasicMethod",
                 "Identifier": "RoslynScribe.TestProject.S001_BasicComments.S001_BasicMethod(int)"
               },
@@ -66,7 +66,7 @@
                     "DocumentName": "S001_BasicComments.cs",
                     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
                     "NameSpace": "RoslynScribe.TestProject",
-                    "TypeName": "RoslynScribe.TestProject.S001_BasicComments",
+                    "TypeName": "S001_BasicComments",
                     "MemberName": "S001_BasicMethod",
                     "Identifier": null
                   },
