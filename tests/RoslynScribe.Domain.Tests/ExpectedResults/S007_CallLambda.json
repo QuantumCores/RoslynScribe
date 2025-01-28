@@ -5,10 +5,10 @@
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S007_CallLambda.cs",
     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
-    "NameSpace": null,
-    "TypeName": null,
+    "NameSpace": "RoslynScribe.TestProject",
+    "TypeName": "S007_CallLambda",
     "MemberName": null,
-    "Identifier": null
+    "Identifier": "S007_CallLambda"
   },
   "ChildNodes": [
     {
@@ -20,8 +20,8 @@
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S007_CallLambda.cs",
         "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
-        "NameSpace": null,
-        "TypeName": null,
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": "S007_CallLambda",
         "MemberName": null,
         "Identifier": null
       },
@@ -36,8 +36,8 @@
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S007_CallLambda.cs",
         "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
-        "NameSpace": null,
-        "TypeName": null,
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": "S007_CallLambda",
         "MemberName": null,
         "Identifier": null
       },

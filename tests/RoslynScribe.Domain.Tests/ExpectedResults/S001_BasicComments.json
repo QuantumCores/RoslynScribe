@@ -1,35 +1,31 @@
 {
   "Value": null,
-  "Kind": "Docuemnt",
+  "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S001_BasicComments.cs",
     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
-    "NameSpace": null,
+    "NameSpace": "RoslynScribe.TestProject",
     "TypeName": null,
     "MemberName": null,
-    "Identifier": null
+    "Identifier": "RoslynScribe.TestProject"
   },
   "ChildNodes": [
     {
-      "Value": [
-        "// S001 namespace comment"
-      ],
+      "Value": [ "// S001 namespace comment" ],
       "Kind": "NamespaceDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S001_BasicComments.cs",
         "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
         "NameSpace": "RoslynScribe.TestProject",
-        "TypeName": null,
+        "TypeName": "S001_BasicComments",
         "MemberName": null,
-        "Identifier": "RoslynScribe.TestProject"
+        "Identifier": "S001_BasicComments"
       },
       "ChildNodes": [
         {
-          "Value": [
-            "// S001 BasicTestClass"
-          ],
+          "Value": [ "// S001 BasicTestClass" ],
           "Kind": "ClassDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -42,9 +38,7 @@
           },
           "ChildNodes": [
             {
-              "Value": [
-                "// S001 BasicMethod"
-              ],
+              "Value": [ "// S001 BasicMethod" ],
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -57,9 +51,7 @@
               },
               "ChildNodes": [
                 {
-                  "Value": [
-                    "// S001 result"
-                  ],
+                  "Value": [ "// S001 result" ],
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",

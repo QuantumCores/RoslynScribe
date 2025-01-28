@@ -5,16 +5,14 @@
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S004_CommentFromOtherClassMethod.cs",
     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
-    "NameSpace": null,
-    "TypeName": null,
+    "NameSpace": "RoslynScribe.TestProject",
+    "TypeName": "S004_TestClass",
     "MemberName": null,
-    "Identifier": null
+    "Identifier": "S004_TestClass"
   },
   "ChildNodes": [
     {
-      "Value": [
-        "// S004 return addition"
-      ],
+      "Value": [ "// S004 return addition" ],
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -27,9 +25,7 @@
       },
       "ChildNodes": [
         {
-          "Value": [
-            "// S004 Nodes shared comment get logic data "
-          ],
+          "Value": [ "// S004 Nodes shared comment get logic data " ],
           "Kind": "LocalDeclarationStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -43,9 +39,7 @@
           "ChildNodes": []
         },
         {
-          "Value": [
-            "// Logic Add two numbers"
-          ],
+          "Value": [ "// Logic Add two numbers" ],
           "Kind": "MethodDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -58,9 +52,7 @@
           },
           "ChildNodes": [
             {
-              "Value": [
-                "// Logic This is add result"
-              ],
+              "Value": [ "// Logic This is add result" ],
               "Kind": "ReturnStatement",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",

@@ -5,70 +5,62 @@
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S005_IfStatementBlockComment.cs",
     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S005_IfStatementBlockComment.cs",
-    "NameSpace": null,
-    "TypeName": null,
+    "NameSpace": "RoslynScribe.TestProject",
+    "TypeName": "S005_IfStatementBlockComment",
     "MemberName": null,
-    "Identifier": null
+    "Identifier": "S005_IfStatementBlockComment"
   },
   "ChildNodes": [
     {
-      "Value": [
-        "// Check condition value"
-      ],
+      "Value": [ "// Check condition value" ],
       "Kind": "IfStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S005_IfStatementBlockComment.cs",
         "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S005_IfStatementBlockComment.cs",
-        "NameSpace": null,
-        "TypeName": null,
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": "S005_IfStatementBlockComment",
         "MemberName": null,
         "Identifier": null
       },
       "ChildNodes": [
         {
-          "Value": [
-            "// S005 If condition is one then 1"
-          ],
+          "Value": [ "// S005 If condition is one then 1" ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "S005_IfStatementBlockComment.cs",
             "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S005_IfStatementBlockComment.cs",
-            "NameSpace": null,
-            "TypeName": null,
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
             "Identifier": null
           },
           "ChildNodes": []
         },
         {
-          "Value": [
-            "// S005 If condition is two then 2"
-          ],
+          "Value": [ "// S005 If condition is two then 2" ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "S005_IfStatementBlockComment.cs",
             "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S005_IfStatementBlockComment.cs",
-            "NameSpace": null,
-            "TypeName": null,
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
             "Identifier": null
           },
           "ChildNodes": []
         },
         {
-          "Value": [
-            "// S005 If condition is other then -1"
-          ],
+          "Value": [ "// S005 If condition is other then -1" ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "S005_IfStatementBlockComment.cs",
             "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S005_IfStatementBlockComment.cs",
-            "NameSpace": null,
-            "TypeName": null,
+            "NameSpace": "RoslynScribe.TestProject",
+            "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
             "Identifier": null
           },

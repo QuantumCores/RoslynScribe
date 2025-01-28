@@ -87,6 +87,7 @@ namespace RoslynScribe.Domain.Services
 
         private static void ProcessNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Document> documents)
         {
+            SetMetaInfo(syntaxNode, syntaxKind, parentNode);
             var lTrivias = syntaxNode.GetLeadingTrivia();
             var childNode = FindCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel);
 
@@ -215,6 +216,39 @@ namespace RoslynScribe.Domain.Services
             parentNode.ChildNodes.Add(childNode);
 
             return childNode;
+        }
+
+        private static void SetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode)
+        {
+            switch (syntaxKind)
+            {
+                case SyntaxKind.NamespaceDeclaration:
+                    var namespaceSyntax = (syntaxNode as NamespaceDeclarationSyntax);
+
+                    if (parentNode.MetaInfo.NameSpace != null)
+                    {
+                        return;
+                    }
+                    var metaInfo = parentNode.MetaInfo;
+                    metaInfo.NameSpace = namespaceSyntax.Name.ToString();
+                    metaInfo.Identifier = namespaceSyntax.Name.ToString();
+                    parentNode.MetaInfo = metaInfo;
+                    break;
+                case SyntaxKind.ClassDeclaration:
+                    var classSyntax = (syntaxNode as ClassDeclarationSyntax);
+
+                    if (parentNode.MetaInfo.TypeName != null)
+                    {
+                        return;
+                    }
+                    var classMetaInfo = parentNode.MetaInfo;
+                    classMetaInfo.TypeName = classSyntax.Identifier.ValueText;
+                    classMetaInfo.Identifier = classSyntax.Identifier.ValueText;
+                    parentNode.MetaInfo = classMetaInfo;
+                    break;                
+                default:                    
+                    break;
+            }
         }
 
         private static ISymbol GetMethodInfo(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)

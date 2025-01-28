@@ -5,16 +5,14 @@
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S003_CommentFromLocalMethod.cs",
     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
-    "NameSpace": null,
-    "TypeName": null,
+    "NameSpace": "RoslynScribe.TestProject",
+    "TypeName": "S003_TestClass",
     "MemberName": null,
-    "Identifier": null
+    "Identifier": "S003_TestClass"
   },
   "ChildNodes": [
     {
-      "Value": [
-        "// S003 basicMethod"
-      ],
+      "Value": [ "// S003 basicMethod" ],
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -27,9 +25,7 @@
       },
       "ChildNodes": [
         {
-          "Value": [
-            "// S003 basic result"
-          ],
+          "Value": [ "// S003 basic result" ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -45,9 +41,7 @@
       ]
     },
     {
-      "Value": [
-        "// S003 second method"
-      ],
+      "Value": [ "// S003 second method" ],
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -60,9 +54,7 @@
       },
       "ChildNodes": [
         {
-          "Value": [
-            "// S003 call basicMethod"
-          ],
+          "Value": [ "// S003 call basicMethod" ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -75,9 +67,7 @@
           },
           "ChildNodes": [
             {
-              "Value": [
-                "// S003 basicMethod"
-              ],
+              "Value": [ "// S003 basicMethod" ],
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -90,9 +80,7 @@
               },
               "ChildNodes": [
                 {
-                  "Value": [
-                    "// S003 basic result"
-                  ],
+                  "Value": [ "// S003 basic result" ],
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",

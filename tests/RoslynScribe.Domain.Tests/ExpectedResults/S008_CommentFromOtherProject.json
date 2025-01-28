@@ -5,10 +5,10 @@
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S008_CommentFromOtherProject.cs",
     "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S008_CommentFromOtherProject.cs",
-    "NameSpace": null,
-    "TypeName": null,
+    "NameSpace": "RoslynScribe.TestProject",
+    "TypeName": "S008_CommentFromOtherProject",
     "MemberName": null,
-    "Identifier": null
+    "Identifier": "S008_CommentFromOtherProject"
   },
   "ChildNodes": [
     {
@@ -20,8 +20,8 @@
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S008_CommentFromOtherProject.cs",
         "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S008_CommentFromOtherProject.cs",
-        "NameSpace": null,
-        "TypeName": null,
+        "NameSpace": "RoslynScribe.TestProject",
+        "TypeName": "S008_CommentFromOtherProject",
         "MemberName": null,
         "Identifier": null
       },

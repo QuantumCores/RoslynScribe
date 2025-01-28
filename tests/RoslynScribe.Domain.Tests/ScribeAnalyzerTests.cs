@@ -62,7 +62,7 @@ namespace RoslynScribe.Domain.Tests
             // Act            
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs");
 
-            // var json = JsonSerializer.Serialize(result);
+             var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
