@@ -4,17 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="ExpectedResults\S001_BasicComments.json" />
-    <None Remove="ExpectedResults\S002_MultiLineComments.json" />
-    <None Remove="ExpectedResults\S003_CommentFromLocalMethod.json" />
-    <None Remove="ExpectedResults\S004_CommentFromOtherClassMethod.json" />
-    <None Remove="ExpectedResults\S005_IfStatementBlockComment.json" />
-    <None Remove="ExpectedResults\S006_ThirdPartyLibrary.json" />
-    <None Remove="ExpectedResults\S007_CallLambda.json" />
-    <None Remove="ExpectedResults\S008_CommentFromOtherProject.json" />
-  </ItemGroup>
+  
 
   <ItemGroup>
     <Content Include="ExpectedResults\S001_BasicComments.json">

@@ -3,8 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace RoslynScribe.Domain.Models
 {
-    public class ScribeNode
+    public class ScribeNode : IScribeNode
     {
+        public int Id { get; set; }
+
         [JsonIgnore]
         public ScribeNode ParentNode { get; set; }
 
@@ -14,7 +16,7 @@ namespace RoslynScribe.Domain.Models
 
         public MetaInfo MetaInfo { get; set; }
 
-        public List<ScribeNode> ChildNodes { get; set; } = new List<ScribeNode>();
+        public List<ScribeNode> ChildNodes { get; set; } = new List<ScribeNode>();        
 
         public override string ToString()
         {

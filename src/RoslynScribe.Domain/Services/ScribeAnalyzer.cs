@@ -42,7 +42,7 @@ namespace RoslynScribe.Domain.Services
             return result;
         }
 
-        public static Task<ScribeNode> Analyze(Solution solution, string projectName, string documentName)
+        internal static Task<ScribeNode> Analyze(Solution solution, string projectName, string documentName)
         {
             var project = solution.Projects.Single(x => x.Name == projectName);
             var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
@@ -50,7 +50,11 @@ namespace RoslynScribe.Domain.Services
             return Analyze(solution, project, documents, document);
         }
 
-        public static async Task<ScribeNode> Analyze(Solution solution, Project project, Dictionary<string, Document> documents, Document document)
+        public static async Task<ScribeNode> Analyze(
+            Solution solution,
+            Project project,
+            Dictionary<string, Document> documents,
+            Document document)
         {
             if (document.Name == project.Name + ".AssemblyInfo.cs" ||
                                 document.Name == project.Name + ".GlobalUsings.g.cs" ||
@@ -83,6 +87,37 @@ namespace RoslynScribe.Domain.Services
             // Console.WriteLine();
 
             return scribeNode;
+        }
+
+        internal static Dictionary<int, ScribeNode> Rebuild(List<ScribeNode> nodes)
+        {
+            var dictionary = RegisterNodes(nodes);
+
+            return dictionary;
+        }
+
+        private static Dictionary<int, ScribeNode> RegisterNodes(List<ScribeNode> nodes)
+        {
+            var result = new Dictionary<int, ScribeNode>();
+            foreach (var node in nodes)
+            {
+                RegisterNode(node, result);
+            }
+
+            return result;
+        }
+
+        private static void RegisterNode(ScribeNode node, Dictionary<int, ScribeNode> dictionary)
+        {
+            var key = node.MetaInfo.GetHashCode();
+            if (!dictionary.ContainsKey(key))
+            {
+                dictionary.Add(key, node);
+                foreach (var child in node.ChildNodes)
+                {
+                    RegisterNode(child, dictionary);
+                }
+            }
         }
 
         private static void ProcessNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Document> documents)
@@ -245,8 +280,8 @@ namespace RoslynScribe.Domain.Services
                     classMetaInfo.TypeName = classSyntax.Identifier.ValueText;
                     classMetaInfo.Identifier = classSyntax.Identifier.ValueText;
                     parentNode.MetaInfo = classMetaInfo;
-                    break;                
-                default:                    
+                    break;
+                default:
                     break;
             }
         }
@@ -285,7 +320,7 @@ namespace RoslynScribe.Domain.Services
                     metaInfo.TypeName = classSyntax.Identifier.ValueText;
                     metaInfo.Identifier = classSyntax.Identifier.ValueText;
                     break;
-                case SyntaxKind.MethodDeclaration:                    
+                case SyntaxKind.MethodDeclaration:
                     var methodSyntax = (syntaxNode as MethodDeclarationSyntax);
 
                     // methods can be called from other project thus copying data from parent won't work

@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace RoslynScribe.Domain.Tests
 {
-    public class ScribeAnalyzerTests
+    public class BasicStructureTests
     {
         [OneTimeSetUp]
         public async Task Setup()

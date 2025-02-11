@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RoslynScribe.Domain.Tests
 {
-    public class FullScribeNodeTests
+    public class MetaInfoTests
     {
         private string _expectedDirectory;
 
