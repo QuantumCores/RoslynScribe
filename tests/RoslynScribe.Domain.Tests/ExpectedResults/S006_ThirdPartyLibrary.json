@@ -1,4 +1,5 @@
 {
+  "Id": 0,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -8,11 +9,15 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S006_ThirdPartyLibrary",
     "MemberName": null,
-    "Identifier": "S006_ThirdPartyLibrary"
+    "Identifier": "S006_ThirdPartyLibrary",
+    "Line": 0
   },
   "ChildNodes": [
     {
-      "Value": [ "// S006 call external method to add days" ],
+      "Id": 0,
+      "Value": [
+        "// S006 call external method to add days"
+      ],
       "Kind": "ExpressionStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -21,7 +26,8 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S006_ThirdPartyLibrary",
         "MemberName": null,
-        "Identifier": null
+        "Identifier": null,
+        "Line": 7
       },
       "ChildNodes": []
     }

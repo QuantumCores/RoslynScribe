@@ -1,4 +1,5 @@
 {
+  "Id": 0,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -8,11 +9,15 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S005_IfStatementBlockComment",
     "MemberName": null,
-    "Identifier": "S005_IfStatementBlockComment"
+    "Identifier": "S005_IfStatementBlockComment",
+    "Line": 0
   },
   "ChildNodes": [
     {
-      "Value": [ "// Check condition value" ],
+      "Id": 0,
+      "Value": [
+        "// Check condition value"
+      ],
       "Kind": "IfStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -21,11 +26,15 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S005_IfStatementBlockComment",
         "MemberName": null,
-        "Identifier": null
+        "Identifier": null,
+        "Line": 6
       },
       "ChildNodes": [
         {
-          "Value": [ "// S005 If condition is one then 1" ],
+          "Id": 0,
+          "Value": [
+            "// S005 If condition is one then 1"
+          ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -34,12 +43,16 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
-            "Identifier": null
+            "Identifier": null,
+            "Line": 9
           },
           "ChildNodes": []
         },
         {
-          "Value": [ "// S005 If condition is two then 2" ],
+          "Id": 0,
+          "Value": [
+            "// S005 If condition is two then 2"
+          ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -48,12 +61,16 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
-            "Identifier": null
+            "Identifier": null,
+            "Line": 14
           },
           "ChildNodes": []
         },
         {
-          "Value": [ "// S005 If condition is other then -1" ],
+          "Id": 0,
+          "Value": [
+            "// S005 If condition is other then -1"
+          ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -62,7 +79,8 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
-            "Identifier": null
+            "Identifier": null,
+            "Line": 19
           },
           "ChildNodes": []
         }

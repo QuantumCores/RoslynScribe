@@ -1,4 +1,5 @@
 {
+  "Id": 0,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -8,11 +9,15 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": null,
     "MemberName": null,
-    "Identifier": "RoslynScribe.TestProject"
+    "Identifier": "RoslynScribe.TestProject",
+    "Line": 0
   },
   "ChildNodes": [
     {
-      "Value": [ "// S001 namespace comment" ],
+      "Id": 0,
+      "Value": [
+        "// S001 namespace comment"
+      ],
       "Kind": "NamespaceDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -21,11 +26,15 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S001_BasicComments",
         "MemberName": null,
-        "Identifier": "S001_BasicComments"
+        "Identifier": "S001_BasicComments",
+        "Line": 0
       },
       "ChildNodes": [
         {
-          "Value": [ "// S001 BasicTestClass" ],
+          "Id": 0,
+          "Value": [
+            "// S001 BasicTestClass"
+          ],
           "Kind": "ClassDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -34,11 +43,15 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S001_BasicComments",
             "MemberName": null,
-            "Identifier": "S001_BasicComments"
+            "Identifier": "S001_BasicComments",
+            "Line": 3
           },
           "ChildNodes": [
             {
-              "Value": [ "// S001 BasicMethod" ],
+              "Id": 0,
+              "Value": [
+                "// S001 BasicMethod"
+              ],
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -47,11 +60,15 @@
                 "NameSpace": "RoslynScribe.TestProject",
                 "TypeName": "S001_BasicComments",
                 "MemberName": "S001_BasicMethod",
-                "Identifier": "RoslynScribe.TestProject.S001_BasicComments.S001_BasicMethod(int)"
+                "Identifier": "RoslynScribe.TestProject.S001_BasicComments.S001_BasicMethod(int)",
+                "Line": 6
               },
               "ChildNodes": [
                 {
-                  "Value": [ "// S001 result" ],
+                  "Id": 0,
+                  "Value": [
+                    "// S001 result"
+                  ],
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",
@@ -60,7 +77,8 @@
                     "NameSpace": "RoslynScribe.TestProject",
                     "TypeName": "S001_BasicComments",
                     "MemberName": "S001_BasicMethod",
-                    "Identifier": null
+                    "Identifier": null,
+                    "Line": 9
                   },
                   "ChildNodes": []
                 }

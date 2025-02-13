@@ -1,4 +1,5 @@
 {
+  "Id": 0,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -8,11 +9,15 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S003_TestClass",
     "MemberName": null,
-    "Identifier": "S003_TestClass"
+    "Identifier": "S003_TestClass",
+    "Line": 0
   },
   "ChildNodes": [
     {
-      "Value": [ "// S003 basicMethod" ],
+      "Id": 0,
+      "Value": [
+        "// S003 basicMethod"
+      ],
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -21,11 +26,15 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S003_TestClass",
         "MemberName": "S003_BasicMethod",
-        "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)"
+        "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)",
+        "Line": 4
       },
       "ChildNodes": [
         {
-          "Value": [ "// S003 basic result" ],
+          "Id": 0,
+          "Value": [
+            "// S003 basic result"
+          ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -34,14 +43,18 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S003_TestClass",
             "MemberName": "S003_BasicMethod",
-            "Identifier": null
+            "Identifier": null,
+            "Line": 7
           },
           "ChildNodes": []
         }
       ]
     },
     {
-      "Value": [ "// S003 second method" ],
+      "Id": 0,
+      "Value": [
+        "// S003 second method"
+      ],
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -50,11 +63,15 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S003_TestClass",
         "MemberName": "S003_SecondMethod",
-        "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_SecondMethod(int)"
+        "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_SecondMethod(int)",
+        "Line": 11
       },
       "ChildNodes": [
         {
-          "Value": [ "// S003 call basicMethod" ],
+          "Id": 0,
+          "Value": [
+            "// S003 call basicMethod"
+          ],
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -63,11 +80,15 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S003_TestClass",
             "MemberName": "S003_SecondMethod",
-            "Identifier": null
+            "Identifier": null,
+            "Line": 14
           },
           "ChildNodes": [
             {
-              "Value": [ "// S003 basicMethod" ],
+              "Id": 0,
+              "Value": [
+                "// S003 basicMethod"
+              ],
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -76,11 +97,15 @@
                 "NameSpace": "RoslynScribe.TestProject",
                 "TypeName": "S003_TestClass",
                 "MemberName": "S003_BasicMethod",
-                "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)"
+                "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)",
+                "Line": 4
               },
               "ChildNodes": [
                 {
-                  "Value": [ "// S003 basic result" ],
+                  "Id": 0,
+                  "Value": [
+                    "// S003 basic result"
+                  ],
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",
@@ -89,7 +114,8 @@
                     "NameSpace": "RoslynScribe.TestProject",
                     "TypeName": "S003_TestClass",
                     "MemberName": "S003_BasicMethod",
-                    "Identifier": null
+                    "Identifier": null,
+                    "Line": 7
                   },
                   "ChildNodes": []
                 }

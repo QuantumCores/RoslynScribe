@@ -15,5 +15,7 @@
         public string MemberName { get; set; }
 
         public string Identifier { get; set; }
+
+        public int Line {  get; set; }
     }
 }

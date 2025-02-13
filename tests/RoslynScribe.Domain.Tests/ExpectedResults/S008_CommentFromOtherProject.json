@@ -1,4 +1,5 @@
 {
+  "Id": 0,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -8,10 +9,12 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S008_CommentFromOtherProject",
     "MemberName": null,
-    "Identifier": "S008_CommentFromOtherProject"
+    "Identifier": "S008_CommentFromOtherProject",
+    "Line": 0
   },
   "ChildNodes": [
     {
+      "Id": 0,
       "Value": [
         "// S008 Nodes shared comment"
       ],
@@ -23,11 +26,13 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S008_CommentFromOtherProject",
         "MemberName": null,
-        "Identifier": null
+        "Identifier": null,
+        "Line": 8
       },
       "ChildNodes": []
     },
     {
+      "Id": 0,
       "Value": [
         "// OtherLogic Multiply two numbers"
       ],
@@ -39,10 +44,12 @@
         "NameSpace": "RoslynScribe.OtherTestProject",
         "TypeName": "OtherLogic",
         "MemberName": "Multiply",
-        "Identifier": "RoslynScribe.OtherTestProject.OtherLogic.Multiply(int, int)"
+        "Identifier": "RoslynScribe.OtherTestProject.OtherLogic.Multiply(int, int)",
+        "Line": 5
       },
       "ChildNodes": [
         {
+          "Id": 0,
           "Value": [
             "// OtherLogic This is multiplication result"
           ],
@@ -54,7 +61,8 @@
             "NameSpace": "RoslynScribe.OtherTestProject",
             "TypeName": "OtherLogic",
             "MemberName": "Multiply",
-            "Identifier": null
+            "Identifier": null,
+            "Line": 8
           },
           "ChildNodes": []
         }

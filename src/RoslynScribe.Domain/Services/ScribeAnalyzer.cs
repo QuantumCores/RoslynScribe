@@ -171,18 +171,23 @@ namespace RoslynScribe.Domain.Services
 
         private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel)
         {
+            var line = -1;
             var comments = new List<string>();
             foreach (var trivia in syntaxTrivias)
             {
                 if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia))
                 {
                     comments.Add(trivia.ToString());
+                    if (line == -1)
+                    {
+                        line = trivia.GetLocation().GetLineSpan().Span.Start.Line;
+                    }
                 }
             }
 
             if (comments.Count != 0)
             {
-                return AddChildNode(syntaxNode, syntaxKind, parentNode, comments.ToArray(), semanticModel);
+                return AddChildNode(syntaxNode, syntaxKind, parentNode, comments.ToArray(), semanticModel, line);
             }
 
             return null;
@@ -238,12 +243,12 @@ namespace RoslynScribe.Domain.Services
             return start != stop;
         }
 
-        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, SemanticModel semanticModel)
+        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, SemanticModel semanticModel, int line)
         {
             var childNode = new ScribeNode
             {
                 ParentNode = parentNode,
-                MetaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel),
+                MetaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line),
                 Kind = syntaxKind.ToString(),
                 Value = value
             };
@@ -293,9 +298,10 @@ namespace RoslynScribe.Domain.Services
             return methodSymbol;
         }
 
-        private static MetaInfo GetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel)
+        private static MetaInfo GetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, int line)
         {
             var metaInfo = new MetaInfo();
+            metaInfo.Line = line;
 
             switch (syntaxKind)
             {
@@ -325,7 +331,7 @@ namespace RoslynScribe.Domain.Services
 
                     // methods can be called from other project thus copying data from parent won't work
                     var symbolInfo = semanticModel.GetDeclaredSymbol(methodSyntax);
-                    return GetMetaInfo(symbolInfo);
+                    return GetMetaInfo(symbolInfo, line);
                 default:
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
@@ -339,7 +345,7 @@ namespace RoslynScribe.Domain.Services
             return metaInfo;
         }
 
-        private static MetaInfo GetMetaInfo(IMethodSymbol symbolInfo)
+        private static MetaInfo GetMetaInfo(IMethodSymbol symbolInfo, int line)
         {
             var metaInfo = new MetaInfo();
             metaInfo.ProjectName = symbolInfo.ContainingAssembly.Name;
@@ -351,6 +357,7 @@ namespace RoslynScribe.Domain.Services
             metaInfo.TypeName = symbolInfo.ContainingType.Name;
             metaInfo.MemberName = symbolInfo.Name;
             metaInfo.Identifier = symbolInfo.OriginalDefinition.ToString();
+            metaInfo.Line = line;
 
             return metaInfo;
         }

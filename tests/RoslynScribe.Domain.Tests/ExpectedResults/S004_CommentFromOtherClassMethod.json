@@ -1,4 +1,5 @@
 {
+  "Id": 0,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -8,11 +9,15 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S004_TestClass",
     "MemberName": null,
-    "Identifier": "S004_TestClass"
+    "Identifier": "S004_TestClass",
+    "Line": 0
   },
   "ChildNodes": [
     {
-      "Value": [ "// S004 return addition" ],
+      "Id": 0,
+      "Value": [
+        "// S004 return addition"
+      ],
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -21,11 +26,15 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S004_TestClass",
         "MemberName": "S004_SecondMethod",
-        "Identifier": "RoslynScribe.TestProject.S004_TestClass.S004_SecondMethod(int)"
+        "Identifier": "RoslynScribe.TestProject.S004_TestClass.S004_SecondMethod(int)",
+        "Line": 4
       },
       "ChildNodes": [
         {
-          "Value": [ "// S004 Nodes shared comment get logic data " ],
+          "Id": 0,
+          "Value": [
+            "// S004 Nodes shared comment get logic data "
+          ],
           "Kind": "LocalDeclarationStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -34,12 +43,16 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S004_TestClass",
             "MemberName": "S004_SecondMethod",
-            "Identifier": null
+            "Identifier": null,
+            "Line": 7
           },
           "ChildNodes": []
         },
         {
-          "Value": [ "// Logic Add two numbers" ],
+          "Id": 0,
+          "Value": [
+            "// Logic Add two numbers"
+          ],
           "Kind": "MethodDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -48,11 +61,15 @@
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "Logic",
             "MemberName": "Add",
-            "Identifier": "RoslynScribe.TestProject.Logic.Add(int, int)"
+            "Identifier": "RoslynScribe.TestProject.Logic.Add(int, int)",
+            "Line": 4
           },
           "ChildNodes": [
             {
-              "Value": [ "// Logic This is add result" ],
+              "Id": 0,
+              "Value": [
+                "// Logic This is add result"
+              ],
               "Kind": "ReturnStatement",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -61,7 +78,8 @@
                 "NameSpace": "RoslynScribe.TestProject",
                 "TypeName": "Logic",
                 "MemberName": "Add",
-                "Identifier": null
+                "Identifier": null,
+                "Line": 7
               },
               "ChildNodes": []
             }

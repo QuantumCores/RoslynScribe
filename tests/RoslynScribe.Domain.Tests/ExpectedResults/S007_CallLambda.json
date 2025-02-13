@@ -1,4 +1,5 @@
 {
+  "Id": 0,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -8,10 +9,12 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S007_CallLambda",
     "MemberName": null,
-    "Identifier": "S007_CallLambda"
+    "Identifier": "S007_CallLambda",
+    "Line": 0
   },
   "ChildNodes": [
     {
+      "Id": 0,
       "Value": [
         "// S007 prepare lambda"
       ],
@@ -23,11 +26,13 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S007_CallLambda",
         "MemberName": null,
-        "Identifier": null
+        "Identifier": null,
+        "Line": 6
       },
       "ChildNodes": []
     },
     {
+      "Id": 0,
       "Value": [
         "// S007 add one in lambda expression"
       ],
@@ -39,7 +44,8 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S007_CallLambda",
         "MemberName": null,
-        "Identifier": null
+        "Identifier": null,
+        "Line": 10
       },
       "ChildNodes": []
     }
