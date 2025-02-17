@@ -50,7 +50,7 @@ namespace RoslynScribe.Domain.Services
             return Analyze(solution, project, documents, document);
         }
 
-        public static async Task<ScribeNode> Analyze(
+        private static async Task<ScribeNode> Analyze(
             Solution solution,
             Project project,
             Dictionary<string, Document> documents,
@@ -70,12 +70,14 @@ namespace RoslynScribe.Domain.Services
 
             var scribeNode = new ScribeNode()
             {
+                Id = Guid.NewGuid(),
                 Kind = "Document",
                 MetaInfo = new MetaInfo
                 {
                     ProjectName = project.Name,
                     DocumentName = document.Name,
                     DocumentPath = document.FilePath,
+                    Identifier = document.FilePath
                 }
             };
 
@@ -89,34 +91,78 @@ namespace RoslynScribe.Domain.Services
             return scribeNode;
         }
 
-        internal static Dictionary<int, ScribeNode> Rebuild(List<ScribeNode> nodes)
+        internal static ScribeResult Rebuild(List<ScribeNode> nodes)
         {
             var dictionary = RegisterNodes(nodes);
-
-            return dictionary;
+            return Rebuild(nodes, dictionary);
         }
 
-        private static Dictionary<int, ScribeNode> RegisterNodes(List<ScribeNode> nodes)
+        private static ScribeResult Rebuild(List<ScribeNode> nodes, Dictionary<int, ScribeNode> dictionary)
         {
-            var result = new Dictionary<int, ScribeNode>();
+            var result = new Dictionary<Guid, ScribeNode>();
+            if (dictionary.Count != 0)
+            {
+                foreach (var node in nodes)
+                {
+                    Rebuild(node, dictionary, result);
+                }
+            }
+
+            return new ScribeResult() { Nodes = result, Trees = nodes };
+        }
+
+        private static ScribeNode Rebuild(ScribeNode node, Dictionary<int, ScribeNode> dictionary, Dictionary<Guid, ScribeNode> result)
+        {
+            if (dictionary.TryGetValue(node.MetaInfo.GetHashCode(), out var reference))
+            {
+                if (!result.ContainsKey(reference.Id))
+                {
+                    result.Add(reference.Id, node);
+                }
+                else
+                {
+                    return new ScribeNode { Id = node.Id, TargetNodeId = reference.Id };
+                }
+            }
+
+            for (int i = 0; i < node.ChildNodes.Count; i++)
+            {
+                node.ChildNodes[i] = Rebuild(node.ChildNodes[i], dictionary, result);
+            }
+
+            return node;
+            //foreach (var child in node.ChildNodes)
+            //{
+            //    Rebuild(child, dictionary, result);
+            //}
+        }
+
+        internal static Dictionary<int, ScribeNode> RegisterNodes(List<ScribeNode> nodes)
+        {
+            var result = new Dictionary<int, NodeCounter>();
             foreach (var node in nodes)
             {
                 RegisterNode(node, result);
             }
 
-            return result;
+            return result.Where(x => x.Value.Count > 1).ToDictionary(x => x.Key, x => x.Value.Node);
         }
 
-        private static void RegisterNode(ScribeNode node, Dictionary<int, ScribeNode> dictionary)
+        private static void RegisterNode(ScribeNode node, Dictionary<int, NodeCounter> dictionary)
         {
-            var key = node.MetaInfo.GetHashCode();
-            if (!dictionary.ContainsKey(key))
+            var key = node.MetaInfo.GetHashCode();            
+            if (dictionary.TryGetValue(key, out var registered))
             {
-                dictionary.Add(key, node);
-                foreach (var child in node.ChildNodes)
-                {
-                    RegisterNode(child, dictionary);
-                }
+                registered.Count++;
+            }
+            else
+            {
+                dictionary.Add(key, new NodeCounter(node));                
+            }
+
+            foreach (var child in node.ChildNodes)
+            {
+                RegisterNode(child, dictionary);
             }
         }
 
@@ -247,7 +293,8 @@ namespace RoslynScribe.Domain.Services
         {
             var childNode = new ScribeNode
             {
-                ParentNode = parentNode,
+                Id = Guid.NewGuid(),
+                //ParentNode = parentNode,
                 MetaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line),
                 Kind = syntaxKind.ToString(),
                 Value = value
@@ -271,7 +318,6 @@ namespace RoslynScribe.Domain.Services
                     }
                     var metaInfo = parentNode.MetaInfo;
                     metaInfo.NameSpace = namespaceSyntax.Name.ToString();
-                    metaInfo.Identifier = namespaceSyntax.Name.ToString();
                     parentNode.MetaInfo = metaInfo;
                     break;
                 case SyntaxKind.ClassDeclaration:
@@ -283,7 +329,6 @@ namespace RoslynScribe.Domain.Services
                     }
                     var classMetaInfo = parentNode.MetaInfo;
                     classMetaInfo.TypeName = classSyntax.Identifier.ValueText;
-                    classMetaInfo.Identifier = classSyntax.Identifier.ValueText;
                     parentNode.MetaInfo = classMetaInfo;
                     break;
                 default:

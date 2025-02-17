@@ -1,14 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace RoslynScribe.Domain.Models
 {
     public class ScribeNode : IScribeNode
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        [JsonIgnore]
-        public ScribeNode ParentNode { get; set; }
+        // This is id of node which this node represents
+        public Guid? TargetNodeId { get; set; }
+
+        //[JsonIgnore]
+        //public ScribeNode ParentNode { get; set; }
 
         public string[] Value { get; set; }
 
@@ -16,7 +20,7 @@ namespace RoslynScribe.Domain.Models
 
         public MetaInfo MetaInfo { get; set; }
 
-        public List<ScribeNode> ChildNodes { get; set; } = new List<ScribeNode>();        
+        public List<ScribeNode> ChildNodes { get; set; } = new List<ScribeNode>();
 
         public override string ToString()
         {

@@ -1,5 +1,6 @@
 {
-  "Id": 0,
+  "Id": "d837ae1a-8b99-4fcc-bcc5-b4052eac5dfd",
+  "TargetNodeId": null,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -9,12 +10,13 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S007_CallLambda",
     "MemberName": null,
-    "Identifier": "S007_CallLambda",
+    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": 0,
+      "Id": "302e8d0d-932f-4b15-a0b2-70c34169dc83",
+      "TargetNodeId": null,
       "Value": [
         "// S007 prepare lambda"
       ],
@@ -32,7 +34,8 @@
       "ChildNodes": []
     },
     {
-      "Id": 0,
+      "Id": "bdfd3eba-239e-4dfa-bcbb-33a41d782ab7",
+      "TargetNodeId": null,
       "Value": [
         "// S007 add one in lambda expression"
       ],

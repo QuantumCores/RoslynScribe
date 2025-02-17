@@ -1,6 +1,6 @@
 ﻿namespace RoslynScribe.Domain.Models
 {
-    public struct  MetaInfo
+    public struct MetaInfo
     {
         public string ProjectName { get; set; }
 
@@ -17,5 +17,10 @@
         public string Identifier { get; set; }
 
         public int Line {  get; set; }
+
+        public override int GetHashCode()
+        {
+            return (ProjectName, DocumentName, DocumentPath, NameSpace, TypeName, MemberName, Identifier, Line).GetHashCode();
+        }
     }
 }

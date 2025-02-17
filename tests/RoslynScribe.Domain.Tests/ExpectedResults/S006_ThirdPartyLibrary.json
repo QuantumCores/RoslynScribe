@@ -1,5 +1,6 @@
 {
-  "Id": 0,
+  "Id": "e87a8346-e884-468c-a011-bc1400f4613c",
+  "TargetNodeId": null,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -9,12 +10,13 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S006_ThirdPartyLibrary",
     "MemberName": null,
-    "Identifier": "S006_ThirdPartyLibrary",
+    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": 0,
+      "Id": "617e1bbc-992e-4bf8-a782-d1bded011998",
+      "TargetNodeId": null,
       "Value": [
         "// S006 call external method to add days"
       ],

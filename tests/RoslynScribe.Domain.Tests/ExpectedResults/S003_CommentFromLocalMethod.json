@@ -1,5 +1,6 @@
 {
-  "Id": 0,
+  "Id": "f3d3b88d-1156-489c-8b31-a84d9cf5729d",
+  "TargetNodeId": null,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -9,12 +10,13 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S003_TestClass",
     "MemberName": null,
-    "Identifier": "S003_TestClass",
+    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": 0,
+      "Id": "55d93fa0-e61f-4b3a-a12c-4a4f12194ab0",
+      "TargetNodeId": null,
       "Value": [
         "// S003 basicMethod"
       ],
@@ -31,7 +33,8 @@
       },
       "ChildNodes": [
         {
-          "Id": 0,
+          "Id": "2c2132c5-66e8-46cb-8f37-dd729ba9579a",
+          "TargetNodeId": null,
           "Value": [
             "// S003 basic result"
           ],
@@ -51,7 +54,8 @@
       ]
     },
     {
-      "Id": 0,
+      "Id": "39c5ba3a-36fc-49b4-8747-3a3adac357a6",
+      "TargetNodeId": null,
       "Value": [
         "// S003 second method"
       ],
@@ -68,7 +72,8 @@
       },
       "ChildNodes": [
         {
-          "Id": 0,
+          "Id": "271c6dfc-3ca5-4850-90dd-53cf3a10ccec",
+          "TargetNodeId": null,
           "Value": [
             "// S003 call basicMethod"
           ],
@@ -85,7 +90,8 @@
           },
           "ChildNodes": [
             {
-              "Id": 0,
+              "Id": "107399ac-3d5c-4275-95e8-d7a3ef41161f",
+              "TargetNodeId": null,
               "Value": [
                 "// S003 basicMethod"
               ],
@@ -102,7 +108,8 @@
               },
               "ChildNodes": [
                 {
-                  "Id": 0,
+                  "Id": "c5df2107-d539-4d0f-a1db-0e6ff7ff416a",
+                  "TargetNodeId": null,
                   "Value": [
                     "// S003 basic result"
                   ],

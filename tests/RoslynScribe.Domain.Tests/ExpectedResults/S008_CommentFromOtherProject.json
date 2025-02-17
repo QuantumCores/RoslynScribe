@@ -1,5 +1,6 @@
 {
-  "Id": 0,
+  "Id": "687be988-4b4a-4529-a29d-fa627f0fd1c4",
+  "TargetNodeId": null,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -9,12 +10,13 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S008_CommentFromOtherProject",
     "MemberName": null,
-    "Identifier": "S008_CommentFromOtherProject",
+    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S008_CommentFromOtherProject.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": 0,
+      "Id": "c8ce0f38-b547-4525-a03f-77c12f486808",
+      "TargetNodeId": null,
       "Value": [
         "// S008 Nodes shared comment"
       ],
@@ -32,7 +34,8 @@
       "ChildNodes": []
     },
     {
-      "Id": 0,
+      "Id": "532b58cc-18ea-4827-8f21-1431d827bea7",
+      "TargetNodeId": null,
       "Value": [
         "// OtherLogic Multiply two numbers"
       ],
@@ -49,7 +52,8 @@
       },
       "ChildNodes": [
         {
-          "Id": 0,
+          "Id": "c1edcb66-29a4-4580-b555-65076b8c319b",
+          "TargetNodeId": null,
           "Value": [
             "// OtherLogic This is multiplication result"
           ],

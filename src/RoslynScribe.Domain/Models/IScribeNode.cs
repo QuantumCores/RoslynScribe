@@ -1,12 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
 
 namespace RoslynScribe.Domain.Models
 {
     public interface IScribeNode
     {
-        int Id { get; set; }
+        Guid Id { get; set; }
 
-        [JsonIgnore]
-        ScribeNode ParentNode { get; set; }
+        //[JsonIgnore]
+        //ScribeNode ParentNode { get; set; }
     }
 }

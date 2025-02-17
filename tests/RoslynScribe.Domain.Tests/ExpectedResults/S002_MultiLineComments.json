@@ -1,5 +1,6 @@
 {
-  "Id": 0,
+  "Id": "f530c63e-d036-498d-8b2c-f3503bfc270a",
+  "TargetNodeId": null,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -9,12 +10,13 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": null,
     "MemberName": null,
-    "Identifier": "RoslynScribe.TestProject",
+    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": 0,
+      "Id": "c91433a4-33f7-4de1-9986-1976b198aafc",
+      "TargetNodeId": null,
       "Value": [
         "// S002 namespace comment",
         "// S002 second namespace comment"
@@ -27,12 +29,13 @@
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S002_MultiLineComments",
         "MemberName": null,
-        "Identifier": "S002_MultiLineComments",
+        "Identifier": "RoslynScribe.TestProject",
         "Line": 0
       },
       "ChildNodes": [
         {
-          "Id": 0,
+          "Id": "b74dfea5-4ac3-4145-803b-1a14e4f17765",
+          "TargetNodeId": null,
           "Value": [
             "// S002 class comment",
             "// S002 second class comment"
@@ -50,7 +53,8 @@
           },
           "ChildNodes": [
             {
-              "Id": 0,
+              "Id": "9f2e5f5e-bbe7-4100-b067-ca8f5e79a726",
+              "TargetNodeId": null,
               "Value": [
                 "// S002 BasicMethod",
                 "// S002 second method comment"
@@ -68,7 +72,8 @@
               },
               "ChildNodes": [
                 {
-                  "Id": 0,
+                  "Id": "170a3f06-f64d-4fa4-9eb8-cd458966b1c0",
+                  "TargetNodeId": null,
                   "Value": [
                     "// S002 result",
                     "// S002 seconod result"

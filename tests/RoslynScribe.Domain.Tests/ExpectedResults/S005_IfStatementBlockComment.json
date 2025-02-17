@@ -1,5 +1,6 @@
 {
-  "Id": 0,
+  "Id": "f669ce5d-e337-49b9-92b9-9e762d949ee4",
+  "TargetNodeId": null,
   "Value": null,
   "Kind": "Document",
   "MetaInfo": {
@@ -9,12 +10,13 @@
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S005_IfStatementBlockComment",
     "MemberName": null,
-    "Identifier": "S005_IfStatementBlockComment",
+    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S005_IfStatementBlockComment.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": 0,
+      "Id": "ac5a19bc-8722-4bf2-ad0a-cfa8eb93bfa0",
+      "TargetNodeId": null,
       "Value": [
         "// Check condition value"
       ],
@@ -31,7 +33,8 @@
       },
       "ChildNodes": [
         {
-          "Id": 0,
+          "Id": "8e2d4430-005b-4f41-ad39-930ae2cc810e",
+          "TargetNodeId": null,
           "Value": [
             "// S005 If condition is one then 1"
           ],
@@ -49,7 +52,8 @@
           "ChildNodes": []
         },
         {
-          "Id": 0,
+          "Id": "7f37aac9-49b5-4447-92c3-c203af3c6951",
+          "TargetNodeId": null,
           "Value": [
             "// S005 If condition is two then 2"
           ],
@@ -67,7 +71,8 @@
           "ChildNodes": []
         },
         {
-          "Id": 0,
+          "Id": "10ac27c7-53d6-4b9d-9d25-3d06c7e35ab1",
+          "TargetNodeId": null,
           "Value": [
             "// S005 If condition is other then -1"
           ],

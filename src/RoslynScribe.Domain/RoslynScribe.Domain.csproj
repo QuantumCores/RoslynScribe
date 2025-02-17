@@ -1,11 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="RoslynScribe.Domain.Tests"/>
+    <None Remove="Models\NodeCounter.cs~RF15562f27.TMP" />
+    <None Remove="Models\ScribeResult.cs~RF15433618.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RoslynScribe.Domain.Tests" />
   </ItemGroup>
 
   <ItemGroup>
