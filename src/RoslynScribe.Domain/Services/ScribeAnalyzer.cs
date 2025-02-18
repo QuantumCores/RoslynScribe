@@ -91,7 +91,7 @@ namespace RoslynScribe.Domain.Services
             return scribeNode;
         }
 
-        internal static ScribeResult Rebuild(List<ScribeNode> nodes)
+        public static ScribeResult Rebuild(List<ScribeNode> nodes)
         {
             var dictionary = RegisterNodes(nodes);
             return Rebuild(nodes, dictionary);

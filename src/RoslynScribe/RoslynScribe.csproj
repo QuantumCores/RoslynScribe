@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="RoslynScribe.Printer.Mermaid" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\RoslynScribe.Domain\RoslynScribe.Domain.csproj" />
   </ItemGroup>
 
