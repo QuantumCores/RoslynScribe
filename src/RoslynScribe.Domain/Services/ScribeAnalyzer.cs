@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
+using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,11 @@ namespace RoslynScribe.Domain.Services
 {
     public static class ScribeAnalyzer
     {
+        public const string CommentLabel = "[ADC]";
+        public const string GuidesLabel = "[ADG]";
+
+        private static readonly string[] Starts = { $"//{CommentLabel}", $"// {CommentLabel}" };
+
         public static async Task<List<ScribeNode>> Analyze(MSBuildWorkspace workspace, Solution solution)
         {
             var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
@@ -131,10 +137,6 @@ namespace RoslynScribe.Domain.Services
             }
 
             return node;
-            //foreach (var child in node.ChildNodes)
-            //{
-            //    Rebuild(child, dictionary, result);
-            //}
         }
 
         internal static Dictionary<int, ScribeNode> RegisterNodes(List<ScribeNode> nodes)
@@ -221,9 +223,10 @@ namespace RoslynScribe.Domain.Services
             var comments = new List<string>();
             foreach (var trivia in syntaxTrivias)
             {
-                if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia))
+                var tmp = trivia.ToString();
+                if ((trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia)) && Starts.Any(x => tmp.StartsWith(x)))
                 {
-                    comments.Add(trivia.ToString());
+                    comments.Add(tmp);
                     if (line == -1)
                     {
                         line = trivia.GetLocation().GetLineSpan().Span.Start.Line;
@@ -297,7 +300,8 @@ namespace RoslynScribe.Domain.Services
                 //ParentNode = parentNode,
                 MetaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line),
                 Kind = syntaxKind.ToString(),
-                Value = value
+                Value = value,
+                Comment = ScribeCommnetParser.Parse(value),
             };
 
             parentNode.ChildNodes.Add(childNode);

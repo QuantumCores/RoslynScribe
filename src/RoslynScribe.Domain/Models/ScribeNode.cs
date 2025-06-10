@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace RoslynScribe.Domain.Models
 {
@@ -15,6 +14,8 @@ namespace RoslynScribe.Domain.Models
         //public ScribeNode ParentNode { get; set; }
 
         public string[] Value { get; set; }
+
+        public ScribeComment Comment { get; set; }
 
         public string Kind { get; set; }
 
