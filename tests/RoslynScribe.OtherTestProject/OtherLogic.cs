@@ -1,12 +1,12 @@
 ﻿namespace RoslynScribe.OtherTestProject
 {
-    // OtherLogic class name comment
+    // [ADC][OtherLogic class name comment]
     public class OtherLogic
     {
-        // OtherLogic Multiply two numbers
+        // [ADC][OtherLogic Multiply two numbers]
         public int Multiply(int x, int y)
         {
-            // OtherLogic This is multiplication result
+            // [ADC][OtherLogic This is multiplication result]
             return x * y;
         }
     }

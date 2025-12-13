@@ -1,7 +1,8 @@
 {
-  "Id": "d837ae1a-8b99-4fcc-bcc5-b4052eac5dfd",
+  "Id": "98d4ed30-6730-a223-cec9-d14d6b95e64f",
   "TargetNodeId": null,
   "Value": null,
+  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -15,11 +16,25 @@
   },
   "ChildNodes": [
     {
-      "Id": "302e8d0d-932f-4b15-a0b2-70c34169dc83",
+      "Id": "9031e2ea-ac9e-d8ff-7138-27eb4be61bde",
       "TargetNodeId": null,
       "Value": [
-        "// S007 prepare lambda"
+        "// [ADC][S007 prepare lambda]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[S007 prepare lambda]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "LocalDeclarationStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -34,11 +49,25 @@
       "ChildNodes": []
     },
     {
-      "Id": "bdfd3eba-239e-4dfa-bcbb-33a41d782ab7",
+      "Id": "4d595483-8279-7255-9186-b0049d094059",
       "TargetNodeId": null,
       "Value": [
-        "// S007 add one in lambda expression"
+        "// [ADC][S007 add one in lambda expression]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[S007 add one in lambda expression]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "LocalDeclarationStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",

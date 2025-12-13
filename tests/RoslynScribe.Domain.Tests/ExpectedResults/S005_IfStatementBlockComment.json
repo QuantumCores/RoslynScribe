@@ -1,7 +1,8 @@
 {
-  "Id": "f669ce5d-e337-49b9-92b9-9e762d949ee4",
+  "Id": "1ed9581c-35d1-ae82-17ce-95135a9d1907",
   "TargetNodeId": null,
   "Value": null,
+  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -15,11 +16,25 @@
   },
   "ChildNodes": [
     {
-      "Id": "ac5a19bc-8722-4bf2-ad0a-cfa8eb93bfa0",
+      "Id": "0ec85f66-3cd4-672d-9853-663ed6d1b9a1",
       "TargetNodeId": null,
       "Value": [
-        "// Check condition value"
+        "// [ADC][Check condition value]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[Check condition value]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "IfStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -33,11 +48,25 @@
       },
       "ChildNodes": [
         {
-          "Id": "8e2d4430-005b-4f41-ad39-930ae2cc810e",
+          "Id": "000b6d15-3e3b-6e68-b3fb-c8b02cdd60d6",
           "TargetNodeId": null,
           "Value": [
-            "// S005 If condition is one then 1"
+            "// [ADC][S005 If condition is one then 1]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[S005 If condition is one then 1]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -52,11 +81,25 @@
           "ChildNodes": []
         },
         {
-          "Id": "7f37aac9-49b5-4447-92c3-c203af3c6951",
+          "Id": "aebb2cdb-72f4-0132-4730-4c9b2e12dd70",
           "TargetNodeId": null,
           "Value": [
-            "// S005 If condition is two then 2"
+            "// [ADC][S005 If condition is two then 2]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[S005 If condition is two then 2]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -71,11 +114,25 @@
           "ChildNodes": []
         },
         {
-          "Id": "10ac27c7-53d6-4b9d-9d25-3d06c7e35ab1",
+          "Id": "a3f467aa-3afd-f266-92d9-4c9bcf960a83",
           "TargetNodeId": null,
           "Value": [
-            "// S005 If condition is other then -1"
+            "// [ADC][S005 If condition is other then -1]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[S005 If condition is other then -1]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",

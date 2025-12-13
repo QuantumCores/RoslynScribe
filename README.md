@@ -16,3 +16,4 @@ I have to go through whole code from start to end to create flow?
  - no
 I can read only declared methods and if method invocation is detected I just store info about that invocation with reference to method declaration
 
+But this doesnt make sense because I would have to store or declared methods - instead of those that have comments. I would copy sytax tree this way which doesn't make sense.

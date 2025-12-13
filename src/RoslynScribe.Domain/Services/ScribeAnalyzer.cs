@@ -15,7 +15,7 @@ namespace RoslynScribe.Domain.Services
     public static class ScribeAnalyzer
     {
         public const string CommentLabel = "[ADC]";
-        public const string GuidesLabel = "[ADG]";
+        // public const string GuidesLabel = "[ADG]";
 
         private static readonly string[] Starts = { $"//{CommentLabel}", $"// {CommentLabel}" };
 
@@ -74,20 +74,25 @@ namespace RoslynScribe.Domain.Services
             var tree = await document.GetSyntaxTreeAsync();
             var rootNode = await tree.GetRootAsync();
 
-            var scribeNode = new ScribeNode()
+            var documentMeta = new MetaInfo
             {
-                Id = Guid.NewGuid(),
-                Kind = "Document",
-                MetaInfo = new MetaInfo
-                {
-                    ProjectName = project.Name,
-                    DocumentName = document.Name,
-                    DocumentPath = document.FilePath,
-                    Identifier = document.FilePath
-                }
+                ProjectName = project.Name,
+                DocumentName = document.Name,
+                DocumentPath = document.FilePath,
+                Identifier = document.FilePath
             };
 
-            Traverse(rootNode, scribeNode, semanticModel, documents);
+            var scribeNode = new ScribeNode()
+            {
+                Id = documentMeta.GetDeterministicId(),
+                Kind = "Document",
+                MetaInfo = documentMeta
+            };
+
+            var trackers = new Trackers();
+            trackers.SemanticModelCache.Add(document.FilePath, semanticModel);
+
+            Traverse(rootNode, scribeNode, semanticModel, documents, trackers);
 
             // SyntaxTreePrinter.Print(rootNode);            
             // ScribeTreePrinter.Print(scribeNode);
@@ -103,7 +108,7 @@ namespace RoslynScribe.Domain.Services
             return Rebuild(nodes, dictionary);
         }
 
-        private static ScribeResult Rebuild(List<ScribeNode> nodes, Dictionary<int, ScribeNode> dictionary)
+        private static ScribeResult Rebuild(List<ScribeNode> nodes, Dictionary<string, ScribeNode> dictionary)
         {
             var result = new Dictionary<Guid, ScribeNode>();
             if (dictionary.Count != 0)
@@ -117,9 +122,9 @@ namespace RoslynScribe.Domain.Services
             return new ScribeResult() { Nodes = result, Trees = nodes };
         }
 
-        private static ScribeNode Rebuild(ScribeNode node, Dictionary<int, ScribeNode> dictionary, Dictionary<Guid, ScribeNode> result)
+        private static ScribeNode Rebuild(ScribeNode node, Dictionary<string, ScribeNode> dictionary, Dictionary<Guid, ScribeNode> result)
         {
-            if (dictionary.TryGetValue(node.MetaInfo.GetHashCode(), out var reference))
+            if (dictionary.TryGetValue(node.MetaInfo.GetIdentityKey(), out var reference))
             {
                 if (!result.ContainsKey(reference.Id))
                 {
@@ -139,9 +144,9 @@ namespace RoslynScribe.Domain.Services
             return node;
         }
 
-        internal static Dictionary<int, ScribeNode> RegisterNodes(List<ScribeNode> nodes)
+        internal static Dictionary<string, ScribeNode> RegisterNodes(List<ScribeNode> nodes)
         {
-            var result = new Dictionary<int, NodeCounter>();
+            var result = new Dictionary<string, NodeCounter>(StringComparer.Ordinal);
             foreach (var node in nodes)
             {
                 RegisterNode(node, result);
@@ -150,16 +155,16 @@ namespace RoslynScribe.Domain.Services
             return result.Where(x => x.Value.Count > 1).ToDictionary(x => x.Key, x => x.Value.Node);
         }
 
-        private static void RegisterNode(ScribeNode node, Dictionary<int, NodeCounter> dictionary)
+        private static void RegisterNode(ScribeNode node, Dictionary<string, NodeCounter> dictionary)
         {
-            var key = node.MetaInfo.GetHashCode();            
+            var key = node.MetaInfo.GetIdentityKey();
             if (dictionary.TryGetValue(key, out var registered))
             {
                 registered.Count++;
             }
             else
             {
-                dictionary.Add(key, new NodeCounter(node));                
+                dictionary.Add(key, new NodeCounter(node));
             }
 
             foreach (var child in node.ChildNodes)
@@ -168,41 +173,12 @@ namespace RoslynScribe.Domain.Services
             }
         }
 
-        private static void ProcessNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Document> documents)
-        {
-            SetMetaInfo(syntaxNode, syntaxKind, parentNode);
-            var lTrivias = syntaxNode.GetLeadingTrivia();
-            var childNode = FindCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel);
-
-            if (syntaxKind == SyntaxKind.InvocationExpression)
-            {
-                var invokedMethod = GetMethodInfo(syntaxNode as InvocationExpressionSyntax, semanticModel);
-                if (invokedMethod != null)
-                {
-                    var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
-                    for (int i = 0; i < syntaxReferences.Length; i++)
-                    {
-                        var location = invokedMethod.Locations[i].GetLineSpan().Path;
-                        var isLocal = location == parentNode.MetaInfo.DocumentPath;
-                        var contextSemanticModel = isLocal ? semanticModel : documents[location].GetSemanticModelAsync().Result;
-                        var syntaxReference = syntaxReferences[i];
-                        var methodNode = syntaxReference.GetSyntax();
-                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, contextSemanticModel, documents);
-                    }
-                }
-            }
-            //var tTrivias = syntaxNode.GetTrailingTrivia();
-            //FindCommentTrivia(syntaxNode, parentNode, tTrivias);
-
-            if (KindSkipTraverse(syntaxNode, syntaxKind))
-            {
-                return;
-            }
-
-            Traverse(syntaxNode, childNode ?? parentNode, semanticModel, documents);
-        }
-
-        private static void Traverse(SyntaxNode node, ScribeNode parentNode, SemanticModel semanticModel, Dictionary<string, Document> documents)
+        private static void Traverse(
+            SyntaxNode node,
+            ScribeNode parentNode,
+            SemanticModel semanticModel,
+            Dictionary<string, Document> documents,
+            Trackers trackers)
         {
             var nodes = node.ChildNodes();
             foreach (var syntaxNode in nodes)
@@ -213,11 +189,77 @@ namespace RoslynScribe.Domain.Services
                     continue;
                 }
 
-                ProcessNode(syntaxNode, kind, parentNode, semanticModel, documents);
+                ProcessNode(syntaxNode, kind, parentNode, semanticModel, documents, trackers);
             }
         }
 
-        private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel)
+        private static void ProcessNode(
+            SyntaxNode syntaxNode,
+            SyntaxKind syntaxKind,
+            ScribeNode parentNode,
+            SemanticModel semanticModel,
+            Dictionary<string, Document> documents,
+            Trackers trackers)
+        {
+            SetMetaInfo(syntaxNode, syntaxKind, parentNode);
+            var lTrivias = syntaxNode.GetLeadingTrivia();
+
+            ScribeNode childNode = null;
+            if (lTrivias.Count != 0)
+            {
+                childNode = FindCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel, trackers);
+
+                if (childNode != null)
+                {
+                    // if trackers contains node with that id it means that this path was already processed
+                    if(trackers.Nodes.ContainsKey(childNode.Id))
+                    {
+                        return;
+                    }
+
+                    trackers.Nodes.Add(childNode.Id, childNode);
+                }
+            }
+
+            if (syntaxKind == SyntaxKind.InvocationExpression)
+            {
+                var invokedMethod = GetMethodInfo(syntaxNode as InvocationExpressionSyntax, semanticModel);
+                if (invokedMethod != null)
+                {
+                    var methodKey = invokedMethod.GetMethodKey();
+
+                    // Avoid infinite recursion
+                    if (!trackers.RecursionStack.Add(methodKey))
+                    {
+                        return;
+                    }
+
+                    var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
+                    for (int i = 0; i < syntaxReferences.Length; i++)
+                    {
+                        var location = invokedMethod.Locations[i].GetLineSpan().Path;
+                        var isLocal = string.Equals(location, parentNode.MetaInfo.DocumentPath, StringComparison.OrdinalIgnoreCase);
+                        var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
+                        var syntaxReference = syntaxReferences[i];
+                        var methodNode = syntaxReference.GetSyntax();
+                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, contextSemanticModel, documents, trackers);
+                    }
+
+                    trackers.RecursionStack.Remove(methodKey);
+                }
+            }
+            //var tTrivias = syntaxNode.GetTrailingTrivia();
+            //FindCommentTrivia(syntaxNode, parentNode, tTrivias);
+
+            if (KindSkipTraverse(syntaxNode, syntaxKind))
+            {
+                return;
+            }
+
+            Traverse(syntaxNode, childNode ?? parentNode, semanticModel, documents, trackers);
+        }
+
+        private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
         {
             var line = -1;
             var comments = new List<string>();
@@ -236,7 +278,7 @@ namespace RoslynScribe.Domain.Services
 
             if (comments.Count != 0)
             {
-                return AddChildNode(syntaxNode, syntaxKind, parentNode, comments.ToArray(), semanticModel, line);
+                return AddChildNode(syntaxNode, syntaxKind, parentNode, comments.ToArray(), semanticModel, line, trackers);
             }
 
             return null;
@@ -292,17 +334,34 @@ namespace RoslynScribe.Domain.Services
             return start != stop;
         }
 
-        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, SemanticModel semanticModel, int line)
+        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, SemanticModel semanticModel, int line, Trackers trackers)
         {
-            var childNode = new ScribeNode
+            var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line);
+            var id = metaInfo.GetDeterministicId();
+
+            if (parentNode.ChildNodes.Any(x => x.Id == id))
             {
-                Id = Guid.NewGuid(),
-                //ParentNode = parentNode,
-                MetaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line),
-                Kind = syntaxKind.ToString(),
-                Value = value,
-                Comment = ScribeCommnetParser.Parse(value),
-            };
+                return null;
+            }
+
+            // do not add to trackers here!
+            ScribeNode childNode = null;
+            if (!trackers.Nodes.ContainsKey(id))
+            {
+                childNode = new ScribeNode
+                {
+                    Id = id,
+                    //ParentNode = parentNode,
+                    MetaInfo = metaInfo,
+                    Kind = syntaxKind.ToString(),
+                    Value = value,
+                    Comment = ScribeCommnetParser.Parse(value),
+                };
+            }
+            else
+            {
+                childNode = trackers.Nodes[id];
+            }
 
             parentNode.ChildNodes.Add(childNode);
 
@@ -340,11 +399,29 @@ namespace RoslynScribe.Domain.Services
             }
         }
 
-        private static ISymbol GetMethodInfo(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)
+        private static IMethodSymbol GetMethodInfo(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)
         {
             var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
             var methodSymbol = symbolInfo.Symbol as IMethodSymbol;
             return methodSymbol;
+        }
+
+        private static SemanticModel GetSemanticModel(string documentPath, SemanticModel currentSemanticModel, Dictionary<string, Document> documents, Dictionary<string, SemanticModel> cache)
+        {
+            if (cache.TryGetValue(documentPath, out var semanticModel))
+            {
+                return semanticModel;
+            }
+
+            if (string.Equals(documentPath, currentSemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                cache[documentPath] = currentSemanticModel;
+                return currentSemanticModel;
+            }
+
+            var model = documents[documentPath].GetSemanticModelAsync().Result;
+            cache[documentPath] = model;
+            return model;
         }
 
         private static MetaInfo GetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, int line)

@@ -1,7 +1,8 @@
 {
-  "Id": "e87a8346-e884-468c-a011-bc1400f4613c",
+  "Id": "9ce59090-f26a-287a-20a3-d3616028e0d5",
   "TargetNodeId": null,
   "Value": null,
+  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -15,11 +16,25 @@
   },
   "ChildNodes": [
     {
-      "Id": "617e1bbc-992e-4bf8-a782-d1bded011998",
+      "Id": "006ba9ab-f9f8-c3aa-70da-b964a9cc67a3",
       "TargetNodeId": null,
       "Value": [
-        "// S006 call external method to add days"
+        "// [ADC][S006 call external method to add days]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[S006 call external method to add days]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "ExpressionStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",

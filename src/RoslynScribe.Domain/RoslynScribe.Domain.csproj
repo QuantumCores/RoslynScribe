@@ -5,12 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Models\ScribeComment.cs~RF1e84690d.TMP" />
-    <None Remove="Models\ScribeComment.cs~RF1e93d981.TMP" />
-    <None Remove="Models\ScribeComment.cs~RF1eb12e2b.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
     <InternalsVisibleTo Include="RoslynScribe.Domain.Tests" />
   </ItemGroup>
 

@@ -1,13 +1,13 @@
-﻿// S001 namespace comment
+﻿// [ADC][S001 namespace comment]
 namespace RoslynScribe.TestProject
 {
-    // S001 BasicTestClass
+    // [ADC][S001 BasicTestClass]
     public class S001_BasicComments
     {
-        // S001 BasicMethod
+        // [ADC][S001 BasicMethod]
         public int S001_BasicMethod(int start)
         {
-            // S001 result
+            // [ADC][S001 result]
             return start + 1;
         }
     }

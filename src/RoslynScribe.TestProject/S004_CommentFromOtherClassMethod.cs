@@ -2,10 +2,10 @@
 {
     internal class S004_TestClass
     {
-        // S004 return addition
+        // [ADC][S004 return addition]
         public int S004_SecondMethod(int start)
         {
-            // S004 Nodes shared comment get logic data 
+            // [ADC][S004 Nodes shared comment get logic data]
             var logic = new Logic();
             return logic.Add(1, 8);
         }

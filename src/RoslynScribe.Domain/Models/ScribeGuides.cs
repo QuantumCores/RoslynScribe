@@ -24,10 +24,22 @@ namespace RoslynScribe.Domain.Models
         public string Path { get; set; }
 
         /// <summary>
+        /// This property contains node ids that should be pointing this node
+        /// </summary>
+        [JsonPropertyName("O")]
+        public string[] OriginIds { get; set; }
+
+        /// <summary>
         /// This property contains node ids which this node should be pointing
         /// </summary>
-        [JsonPropertyName("F")]
-        public string[] Followers { get; set; }
+        [JsonPropertyName("D")]
+        public string[] DestinationIds { get; set; }
+
+        /// <summary>
+        /// Tags for given node
+        /// </summary>
+        [JsonPropertyName("T")]
+        public string[] Tags { get; set; }
 
         public static ScribeGuides Default()
         {

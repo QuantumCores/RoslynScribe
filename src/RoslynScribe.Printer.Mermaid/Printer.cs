@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace RoslynScribe.Printer.Mermaid
@@ -11,6 +12,12 @@ namespace RoslynScribe.Printer.Mermaid
         public static async Task Print(PrintingOptions options)
         {
             var result = await RoslynScribe.Program.Run();
+            var flow = Print(result, options);
+        }
+
+        public static async Task Print(PrintingOptions options, string filePath)
+        {
+            var result = JsonSerializer.Deserialize<ScribeResult>(filePath);
             var flow = Print(result, options);
         }
 

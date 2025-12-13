@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="S003_CommentFromLocalMethod.cs~RF1e02919c.TMP" />
-    <None Remove="S008_CommentFromOtherProject.cs~RF13e20420.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\tests\RoslynScribe.OtherTestProject\RoslynScribe.OtherTestProject.csproj" />
   </ItemGroup>
 

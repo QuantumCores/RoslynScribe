@@ -19,11 +19,11 @@ namespace RoslynScribe.Domain.Extensions
                     comments.AddRange(commentsTmp);
                 }
 
-                var guidesTmp = value.Split(new string[] { ScribeAnalyzer.GuidesLabel }, System.StringSplitOptions.RemoveEmptyEntries);
-                if(guidesTmp.Length != 0)
-                {
-                    guides = guidesTmp[0];
-                }
+                //var guidesTmp = value.Split(new string[] { ScribeAnalyzer.GuidesLabel }, System.StringSplitOptions.RemoveEmptyEntries);
+                //if(guidesTmp.Length != 0)
+                //{
+                //    guides = guidesTmp[0];
+                //}
             }
 
             if(guides != null)

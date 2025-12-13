@@ -1,7 +1,8 @@
 {
-  "Id": "eeca54d9-809d-4a2a-9ff9-0fdad4b2fd5f",
+  "Id": "38806d1d-1a4d-fc41-1aee-48f2f72d4d0c",
   "TargetNodeId": null,
   "Value": null,
+  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -15,11 +16,25 @@
   },
   "ChildNodes": [
     {
-      "Id": "63844724-060a-47c3-a3d6-5f19b6b687ce",
+      "Id": "6ddff3b7-c279-2d25-63e1-93b21c2789d1",
       "TargetNodeId": null,
       "Value": [
-        "// S004 return addition"
+        "// [ADC][S004 return addition]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[S004 return addition]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -33,11 +48,25 @@
       },
       "ChildNodes": [
         {
-          "Id": "dc5e881b-6f59-4f5d-987f-26d4c072bc0c",
+          "Id": "5b107038-7969-d1df-2127-7c65ac6c5c41",
           "TargetNodeId": null,
           "Value": [
-            "// S004 Nodes shared comment get logic data "
+            "// [ADC][S004 Nodes shared comment get logic data]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[S004 Nodes shared comment get logic data]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "LocalDeclarationStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -52,11 +81,25 @@
           "ChildNodes": []
         },
         {
-          "Id": "de3a5059-c797-4fce-8154-67a92ccb151f",
+          "Id": "66000eb4-b4bc-a587-fbdc-3c6de6bf13b1",
           "TargetNodeId": null,
           "Value": [
-            "// Logic Add two numbers"
+            "// [ADC][Logic Add two numbers]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[Logic Add two numbers]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "MethodDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -70,11 +113,25 @@
           },
           "ChildNodes": [
             {
-              "Id": "072d4900-279d-49db-9b1c-160ece1b3fb4",
+              "Id": "963e1dbd-4669-d278-6260-69f22b22b703",
               "TargetNodeId": null,
               "Value": [
-                "// Logic This is add result"
+                "// [ADC][Logic This is add result]"
               ],
+              "Comment": {
+                "Comments": [
+                  "// ",
+                  "[Logic This is add result]"
+                ],
+                "Guide": {
+                  "I": null,
+                  "L": 0,
+                  "P": null,
+                  "O": null,
+                  "D": null,
+                  "T": null
+                }
+              },
               "Kind": "ReturnStatement",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",

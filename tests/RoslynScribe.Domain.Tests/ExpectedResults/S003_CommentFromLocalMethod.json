@@ -1,7 +1,8 @@
 {
-  "Id": "f3d3b88d-1156-489c-8b31-a84d9cf5729d",
+  "Id": "52e94e25-12d2-3780-2efd-40b081ba4225",
   "TargetNodeId": null,
   "Value": null,
+  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -15,11 +16,25 @@
   },
   "ChildNodes": [
     {
-      "Id": "55d93fa0-e61f-4b3a-a12c-4a4f12194ab0",
+      "Id": "26e8c0c1-7b4a-8e4b-9d72-d78693a61125",
       "TargetNodeId": null,
       "Value": [
-        "// S003 basicMethod"
+        "// [ADC][S003 basicMethod]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[S003 basicMethod]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -33,11 +48,25 @@
       },
       "ChildNodes": [
         {
-          "Id": "2c2132c5-66e8-46cb-8f37-dd729ba9579a",
+          "Id": "c2fc9872-0179-edc7-aa15-fb82ba9559f5",
           "TargetNodeId": null,
           "Value": [
-            "// S003 basic result"
+            "// [ADC][S003 basic result]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[S003 basic result]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -54,11 +83,25 @@
       ]
     },
     {
-      "Id": "39c5ba3a-36fc-49b4-8747-3a3adac357a6",
+      "Id": "964f3576-b21d-dac9-1a03-42a4aa82554a",
       "TargetNodeId": null,
       "Value": [
-        "// S003 second method"
+        "// [ADC][S003 second method]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[S003 second method]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -72,11 +115,25 @@
       },
       "ChildNodes": [
         {
-          "Id": "271c6dfc-3ca5-4850-90dd-53cf3a10ccec",
+          "Id": "6ad38714-66fc-5f0e-fa35-a58b6823732b",
           "TargetNodeId": null,
           "Value": [
-            "// S003 call basicMethod"
+            "// [ADC][S003 call basicMethod]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[S003 call basicMethod]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -90,11 +147,25 @@
           },
           "ChildNodes": [
             {
-              "Id": "107399ac-3d5c-4275-95e8-d7a3ef41161f",
+              "Id": "26e8c0c1-7b4a-8e4b-9d72-d78693a61125",
               "TargetNodeId": null,
               "Value": [
-                "// S003 basicMethod"
+                "// [ADC][S003 basicMethod]"
               ],
+              "Comment": {
+                "Comments": [
+                  "// ",
+                  "[S003 basicMethod]"
+                ],
+                "Guide": {
+                  "I": null,
+                  "L": 0,
+                  "P": null,
+                  "O": null,
+                  "D": null,
+                  "T": null
+                }
+              },
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -108,11 +179,25 @@
               },
               "ChildNodes": [
                 {
-                  "Id": "c5df2107-d539-4d0f-a1db-0e6ff7ff416a",
+                  "Id": "c2fc9872-0179-edc7-aa15-fb82ba9559f5",
                   "TargetNodeId": null,
                   "Value": [
-                    "// S003 basic result"
+                    "// [ADC][S003 basic result]"
                   ],
+                  "Comment": {
+                    "Comments": [
+                      "// ",
+                      "[S003 basic result]"
+                    ],
+                    "Guide": {
+                      "I": null,
+                      "L": 0,
+                      "P": null,
+                      "O": null,
+                      "D": null,
+                      "T": null
+                    }
+                  },
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",

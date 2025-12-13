@@ -1,7 +1,8 @@
 {
-  "Id": "687be988-4b4a-4529-a29d-fa627f0fd1c4",
+  "Id": "8839ee25-814b-d27f-82f6-c4c9bc14d465",
   "TargetNodeId": null,
   "Value": null,
+  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -15,11 +16,25 @@
   },
   "ChildNodes": [
     {
-      "Id": "c8ce0f38-b547-4525-a03f-77c12f486808",
+      "Id": "157f25c5-3cbf-a5eb-0cd6-a84af65c331b",
       "TargetNodeId": null,
       "Value": [
-        "// S008 Nodes shared comment"
+        "// [ADC][S008 Nodes shared comment]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[S008 Nodes shared comment]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "LocalDeclarationStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -34,11 +49,25 @@
       "ChildNodes": []
     },
     {
-      "Id": "532b58cc-18ea-4827-8f21-1431d827bea7",
+      "Id": "ecae8230-6a03-2950-51e7-866518330c3d",
       "TargetNodeId": null,
       "Value": [
-        "// OtherLogic Multiply two numbers"
+        "// [ADC][OtherLogic Multiply two numbers]"
       ],
+      "Comment": {
+        "Comments": [
+          "// ",
+          "[OtherLogic Multiply two numbers]"
+        ],
+        "Guide": {
+          "I": null,
+          "L": 0,
+          "P": null,
+          "O": null,
+          "D": null,
+          "T": null
+        }
+      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.OtherTestProject",
@@ -52,11 +81,25 @@
       },
       "ChildNodes": [
         {
-          "Id": "c1edcb66-29a4-4580-b555-65076b8c319b",
+          "Id": "87c5ee91-5102-11f0-d9f6-6df10a8eb444",
           "TargetNodeId": null,
           "Value": [
-            "// OtherLogic This is multiplication result"
+            "// [ADC][OtherLogic This is multiplication result]"
           ],
+          "Comment": {
+            "Comments": [
+              "// ",
+              "[OtherLogic This is multiplication result]"
+            ],
+            "Guide": {
+              "I": null,
+              "L": 0,
+              "P": null,
+              "O": null,
+              "D": null,
+              "T": null
+            }
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.OtherTestProject",
