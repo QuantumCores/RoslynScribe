@@ -31,9 +31,10 @@ namespace RoslynScribe.Printer.Mermaid
 
             // transitions set to avoid duplicated connections between nodes
             var transitions = new HashSet<(Guid, Guid)>();
+            var labeled = new HashSet<Guid>();
             foreach (var node in scribeResult.Trees)
             {
-                Traverse(sb, node, scribeResult.Nodes, transitions);
+                Traverse(sb, node, scribeResult.Nodes, transitions, labeled);
                 sb.AppendLine("");
                 sb.AppendLine("");
             }
@@ -41,46 +42,40 @@ namespace RoslynScribe.Printer.Mermaid
             return sb.ToString();
         }
 
-        private static void Traverse(StringBuilder sb, ScribeNode node, Dictionary<Guid, ScribeNode> nodes, HashSet<(Guid, Guid)> transitions)
+        private static void Traverse(
+            StringBuilder sb,
+            ScribeTreeNode node,
+            Dictionary<Guid, ScribeNodeData> nodes,
+            HashSet<(Guid, Guid)> transitions,
+            HashSet<Guid> labeled)
         {
-            var current = node;
-            var isCurrentUnique = true;
-            if (node.TargetNodeId != null)
-            {
-                current = nodes[node.TargetNodeId.Value];
-                isCurrentUnique = false;
-            }
+            var current = nodes[node.Id];
+            var showCurrentValue = labeled.Add(node.Id);
 
-            // what if there are no child nodes? And node is referenced from another project?
-            if (current.ChildNodes.Count != 0)
+            if (node.ChildNodes.Count != 0)
             {
-                foreach (var child in current.ChildNodes)
+                foreach (var child in node.ChildNodes)
                 {
-                    var tmp = child;
-                    var isTmpUnique = true;
-                    if (child.TargetNodeId != null)
-                    {
-                        tmp = nodes[child.TargetNodeId.Value];
-                        isTmpUnique = false;
-                    }
+                    var tmp = nodes[child.Id];
+                    var showTmpValue = labeled.Add(child.Id);
 
                     var transition = (current.Id, tmp.Id);
                     if(!transitions.Contains(transition))
                     {
                         transitions.Add(transition);
-                        sb.AppendLine($"{GetText(current, isCurrentUnique)} --- {GetText(tmp, isTmpUnique)}");
+                        sb.AppendLine($"{GetText(current, showCurrentValue)} --- {GetText(tmp, showTmpValue)}");
                     }
 
-                    Traverse(sb, tmp, nodes, transitions);
+                    Traverse(sb, child, nodes, transitions, labeled);
                 }
             }
         }
 
-        private static string GetText(ScribeNode node, bool isUnique)
+        private static string GetText(ScribeNodeData node, bool showValue)
         {
             var result = node.Kind == "Document" ? node.MetaInfo.DocumentName : node.Id.ToString();
             
-            if (node.Value != null && isUnique)
+            if (node.Value != null && showValue)
             {
                 var shape = GetShape(node);
                 result += shape[0] + "\"'" + string.Join(", ", node.Value) + "'\"" + shape[1];
@@ -89,7 +84,7 @@ namespace RoslynScribe.Printer.Mermaid
             return result;
         }
 
-        private static string[] GetShape(ScribeNode node)
+        private static string[] GetShape(ScribeNodeData node)
         {
             switch (node.Kind)
             {

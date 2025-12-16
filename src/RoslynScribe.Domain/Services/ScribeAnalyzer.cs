@@ -104,44 +104,88 @@ namespace RoslynScribe.Domain.Services
 
         public static ScribeResult Rebuild(List<ScribeNode> nodes)
         {
-            var duplicatedNodes = FindDuplicatedNodes(nodes);
-            return Rebuild(nodes, duplicatedNodes);
+            var nodeData = BuildNodeDataMap(nodes);
+            var trees = new List<ScribeTreeNode>(nodes.Count);
+            foreach (var node in nodes)
+            {
+                trees.Add(BuildTree(node, new HashSet<Guid>()));
+            }
+
+            return new ScribeResult { Nodes = nodeData, Trees = trees };
         }
 
-        private static ScribeResult Rebuild(List<ScribeNode> nodes, Dictionary<Guid, ScribeNode> duplicatedNodes)
+        private static Dictionary<Guid, ScribeNodeData> BuildNodeDataMap(List<ScribeNode> roots)
         {
-            var result = new Dictionary<Guid, ScribeNode>();
-            if (duplicatedNodes.Count != 0)
+            var byId = new Dictionary<Guid, ScribeNode>();
+            var visited = new HashSet<Guid>();
+            var stack = new Stack<ScribeNode>(roots);
+
+            while (stack.Count != 0)
             {
-                foreach (var node in nodes)
+                var node = stack.Pop();
+                var id = node.TargetNodeId ?? node.Id;
+                if (!visited.Add(id))
                 {
-                    Rebuild(node, duplicatedNodes, result);
+                    continue;
+                }
+
+                if (!byId.ContainsKey(id))
+                {
+                    byId.Add(id, node);
+                }
+
+                foreach (var child in node.ChildNodes)
+                {
+                    stack.Push(child);
                 }
             }
 
-            return new ScribeResult() { Nodes = result, Trees = nodes };
+            var result = new Dictionary<Guid, ScribeNodeData>(byId.Count);
+            foreach (var pair in byId)
+            {
+                var node = pair.Value;
+                var childNodeIds = new List<Guid>(node.ChildNodes.Count);
+                var seenChildIds = new HashSet<Guid>();
+                foreach (var child in node.ChildNodes)
+                {
+                    var childId = child.TargetNodeId ?? child.Id;
+                    if (seenChildIds.Add(childId))
+                    {
+                        childNodeIds.Add(childId);
+                    }
+                }
+
+                result[pair.Key] = new ScribeNodeData
+                {
+                    Id = pair.Key,
+                    Kind = node.Kind,
+                    MetaInfo = node.MetaInfo,
+                    Value = node.Value,
+                    Comment = node.Comment,
+                    ChildNodeIds = childNodeIds
+                };
+            }
+
+            return result;
         }
 
-        private static ScribeNode Rebuild(ScribeNode node, Dictionary<Guid, ScribeNode> duplicatedNodes, Dictionary<Guid, ScribeNode> result)
+        private static ScribeTreeNode BuildTree(ScribeNode node, HashSet<Guid> recursionGuard)
         {
-            if (duplicatedNodes.TryGetValue(node.Id, out var reference))
+            var id = node.TargetNodeId ?? node.Id;
+            var treeNode = new ScribeTreeNode { Id = id };
+
+            if (!recursionGuard.Add(id))
             {
-                if (!result.ContainsKey(reference.Id))
-                {
-                    result.Add(reference.Id, node);
-                }
-                else
-                {
-                    return new ScribeNode { Id = node.Id, TargetNodeId = reference.Id };
-                }
+                return treeNode;
             }
 
-            for (int i = 0; i < node.ChildNodes.Count; i++)
+            foreach (var child in node.ChildNodes)
             {
-                node.ChildNodes[i] = Rebuild(node.ChildNodes[i], duplicatedNodes, result);
+                treeNode.ChildNodes.Add(BuildTree(child, recursionGuard));
             }
 
-            return node;
+            recursionGuard.Remove(id);
+            return treeNode;
         }
 
         internal static Dictionary<Guid, ScribeNode> FindDuplicatedNodes(List<ScribeNode> nodes)

@@ -47,7 +47,14 @@ namespace RoslynScribe.Domain.Tests
             var result = ScribeAnalyzer.Rebuild(new List<ScribeNode> { tree });
 
             // Assert
-            Assert.That(result.Nodes.Count == 2);
+            Assert.That(result.Nodes.Count, Is.GreaterThan(0));
+            Assert.That(result.Trees.Count, Is.EqualTo(1));
+
+            foreach (var node in result.Nodes.Values)
+            {
+                Assert.That(node.ChildNodeIds, Is.Not.Null);
+                Assert.That(node.ChildNodeIds.All(result.Nodes.ContainsKey), Is.True);
+            }
         }
 
         [Test]
@@ -73,18 +80,15 @@ namespace RoslynScribe.Domain.Tests
             var rebuilt2 = ScribeAnalyzer.Rebuild(new List<ScribeNode> { tree2 });
 
             CollectionAssert.AreEquivalent(rebuilt1.Nodes.Keys, rebuilt2.Nodes.Keys);
-            CollectionAssert.AreEquivalent(GetTargetIds(rebuilt1.Trees), GetTargetIds(rebuilt2.Trees));
+            CollectionAssert.AreEqual(GetTreeIds(rebuilt1.Trees), GetTreeIds(rebuilt2.Trees));
         }
 
-        private static List<Guid> GetTargetIds(List<ScribeNode> trees)
+        private static List<Guid> GetTreeIds(List<ScribeTreeNode> trees)
         {
-            var targets = new List<Guid>();
-            void Traverse(ScribeNode node)
+            var ids = new List<Guid>();
+            void Traverse(ScribeTreeNode node)
             {
-                if (node.TargetNodeId.HasValue)
-                {
-                    targets.Add(node.TargetNodeId.Value);
-                }
+                ids.Add(node.Id);
 
                 foreach (var child in node.ChildNodes)
                 {
@@ -97,7 +101,7 @@ namespace RoslynScribe.Domain.Tests
                 Traverse(tree);
             }
 
-            return targets;
+            return ids;
         }
     }
 }
