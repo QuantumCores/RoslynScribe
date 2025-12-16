@@ -25,13 +25,13 @@ namespace RoslynScribe.Domain.Tests
         }
 
         [Test]
-        public async Task S001_returns_valid_tree()
+        public async Task S003_finds_duplicated_nodes()
         {
             // Arrange
             var tree = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs");
 
             // Act
-            var result = ScribeAnalyzer.RegisterNodes(new List<ScribeNode> { tree });
+            var result = ScribeAnalyzer.FindDuplicatedNodes(new List<ScribeNode> { tree });
 
             // Assert
             Assert.IsTrue(result.Count == 2);
@@ -56,8 +56,8 @@ namespace RoslynScribe.Domain.Tests
             var tree1 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs");
             var tree2 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs");
 
-            var map1 = ScribeAnalyzer.RegisterNodes(new List<ScribeNode> { tree1 });
-            var map2 = ScribeAnalyzer.RegisterNodes(new List<ScribeNode> { tree2 });
+            var map1 = ScribeAnalyzer.FindDuplicatedNodes(new List<ScribeNode> { tree1 });
+            var map2 = ScribeAnalyzer.FindDuplicatedNodes(new List<ScribeNode> { tree2 });
 
             CollectionAssert.AreEquivalent(map1.Keys, map2.Keys);
             CollectionAssert.AreEquivalent(map1.Values.Select(x => x.Id), map2.Values.Select(x => x.Id));

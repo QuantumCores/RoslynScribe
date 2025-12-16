@@ -13,6 +13,7 @@ namespace RoslynScribe.Domain.Models
         //[JsonIgnore]
         //public ScribeNode ParentNode { get; set; }
 
+        // commens in their original form
         public string[] Value { get; set; }
 
         public ScribeComment Comment { get; set; }

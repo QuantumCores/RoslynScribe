@@ -23,6 +23,7 @@ namespace RoslynScribe.Domain.Services
         {
             var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
             var result = new List<ScribeNode>();
+            var trackers = new Trackers();
 
             foreach (var project in solution.Projects)
             {
@@ -30,7 +31,7 @@ namespace RoslynScribe.Domain.Services
                 {
                     foreach (var document in project.Documents)
                     {
-                        var node = await Analyze(solution, project, documents, document);
+                        var node = await Analyze(project, documents, document, trackers);
                         if (node != null)
                         {
                             result.Add(node);
@@ -53,18 +54,18 @@ namespace RoslynScribe.Domain.Services
             var project = solution.Projects.Single(x => x.Name == projectName);
             var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
             var document = project.Documents.Single(x => x.Name == documentName);
-            return Analyze(solution, project, documents, document);
+            return Analyze(project, documents, document, new Trackers());
         }
 
         private static async Task<ScribeNode> Analyze(
-            Solution solution,
             Project project,
             Dictionary<string, Document> documents,
-            Document document)
+            Document document,
+            Trackers trackers)
         {
-            if (document.Name == project.Name + ".AssemblyInfo.cs" ||
-                                document.Name == project.Name + ".GlobalUsings.g.cs" ||
-                                document.Name.EndsWith("AssemblyAttributes.cs"))
+            if (document.Name.EndsWith(".AssemblyInfo.cs") 
+                || document.Name.EndsWith(".GlobalUsings.g.cs") 
+                || document.Name.EndsWith("AssemblyAttributes.cs"))
             {
                 return null;
             }
@@ -89,7 +90,6 @@ namespace RoslynScribe.Domain.Services
                 MetaInfo = documentMeta
             };
 
-            var trackers = new Trackers();
             trackers.SemanticModelCache.Add(document.FilePath, semanticModel);
 
             Traverse(rootNode, scribeNode, semanticModel, documents, trackers);
@@ -104,27 +104,27 @@ namespace RoslynScribe.Domain.Services
 
         public static ScribeResult Rebuild(List<ScribeNode> nodes)
         {
-            var dictionary = RegisterNodes(nodes);
-            return Rebuild(nodes, dictionary);
+            var duplicatedNodes = FindDuplicatedNodes(nodes);
+            return Rebuild(nodes, duplicatedNodes);
         }
 
-        private static ScribeResult Rebuild(List<ScribeNode> nodes, Dictionary<string, ScribeNode> dictionary)
+        private static ScribeResult Rebuild(List<ScribeNode> nodes, Dictionary<Guid, ScribeNode> duplicatedNodes)
         {
             var result = new Dictionary<Guid, ScribeNode>();
-            if (dictionary.Count != 0)
+            if (duplicatedNodes.Count != 0)
             {
                 foreach (var node in nodes)
                 {
-                    Rebuild(node, dictionary, result);
+                    Rebuild(node, duplicatedNodes, result);
                 }
             }
 
             return new ScribeResult() { Nodes = result, Trees = nodes };
         }
 
-        private static ScribeNode Rebuild(ScribeNode node, Dictionary<string, ScribeNode> dictionary, Dictionary<Guid, ScribeNode> result)
+        private static ScribeNode Rebuild(ScribeNode node, Dictionary<Guid, ScribeNode> duplicatedNodes, Dictionary<Guid, ScribeNode> result)
         {
-            if (dictionary.TryGetValue(node.MetaInfo.GetIdentityKey(), out var reference))
+            if (duplicatedNodes.TryGetValue(node.Id, out var reference))
             {
                 if (!result.ContainsKey(reference.Id))
                 {
@@ -138,15 +138,15 @@ namespace RoslynScribe.Domain.Services
 
             for (int i = 0; i < node.ChildNodes.Count; i++)
             {
-                node.ChildNodes[i] = Rebuild(node.ChildNodes[i], dictionary, result);
+                node.ChildNodes[i] = Rebuild(node.ChildNodes[i], duplicatedNodes, result);
             }
 
             return node;
         }
 
-        internal static Dictionary<string, ScribeNode> RegisterNodes(List<ScribeNode> nodes)
+        internal static Dictionary<Guid, ScribeNode> FindDuplicatedNodes(List<ScribeNode> nodes)
         {
-            var result = new Dictionary<string, NodeCounter>(StringComparer.Ordinal);
+            var result = new Dictionary<Guid, NodeCounter>();
             foreach (var node in nodes)
             {
                 RegisterNode(node, result);
@@ -155,9 +155,9 @@ namespace RoslynScribe.Domain.Services
             return result.Where(x => x.Value.Count > 1).ToDictionary(x => x.Key, x => x.Value.Node);
         }
 
-        private static void RegisterNode(ScribeNode node, Dictionary<string, NodeCounter> dictionary)
+        private static void RegisterNode(ScribeNode node, Dictionary<Guid, NodeCounter> dictionary)
         {
-            var key = node.MetaInfo.GetIdentityKey();
+            var key = node.Id;
             if (dictionary.TryGetValue(key, out var registered))
             {
                 registered.Count++;

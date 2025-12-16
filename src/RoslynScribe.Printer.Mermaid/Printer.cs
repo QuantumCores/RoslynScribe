@@ -29,6 +29,7 @@ namespace RoslynScribe.Printer.Mermaid
             sb.AppendLine("---");
             sb.AppendLine("flowchart LR");
 
+            // transitions set to avoid duplicated connections between nodes
             var transitions = new HashSet<(Guid, Guid)>();
             foreach (var node in scribeResult.Trees)
             {
@@ -50,6 +51,7 @@ namespace RoslynScribe.Printer.Mermaid
                 isCurrentUnique = false;
             }
 
+            // what if there are no child nodes? And node is referenced from another project?
             if (current.ChildNodes.Count != 0)
             {
                 foreach (var child in current.ChildNodes)
@@ -77,9 +79,10 @@ namespace RoslynScribe.Printer.Mermaid
         private static string GetText(ScribeNode node, bool isUnique)
         {
             var result = node.Kind == "Document" ? node.MetaInfo.DocumentName : node.Id.ToString();
-            var shape = GetShape(node);
+            
             if (node.Value != null && isUnique)
             {
+                var shape = GetShape(node);
                 result += shape[0] + "\"'" + string.Join(", ", node.Value) + "'\"" + shape[1];
             }
 
