@@ -15,7 +15,19 @@ namespace RoslynScribe.Domain.Models
         /// E.g. if level 2 is printed then only nodes of level 1 and 2 are included
         /// </summary>
         [JsonPropertyName("L")]
-        public int Level { get; set; }
+        public int Level { get; set; } = 1;
+
+        /// <summary>
+        /// This text is used to describe the node.
+        /// </summary>
+        [JsonPropertyName("T")]
+        public string Text { get; set; }
+
+        /// <summary>
+        /// This text is used to describe the node.
+        /// </summary>
+        [JsonPropertyName("D")]
+        public string Description { get; set; }
 
         /// <summary>
         /// 
@@ -32,13 +44,13 @@ namespace RoslynScribe.Domain.Models
         /// <summary>
         /// This property contains node ids which this node should be pointing
         /// </summary>
-        [JsonPropertyName("D")]
+        [JsonPropertyName("DI")]
         public string[] DestinationIds { get; set; }
 
         /// <summary>
         /// Tags for given node
         /// </summary>
-        [JsonPropertyName("T")]
+        [JsonPropertyName("Tags")]
         public string[] Tags { get; set; }
 
         public static ScribeGuides Default()

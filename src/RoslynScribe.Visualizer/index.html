@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoslynScribe Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Dependencies -->
+    <!-- Ideally, these are downloaded locally for offline support -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <script>
+        // Fallback for local development if CDN fails or for strict offline setup
+        if (typeof mermaid === 'undefined') {
+            document.write('<script src="mermaid.min.js"><\/script>');
+        }
+        if (typeof svgPanZoom === 'undefined') {
+            document.write('<script src="svg-pan-zoom.min.js"><\/script>');
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>RoslynScribe Visualizer</h1>
+        <div class="controls">
+            <input type="file" id="file-input" accept=".json" style="display: none;">
+            <button id="btn-load" class="primary">Load Data</button>
+            
+            <select id="tree-select" style="display: none;">
+                <option value="">Select Flow...</option>
+            </select>
+
+            <input type="text" id="search-input" placeholder="Search nodes or tags..." disabled>
+            <button id="btn-prev-match" disabled>&lt;</button>
+            <button id="btn-next-match" disabled>&gt;</button>
+
+            <button id="btn-reset" disabled>Reset View</button>
+            <button id="btn-save-config" disabled>Save Config</button>
+            <button id="btn-load-config" disabled>Load Config</button>
+            <input type="file" id="config-input" accept=".json" style="display: none;">
+        </div>
+    </header>
+
+    <div id="main-container">
+        <div id="graph-container">
+            <div id="mermaid-output"></div>
+        </div>
+        
+        <aside id="side-panel">
+            <div class="panel-section">
+                <h3>Node Details</h3>
+                <div id="node-meta-content">
+                    <p class="meta-item">Select a node to view details.</p>
+                </div>
+            </div>
+            <div class="panel-section" id="comments-section" style="display:none;">
+                <h3>Comments</h3>
+                <div id="node-comments-content"></div>
+            </div>
+        </aside>
+    </div>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-text">Processing...</div>
+    </div>
+
+    <!-- Main Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,18 @@
+{
+  "name": "roslynscribe",
+  "version": "1.0.0",
+  "description": "Add tests for local functions\r Add tests for multiple SubTypes ()\r Add tests where class has only commnets in methods but methods are not calling each other (what is the parent here? document node?)\r Add tests with async\r Add tests with partial classes where functions can be defined\r Change how Nodes are referenced\r  - add nodes to dictionary\r  - \r Add node attributes template (Identifier, Level, etc)\r  - Identifier (optional) identifies node if we want to relate to it later\r  - Level - graph can geneareted with different level of details e.g. 1 - least detailed, 2 - detailed, 3 - all nodes\r  - Path - defines which for which path node tree should be generated e.g. if we have two subtypes we can specify which subtype node tree to print\r  -",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

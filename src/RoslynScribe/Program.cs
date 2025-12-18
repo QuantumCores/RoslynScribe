@@ -4,6 +4,8 @@ using RoslynScribe.Domain.ScribeConsole;
 using RoslynScribe.Domain.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace RoslynScribe
@@ -32,13 +34,20 @@ namespace RoslynScribe
 
                 // Attach progress reporter so we print projects as they are loaded.
                 var solution = await workspace.OpenSolutionAsync(solutionPath, new ConsoleProgressReporter());
+                Console.WriteLine($"Finished loading solution '{solutionPath}', analyzing...");
 
+                Console.WriteLine($"Analyzing solution '{solutionPath}'");
                 nodes = await ScribeAnalyzer.Analyze(workspace, solution);
-
-                Console.WriteLine($"Finished loading solution '{solutionPath}'");
+                Console.WriteLine($"Finished analyzing solution '{solutionPath}', rebuilding...");
+                
             }
 
-            return ScribeAnalyzer.Rebuild(nodes);
+            Console.WriteLine($"Rebuilding nodes");
+            var result = ScribeAnalyzer.Rebuild(nodes);
+
+            File.WriteAllText("result.json", JsonSerializer.Serialize(result));
+
+            return result;
         }
     }
 }
