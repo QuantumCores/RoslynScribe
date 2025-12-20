@@ -9,7 +9,7 @@ namespace RoslynScribe.Domain.Extensions
 {
     internal class ScribeCommnetParser
     {
-        internal static ScribeComment Parse(string[] values)
+        internal static ScribeGuides Parse(string[] values)
         {
             var comments = new List<string>();
             var guide = ScribeGuides.Default();
@@ -22,11 +22,7 @@ namespace RoslynScribe.Domain.Extensions
                 }
             }
 
-            return new ScribeComment
-            {
-                Comments = comments.ToArray(),
-                Guide = guide,
-            };
+            return guide;            
         }
 
         private static void ParseCommentLine(string value, ScribeGuides guide, List<string> comments)
@@ -216,10 +212,17 @@ namespace RoslynScribe.Domain.Extensions
                 return;
             }
 
-            if (key.Equals("I", StringComparison.OrdinalIgnoreCase) ||
+            if (key.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
                 key.Equals("Identifier", StringComparison.OrdinalIgnoreCase))
             {
-                guide.Identifier = value;
+                guide.Id = value;
+                return;
+            }
+
+            if (key.Equals("Uid", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("UserIdentifier", StringComparison.OrdinalIgnoreCase))
+            {
+                guide.UserDefinedId = value;
                 return;
             }
 
@@ -247,10 +250,10 @@ namespace RoslynScribe.Domain.Extensions
                 return;
             }
 
-            if (key.Equals("DI", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("DestinationIds", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals("Dui", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("DestinationUserIds", StringComparison.OrdinalIgnoreCase))
             {
-                guide.DestinationIds = MergeStringList(guide.DestinationIds, SplitList(value));
+                guide.DestinationUserIds = MergeStringList(guide.DestinationUserIds, SplitList(value));
                 return;
             }
         }

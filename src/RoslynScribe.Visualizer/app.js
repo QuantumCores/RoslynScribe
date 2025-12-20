@@ -63,6 +63,26 @@ class ScribeApp {
             if (file)
                 this.loadConfigFile(file);
         });
+        document.getElementById('mermaid-output')?.addEventListener('click', (e) => {
+            let target = e.target;
+            while (target && target.id !== 'mermaid-output') {
+                if (target.tagName === 'BUTTON' && target.dataset.action) {
+                    const action = target.dataset.action;
+                    const id = target.dataset.id;
+                    if (action === 'expand' && id) {
+                        this.expandNode(id);
+                        e.stopPropagation();
+                        return;
+                    }
+                    if (action === 'details' && id) {
+                        this.showNodeDetails(id);
+                        e.stopPropagation();
+                        return;
+                    }
+                }
+                target = target.parentElement;
+            }
+        });
     }
     showLoading(show) {
         const overlay = document.getElementById('loading-overlay');
@@ -83,7 +103,7 @@ class ScribeApp {
             this.buildChildToParentMap();
             this.populateTreeSelect();
             if (this.data.Trees.length > 0) {
-                this.setActiveTree(this.data.Trees[0].Id);
+                this.setActiveTree('all');
             }
             else {
                 alert("No execution trees found in result.");
@@ -128,6 +148,10 @@ class ScribeApp {
         select.innerHTML = '';
         if (!this.data)
             return;
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.text = 'All Flows';
+        select.appendChild(allOption);
         this.data.Trees.forEach((tree, index) => {
             const nodeData = this.data.Nodes[tree.Id];
             const name = nodeData?.MetaInfo?.MemberName || `Flow ${index + 1} (${tree.Id.substring(0, 8)})`;
@@ -139,7 +163,6 @@ class ScribeApp {
     }
     async setActiveTree(treeId) {
         this.activeTreeId = treeId;
-        this.visibleNodeIds.clear();
         await this.renderGraph();
     }
     async resetView() {
@@ -176,6 +199,32 @@ class ScribeApp {
         }
         return null;
     }
+    calculateVisibleSet(trees) {
+        const visibleSet = new Set();
+        const targetNodes = new Set();
+        const scan = (node) => {
+            const data = this.data.Nodes[node.Id];
+            const level = data.Comment?.Guide?.L ?? 0;
+            if (level <= 1 || this.visibleNodeIds.has(node.Id)) {
+                targetNodes.add(node.Id);
+            }
+            for (const child of node.ChildNodes) {
+                scan(child);
+            }
+        };
+        trees.forEach(t => scan(t));
+        targetNodes.forEach(targetId => {
+            let curr = targetId;
+            while (curr) {
+                visibleSet.add(curr);
+                const parent = this.childToParentMap.get(curr);
+                if (!parent)
+                    break;
+                curr = parent;
+            }
+        });
+        return visibleSet;
+    }
     async renderGraph() {
         await this.showLoading(true);
         const container = document.getElementById('mermaid-output');
@@ -183,29 +232,26 @@ class ScribeApp {
             this.showLoading(false);
             return;
         }
-        const activeTree = this.data.Trees.find(t => t.Id === this.activeTreeId);
-        if (!activeTree)
+        const treesToRender = (this.activeTreeId === 'all')
+            ? this.data.Trees
+            : this.data.Trees.filter(t => t.Id === this.activeTreeId);
+        if (treesToRender.length === 0) {
+            this.showLoading(false);
             return;
+        }
+        const nodesToRender = this.calculateVisibleSet(treesToRender);
         let graphDef = "graph TD\n";
         const processedNodes = new Set();
         const generateNode = (treeNode) => {
             const id = treeNode.Id;
             const data = this.data.Nodes[id];
             const guide = data.Comment?.Guide;
-            const level = guide?.L ?? 0;
-            const isVisibleByDefault = (level !== undefined && level <= 1) || (level === undefined);
-            const isExplicitlyVisible = this.visibleNodeIds.has(id);
-            const isVisible = isVisibleByDefault || isExplicitlyVisible;
             const labelText = (guide?.T || data.Value?.join(' ') || data.MetaInfo?.MemberName || "Unknown").replace(/"/g, "'");
             const cleanLabelText = labelText.replace(/[\n\r]+/g, ' ').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             let hiddenCount = 0;
             if (treeNode.ChildNodes) {
                 for (const child of treeNode.ChildNodes) {
-                    const childData = this.data.Nodes[child.Id];
-                    const childLevel = childData.Comment?.Guide?.L ?? 0;
-                    const childDefaultVis = (childLevel <= 1);
-                    const childExplicitVis = this.visibleNodeIds.has(child.Id);
-                    if (!childDefaultVis && !childExplicitVis) {
+                    if (!nodesToRender.has(child.Id)) {
                         hiddenCount++;
                     }
                 }
@@ -214,9 +260,9 @@ class ScribeApp {
                 ? `<div class='badge'>+${hiddenCount}</div>`
                 : '';
             const expandBtnHtml = (treeNode.ChildNodes.length > 0 && hiddenCount > 0)
-                ? `<button class='node-icon-btn' onclick='window.scribeApp.expandNode("${id}")' title='Expand'>${ICONS.EXPAND.replace(/"/g, "'")}</button>`
+                ? `<button class='node-icon-btn' data-action='expand' data-id='${id}' title='Expand'>${ICONS.EXPAND.replace(/"/g, "'")}</button>`
                 : '';
-            const detailsBtnHtml = `<button class='node-icon-btn' onclick='window.scribeApp.showDetails("${id}")' title='Details'>${ICONS.DETAILS.replace(/"/g, "'")}</button>`;
+            const detailsBtnHtml = `<button class='node-icon-btn' data-action='details' data-id='${id}' title='Details'>${ICONS.DETAILS.replace(/"/g, "'")}</button>`;
             const htmlLabel = `
                 <div class='node-content'>
                     <div class='node-badges'>${badgesHtml}</div>
@@ -226,7 +272,7 @@ class ScribeApp {
                         ${detailsBtnHtml}
                     </div>
                 </div>
-            `;
+            `.replace(/[\n\r]+/g, '').replace(/\s+/g, ' ');
             const styles = [];
             if (data.Kind === "Document")
                 styles.push("node-document");
@@ -244,10 +290,7 @@ class ScribeApp {
                 graphDef += `    class ${id} ${styles.join(',')}\n`;
             }
             for (const child of treeNode.ChildNodes) {
-                const childData = this.data.Nodes[child.Id];
-                const childLevel = childData.Comment?.Guide?.L ?? 0;
-                const childIsVisible = (childLevel <= 1) || this.visibleNodeIds.has(child.Id);
-                if (childIsVisible) {
+                if (nodesToRender.has(child.Id)) {
                     graphDef += `    ${id} --> ${child.Id}\n`;
                     if (!processedNodes.has(child.Id)) {
                         processedNodes.add(child.Id);
@@ -256,8 +299,12 @@ class ScribeApp {
                 }
             }
         };
-        processedNodes.add(activeTree.Id);
-        generateNode(activeTree);
+        treesToRender.forEach(tree => {
+            if (!processedNodes.has(tree.Id) && nodesToRender.has(tree.Id)) {
+                processedNodes.add(tree.Id);
+                generateNode(tree);
+            }
+        });
         graphDef += `\n    classDef default fill:#e3f2fd,stroke:#333,stroke-width:1px;\n`;
         graphDef += `    classDef highlighted stroke:#ff9800,stroke-width:3px;\n`;
         graphDef += `    classDef tagwarning fill:#fff3e0,stroke:#ffb74d;\n`;
@@ -268,6 +315,13 @@ class ScribeApp {
                 throw new Error("Graph parsing failed");
             const { svg } = await mermaid.render('graphDiv', graphDef);
             container.innerHTML = svg;
+            const svgEl = container.querySelector('svg');
+            if (svgEl) {
+                svgEl.setAttribute('width', '100%');
+                svgEl.setAttribute('height', '100%');
+                svgEl.style.width = '100%';
+                svgEl.style.height = '100%';
+            }
             this.panZoomInstance = svgPanZoom(container.querySelector('svg'), {
                 zoomEnabled: true,
                 controlIconsEnabled: true,
@@ -292,6 +346,7 @@ class ScribeApp {
         if (!data || !panel || !content)
             return;
         panel.classList.add('open');
+        panel.style.display = 'block';
         const meta = data.MetaInfo;
         content.innerHTML = `
             <div class="meta-item"><span class="meta-label">ID</span><span class="meta-value">${data.Id}</span></div>

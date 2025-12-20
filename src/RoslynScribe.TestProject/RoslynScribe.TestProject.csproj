@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="S011_InterfaceImpl.cs~RFfb2dc2.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\tests\RoslynScribe.OtherTestProject\RoslynScribe.OtherTestProject.csproj" />
   </ItemGroup>
 

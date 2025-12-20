@@ -1,3 +1,4 @@
+using RoslynScribe.Domain.Extensions;
 using System;
 using System.Collections.Generic;
 
@@ -5,12 +6,15 @@ namespace RoslynScribe.Domain.Models
 {
     public class ScribeNodeData : IScribeNode
     {
+        public ScribeNodeData(Guid id, string[] value)
+        {
+            Id = id;
+            ScribeCommnetParser.Parse(value);
+        }
+
         public Guid Id { get; set; }
 
-        // comments in their original form
-        public string[] Value { get; set; }
-
-        public ScribeComment Comment { get; set; }
+        public ScribeGuides Guides { get; set; }
 
         public string Kind { get; set; }
 

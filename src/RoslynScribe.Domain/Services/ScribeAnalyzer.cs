@@ -155,13 +155,10 @@ namespace RoslynScribe.Domain.Services
                     }
                 }
 
-                result[pair.Key] = new ScribeNodeData
+                result[pair.Key] = new ScribeNodeData(node.Id, node.Value)
                 {
-                    Id = pair.Key,
                     Kind = node.Kind,
                     MetaInfo = node.MetaInfo,
-                    Value = node.Value,
-                    Comment = node.Comment,
                     ChildNodeIds = childNodeIds
                 };
             }
@@ -341,7 +338,9 @@ namespace RoslynScribe.Domain.Services
                 kind == SyntaxKind.AttributeArgumentList ||
                 kind == SyntaxKind.AttributeList ||
                 kind == SyntaxKind.AttributeTargetSpecifier ||
-                kind == SyntaxKind.CompilationUnit;
+                kind == SyntaxKind.CompilationUnit ||
+                kind == SyntaxKind.PredefinedType ||
+                kind == SyntaxKind.ParameterList;
         }
 
         private static bool KindSkipTraverse(SyntaxNode syntaxNode, SyntaxKind kind)
@@ -383,7 +382,12 @@ namespace RoslynScribe.Domain.Services
             var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line);
             var id = metaInfo.GetDeterministicId();
 
-            if (parentNode.ChildNodes.Any(x => x.Id == id))
+            if(value.Any(x => x.Contains("T:`S011 This is interface method`")))
+            {
+                int u = 0;
+            }
+
+            if (parentNode.ChildNodes.Any(x => x.Id == id) || parentNode.Id == id)
             {
                 return null;
             }
@@ -398,8 +402,7 @@ namespace RoslynScribe.Domain.Services
                     //ParentNode = parentNode,
                     MetaInfo = metaInfo,
                     Kind = syntaxKind.ToString(),
-                    Value = value,
-                    Comment = ScribeCommnetParser.Parse(value),
+                    Value = value,                    
                 };
             }
             else

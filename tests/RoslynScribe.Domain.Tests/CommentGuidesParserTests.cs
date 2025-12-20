@@ -13,7 +13,7 @@ namespace RoslynScribe.Domain.Tests
                 "// [ADC][D:`this is some comment`]"
             });
 
-            Assert.That(parsed.Guide.Description, Is.EqualTo("this is some comment"));
+            Assert.That(parsed.Description, Is.EqualTo("this is some comment"));
         }
 
         [Test]
@@ -24,7 +24,7 @@ namespace RoslynScribe.Domain.Tests
                 "// [ADC][T:`Lorem ipsum`]"
             });
 
-            Assert.That(parsed.Guide.Text, Is.EqualTo("Lorem ipsum"));
+            Assert.That(parsed.Text, Is.EqualTo("Lorem ipsum"));
         }
 
         [Test]
@@ -32,11 +32,19 @@ namespace RoslynScribe.Domain.Tests
         {
             var parsed = ScribeCommnetParser.Parse(new[]
             {
-                "// [ADC][D:`this is some comment`, Tags:`processA; processB`]"
+                "// [ADC][D:`this is some comment`, Tags:`processA; processB`, Id:`identifier`, Uid:`userIdentifier`, T:`text`, P:`path`, L:`2`, O:`origin`, Dui:`destination1; destination2`]"
             });
 
-            Assert.That(parsed.Guide.Description, Is.EqualTo("this is some comment"));
-            Assert.That(parsed.Guide.Tags, Is.EquivalentTo(new[] { "processA", "processB" }));
+            Assert.That(parsed.Description, Is.EqualTo("this is some comment"));
+            Assert.That(parsed.Tags, Is.EquivalentTo(new[] { "processA", "processB" }));
+            Assert.That(parsed.Id, Is.EqualTo("identifier"));
+            Assert.That(parsed.UserDefinedId, Is.EqualTo("userIdentifier"));
+            Assert.That(parsed.Text, Is.EqualTo("text"));
+            Assert.That(parsed.Path, Is.EqualTo("path"));
+            Assert.That(parsed.Level, Is.EqualTo(2));
+            Assert.That(parsed.OriginIds, Is.EquivalentTo(new[] { "origin" }));
+            Assert.That(parsed.DestinationUserIds, Is.EquivalentTo(new[] { "destination1", "destination2" }));
+            
         }
 
         [Test]
@@ -47,7 +55,7 @@ namespace RoslynScribe.Domain.Tests
                 "// [ADC][D:`don't escape this`]"
             });
 
-            Assert.That(parsed.Guide.Description, Is.EqualTo("don't escape this"));
+            Assert.That(parsed.Description, Is.EqualTo("don't escape this"));
         }
 
         [Test]
@@ -58,7 +66,7 @@ namespace RoslynScribe.Domain.Tests
                 "// [ADC][D:`use \\`backticks\\` sometimes`]"
             });
 
-            Assert.That(parsed.Guide.Description, Is.EqualTo("use `backticks` sometimes"));
+            Assert.That(parsed.Description, Is.EqualTo("use `backticks` sometimes"));
         }
     }
 }

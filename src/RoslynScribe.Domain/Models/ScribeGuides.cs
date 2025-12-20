@@ -7,8 +7,14 @@ namespace RoslynScribe.Domain.Models
         /// <summary>
         /// Unique node identifier
         /// </summary>
-        [JsonPropertyName("I")]
-        public string Identifier { get; set; }
+        [JsonPropertyName("Id")]
+        public string Id { get; set; }
+
+        /// <summary>
+        /// Unique user defined node identifier
+        /// </summary>
+        [JsonPropertyName("Uid")]
+        public string UserDefinedId { get; set; }
 
         /// <summary>
         /// Describes the maximum level of details for which this node should be printed. 
@@ -44,8 +50,8 @@ namespace RoslynScribe.Domain.Models
         /// <summary>
         /// This property contains node ids which this node should be pointing
         /// </summary>
-        [JsonPropertyName("DI")]
-        public string[] DestinationIds { get; set; }
+        [JsonPropertyName("DUI")]
+        public string[] DestinationUserIds { get; set; }
 
         /// <summary>
         /// Tags for given node

@@ -81,6 +81,30 @@ class ScribeApp {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) this.loadConfigFile(file);
         });
+
+        // Global Event Delegation for Dynamic Mermaid Elements
+        // This is robust against parsing errors and scope issues
+        document.getElementById('mermaid-output')?.addEventListener('click', (e: Event) => {
+            let target = e.target as HTMLElement;
+            // Traverse up to find button or relevant container
+            while (target && target.id !== 'mermaid-output') {
+                if (target.tagName === 'BUTTON' && target.dataset.action) {
+                    const action = target.dataset.action;
+                    const id = target.dataset.id;
+                    if (action === 'expand' && id) {
+                        this.expandNode(id);
+                        e.stopPropagation();
+                        return;
+                    }
+                    if (action === 'details' && id) {
+                        this.showNodeDetails(id);
+                        e.stopPropagation();
+                        return;
+                    }
+                }
+                target = target.parentElement as HTMLElement;
+            }
+        });
     }
 
     private showLoading(show: boolean) {
@@ -107,9 +131,9 @@ class ScribeApp {
             this.buildChildToParentMap();
             this.populateTreeSelect();
             
-            // Default: Select first tree
+            // Default: Select 'all'
             if (this.data.Trees.length > 0) {
-                this.setActiveTree(this.data.Trees[0].Id);
+                this.setActiveTree('all');
             } else {
                 alert("No execution trees found in result.");
             }
@@ -160,6 +184,12 @@ class ScribeApp {
         
         if (!this.data) return;
 
+        // Add "All Flows" option
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.text = 'All Flows';
+        select.appendChild(allOption);
+
         this.data.Trees.forEach((tree, index) => {
             const nodeData = this.data!.Nodes[tree.Id];
             const name = nodeData?.MetaInfo?.MemberName || `Flow ${index + 1} (${tree.Id.substring(0, 8)})`;
@@ -172,8 +202,7 @@ class ScribeApp {
 
     private async setActiveTree(treeId: string) {
         this.activeTreeId = treeId;
-        this.visibleNodeIds.clear(); // Reset expansions on tree switch? Or keep? Usually reset is cleaner.
-        // Or keep Level 1 rule.
+        // this.visibleNodeIds.clear(); // Keep expansions when switching views?
         await this.renderGraph();
     }
 
@@ -188,12 +217,6 @@ class ScribeApp {
     public async expandNode(nodeId: string) {
         if (!this.data) return;
         
-        // Add specific children to visible set
-        // We need to find the TreeNode for this ID to get its children
-        // Since we don't have a direct ID->TreeNode map (only ID->NodeData), we might need to scan the current tree or map it.
-        // Actually, NodeData has ChildNodeIds, which matches the TreeNode structure usually.
-        // Let's rely on NodeData for finding children IDs to reveal.
-        
         const nodeData = this.data.Nodes[nodeId];
         if (nodeData && nodeData.ChildNodeIds) {
             let hasChanges = false;
@@ -205,8 +228,6 @@ class ScribeApp {
             }
             if (hasChanges) {
                 await this.renderGraph();
-                // Restore zoom? Usually re-render resets zoom unless we explicitly save/restore.
-                // pan-zoom library has getZoom/getPan.
             }
         }
     }
@@ -220,6 +241,50 @@ class ScribeApp {
         return null;
     }
 
+    // New Visibility Logic: Calculate all nodes that MUST be visible
+    // 1. Identify Target Nodes: (Level <= 1 OR visibleNodeIds.has(id))
+    // 2. Walk up from every Target Node to Root. Add all ancestors to visible set.
+    private calculateVisibleSet(trees: ScribeTreeNode[]): Set<string> {
+        const visibleSet = new Set<string>();
+        const targetNodes = new Set<string>();
+
+        // Step 1: Find all inherently interesting nodes
+        // We need to traverse all trees because childToParentMap is already built
+        // but we need to scan nodes for Level property
+        
+        const scan = (node: ScribeTreeNode) => {
+            const data = this.data!.Nodes[node.Id];
+            const level = data.Comment?.Guide?.L ?? 0;
+            
+            // Is this a target node?
+            if (level <= 1 || this.visibleNodeIds.has(node.Id)) {
+                targetNodes.add(node.Id);
+            }
+            
+            for (const child of node.ChildNodes) {
+                scan(child);
+            }
+        };
+
+        trees.forEach(t => scan(t));
+
+        // Step 2: Ensure path to root for all target nodes
+        targetNodes.forEach(targetId => {
+            let curr = targetId;
+            while(curr) {
+                visibleSet.add(curr);
+                const parent = this.childToParentMap.get(curr);
+                // If we hit a root (no parent), break
+                if (!parent) break;
+                // If parent is already processed in this loop (optimization), we can stop? 
+                // No, different paths might merge. Just continue.
+                curr = parent;
+            }
+        });
+
+        return visibleSet;
+    }
+
     private async renderGraph() {
         await this.showLoading(true);
         const container = document.getElementById('mermaid-output');
@@ -229,8 +294,18 @@ class ScribeApp {
         }
 
         // 1. Build Graph Definition
-        const activeTree = this.data.Trees.find(t => t.Id === this.activeTreeId);
-        if (!activeTree) return;
+        // If activeTreeId is 'all', render all trees. Otherwise render specific one.
+        const treesToRender = (this.activeTreeId === 'all') 
+            ? this.data.Trees 
+            : this.data.Trees.filter(t => t.Id === this.activeTreeId);
+
+        if (treesToRender.length === 0) {
+            this.showLoading(false);
+            return;
+        }
+
+        // Calculate Visibility
+        const nodesToRender = this.calculateVisibleSet(treesToRender);
 
         let graphDef = "graph TD\n";
         
@@ -241,36 +316,7 @@ class ScribeApp {
         const generateNode = (treeNode: ScribeTreeNode) => {
             const id = treeNode.Id;
             const data = this.data!.Nodes[id];
-            
-            // Visibility Check
-            // Rule: Visible IF (Level <= 1) OR (In visibleNodeIds)
-            // AND Parent must be effectively processed (we are in recursion, so parent called us)
-            // But wait, if we are here, parent decided to process us? 
-            // No, we need to decide if WE should continue to children.
-            
             const guide = data.Comment?.Guide;
-            const level = guide?.L ?? 0; // Default to 0? Or 1?
-            
-            // NOTE: PRD says "Default State: Level = 1". So Level 1 is visible. Level 2 is hidden.
-            // If Level is undefined, treat as 1 (visible) or 0? 
-            // If Guide is null, it's just a node.
-            
-            // Is this node visible?
-            // Root is always visible.
-            // Others depend on logic.
-            // Actually, we should just traverse. If a node is visible, we emit it.
-            // If it has hidden children, we emit a badge.
-            // If it is NOT visible (e.g. Level 2 and not expanded), we stop recursion.
-            
-            // Wait, "Level 1" means nodes with L=1. What about L=0?
-            // Let's assume L <= 1 is visible by default.
-            
-            const isVisibleByDefault = (level !== undefined && level <= 1) || (level === undefined);
-            const isExplicitlyVisible = this.visibleNodeIds.has(id);
-            const isVisible = isVisibleByDefault || isExplicitlyVisible;
-            
-            // However, if parent is hidden, child shouldn't be rendered (unless graph is disconnected).
-            // Since we traverse from root, if we stop at parent, child is never reached. Good.
             
             // Build Node Content
             const labelText = (guide?.T || data.Value?.join(' ') || data.MetaInfo?.MemberName || "Unknown").replace(/"/g, "'");
@@ -282,11 +328,7 @@ class ScribeApp {
             // Check actual children in the Tree structure, not just Data
             if (treeNode.ChildNodes) {
                 for (const child of treeNode.ChildNodes) {
-                    const childData = this.data!.Nodes[child.Id];
-                    const childLevel = childData.Comment?.Guide?.L ?? 0;
-                    const childDefaultVis = (childLevel <= 1);
-                    const childExplicitVis = this.visibleNodeIds.has(child.Id);
-                    if (!childDefaultVis && !childExplicitVis) {
+                    if (!nodesToRender.has(child.Id)) {
                         hiddenCount++;
                     }
                 }
@@ -296,11 +338,12 @@ class ScribeApp {
                 ? `<div class='badge'>+${hiddenCount}</div>` 
                 : '';
                 
+            // Use data attributes for event delegation
             const expandBtnHtml = (treeNode.ChildNodes.length > 0 && hiddenCount > 0)
-                ? `<button class='node-icon-btn' onclick='window.scribeApp.expandNode("${id}")' title='Expand'>${ICONS.EXPAND.replace(/"/g, "'")}</button>`
+                ? `<button class='node-icon-btn' data-action='expand' data-id='${id}' title='Expand'>${ICONS.EXPAND.replace(/"/g, "'")}</button>`
                 : '';
 
-            const detailsBtnHtml = `<button class='node-icon-btn' onclick='window.scribeApp.showDetails("${id}")' title='Details'>${ICONS.DETAILS.replace(/"/g, "'")}</button>`;
+            const detailsBtnHtml = `<button class='node-icon-btn' data-action='details' data-id='${id}' title='Details'>${ICONS.DETAILS.replace(/"/g, "'")}</button>`;
 
 
             const htmlLabel = `
@@ -312,7 +355,7 @@ class ScribeApp {
                         ${detailsBtnHtml}
                     </div>
                 </div>
-            `;
+            `.replace(/[\n\r]+/g, '').replace(/\s+/g, ' ');
             
             // Style Classes
             const styles: string[] = [];
@@ -342,15 +385,8 @@ class ScribeApp {
             
             // Traverse Children
             for (const child of treeNode.ChildNodes) {
-                const childData = this.data!.Nodes[child.Id];
-                const childLevel = childData.Comment?.Guide?.L ?? 0;
-                const childIsVisible = (childLevel <= 1) || this.visibleNodeIds.has(child.Id);
-                
-                if (childIsVisible) {
+                if (nodesToRender.has(child.Id)) {
                     // Emit Edge
-                    // Check for recursion (if child was already visited in this path? No, mermaid handles DAG)
-                    // But we might want styled edges for loopbacks.
-                    // Simple edge for now:
                     graphDef += `    ${id} --> ${child.Id}\n`;
                     
                     if (!processedNodes.has(child.Id)) {
@@ -361,11 +397,14 @@ class ScribeApp {
             }
         };
 
-        processedNodes.add(activeTree.Id);
-        generateNode(activeTree);
+        treesToRender.forEach(tree => {
+            if (!processedNodes.has(tree.Id) && nodesToRender.has(tree.Id)) {
+                processedNodes.add(tree.Id);
+                generateNode(tree);
+            }
+        });
 
         // Add Style Definitions (Dynamic)
-        // We can pre-define common ones or generate.
         graphDef += `\n    classDef default fill:#e3f2fd,stroke:#333,stroke-width:1px;\n`;
         graphDef += `    classDef highlighted stroke:#ff9800,stroke-width:3px;\n`;
         graphDef += `    classDef tagwarning fill:#fff3e0,stroke:#ffb74d;\n`;
@@ -374,6 +413,7 @@ class ScribeApp {
         // Render
         try {
             // Check if graph is valid
+            // console.log(graphDef);
             const isValid = await mermaid.parse(graphDef);
             if (!isValid) throw new Error("Graph parsing failed");
             
@@ -381,6 +421,15 @@ class ScribeApp {
             const { svg } = await mermaid.render('graphDiv', graphDef);
             container.innerHTML = svg;
             
+            // Fix svg size to take full container
+            const svgEl = container.querySelector('svg');
+            if(svgEl) {
+                svgEl.setAttribute('width', '100%');
+                svgEl.setAttribute('height', '100%');
+                svgEl.style.width = '100%';
+                svgEl.style.height = '100%';
+            }
+
             // Initialize PanZoom
             this.panZoomInstance = svgPanZoom(container.querySelector('svg'), {
                 zoomEnabled: true,
@@ -407,6 +456,8 @@ class ScribeApp {
         if (!data || !panel || !content) return;
 
         panel.classList.add('open');
+        // Ensure display block via style if class isn't enough (though css handles it)
+        panel.style.display = 'block';
         
         const meta = data.MetaInfo;
         content.innerHTML = `
@@ -558,4 +609,3 @@ class ScribeApp {
 
 // Bootstrap
 new ScribeApp();
-

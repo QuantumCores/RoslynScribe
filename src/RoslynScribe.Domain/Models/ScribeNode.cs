@@ -10,13 +10,8 @@ namespace RoslynScribe.Domain.Models
         // This is id of node which this node represents
         public Guid? TargetNodeId { get; set; }
 
-        //[JsonIgnore]
-        //public ScribeNode ParentNode { get; set; }
-
         // commens in their original form
         public string[] Value { get; set; }
-
-        public ScribeComment Comment { get; set; }
 
         public string Kind { get; set; }
 

@@ -426,5 +426,56 @@ namespace RoslynScribe.Domain.Tests
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected));
         }
+
+        [Test]
+        public async Task S011_returns_valid_tree()
+        {
+            // Arrange
+            var expected = new ScribeNode
+            {
+                Value = null,
+                ChildNodes = new List<ScribeNode>()
+                {
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class`]" },
+                        ChildNodes = new List<ScribeNode>()
+                        {
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class property`]" },                                
+                            },
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class method`]" },
+                            },
+                        }
+                    },
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface`]" },
+                        ChildNodes = new List<ScribeNode>()
+                        {
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface property`]" },
+                            },
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface method`]" },
+                            },
+                        }
+
+                    },
+                },
+            };
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S011_InterfaceImpl.cs");
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            Assert.IsTrue(result.IsEquivalent(expected));
+        }
     }
 }

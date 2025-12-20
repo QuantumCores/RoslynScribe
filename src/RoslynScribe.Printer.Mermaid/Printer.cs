@@ -75,10 +75,10 @@ namespace RoslynScribe.Printer.Mermaid
         {
             var result = node.Kind == "Document" ? node.MetaInfo.DocumentName : node.Id.ToString();
             
-            if (node.Value != null && showValue)
+            if (node.Guides != null && showValue)
             {
                 var shape = GetShape(node);
-                result += shape[0] + "\"'" + string.Join(", ", node.Value) + "'\"" + shape[1];
+                result += shape[0] + "\"'" + string.Join(", ", node.Guides.Text) + "'\"" + shape[1];
             }
 
             return result;
