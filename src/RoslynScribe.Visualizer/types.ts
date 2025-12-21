@@ -10,26 +10,21 @@ interface ScribeTreeNode {
 
 interface ScribeNodeData {
     Id: string;
-    Value: string[];
-    Comment?: ScribeComment;
+    Guides?: ScribeGuides;
     Kind: string;
     MetaInfo: MetaInfo;
     ChildNodeIds: string[];
 }
 
-interface ScribeComment {
-    Comments: string[];
-    Guide?: ScribeGuides;
-}
-
 interface ScribeGuides {
-    I?: string; // Identifier
+    Id?: string; // Identifier
+    Uid?: string; // User defined identifier
     L?: number; // Level
     T?: string; // Text
     D?: string; // Description
     P?: string; // Path
     O?: string[]; // OriginIds
-    DI?: string[]; // DestinationIds
+    DUI?: string[]; // DestinationUserIds
     Tags?: string[]; // Tags
 }
 

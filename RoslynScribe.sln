@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.10.35013.160
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11312.210 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe", "src\RoslynScribe\RoslynScribe.csproj", "{E319ED67-CF7C-4802-8ED0-5DE447E70C2E}"
 EndProject
@@ -14,6 +14,17 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe.OtherTestProject", "tests\RoslynScribe.OtherTestProject\RoslynScribe.OtherTestProject.csproj", "{A19D572C-1966-4B34-B31A-FDEEED7016D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynScribe.Printer.Mermaid", "src\RoslynScribe.Printer.Mermaid\RoslynScribe.Printer.Mermaid.csproj", "{952A7BD4-5604-4F42-9740-8F8D30120E3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RoslynScribe.Visualizer", "RoslynScribe.Visualizer", "{13D434EA-4D5B-416D-A695-1507D237D5D6}"
+	ProjectSection(SolutionItems) = preProject
+		src\RoslynScribe.Visualizer\app.js = src\RoslynScribe.Visualizer\app.js
+		src\RoslynScribe.Visualizer\app.js.map = src\RoslynScribe.Visualizer\app.js.map
+		src\RoslynScribe.Visualizer\app.ts = src\RoslynScribe.Visualizer\app.ts
+		src\RoslynScribe.Visualizer\index.html = src\RoslynScribe.Visualizer\index.html
+		src\RoslynScribe.Visualizer\style.css = src\RoslynScribe.Visualizer\style.css
+		src\RoslynScribe.Visualizer\tsconfig.json = src\RoslynScribe.Visualizer\tsconfig.json
+		src\RoslynScribe.Visualizer\types.ts = src\RoslynScribe.Visualizer\types.ts
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

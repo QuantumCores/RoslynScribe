@@ -61,10 +61,7 @@ namespace RoslynScribe.Domain.Models
 
         public static ScribeGuides Default()
         {
-            return new ScribeGuides()
-            {
-                Level = 0,
-            };
+            return new ScribeGuides();
         }
     }
 }

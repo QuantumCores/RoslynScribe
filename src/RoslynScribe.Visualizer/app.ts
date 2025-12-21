@@ -235,7 +235,7 @@ class ScribeApp {
     }
 
     private getNodeLevel(nodeId: string): number {
-        const level = this.data?.Nodes[nodeId]?.Comment?.Guide?.L;
+        const level = this.data?.Nodes[nodeId]?.Guides?.L;
         return typeof level === 'number' ? level : 0;
     }
 
@@ -323,10 +323,10 @@ class ScribeApp {
         const generateNodeDefinition = (treeNode: ScribeTreeNode) => {
             const id = treeNode.Id;
             const data = this.data!.Nodes[id];
-            const guide = data.Comment?.Guide;
+            const guide = data.Guides;
             
             // Build Node Content
-            const labelText = (guide?.T || data.Value?.join(' ') || data.MetaInfo?.MemberName || "Unknown").replace(/"/g, "'");
+            const labelText = (guide?.T || data.MetaInfo?.MemberName || "Unknown").replace(/"/g, "'");
             const cleanLabelText = labelText.replace(/[\n\r]+/g, ' ').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             
             // Badges (Hidden Children Count)
@@ -484,13 +484,14 @@ class ScribeApp {
         panel.style.display = 'block';
         
         const meta = data.MetaInfo;
-        const guide = data.Comment?.Guide;
+        const guide = data.Guides;
         const tags = guide?.Tags?.length ? guide.Tags.join(', ') : '';
         const rows = [
             this.renderMetaRow('ID', data.Id),
             this.renderMetaRow('Kind', data.Kind),
             this.renderMetaRow('Level', guide?.L),
-            this.renderMetaRow('Identifier', guide?.I),
+            this.renderMetaRow('Identifier', guide?.Id),
+            this.renderMetaRow('User Id', guide?.Uid),
             this.renderMetaRow('Text', guide?.T),
             this.renderMetaRow('Description', guide?.D),
             this.renderMetaRow('Path', guide?.P),
@@ -506,9 +507,9 @@ class ScribeApp {
         ];
         content.innerHTML = rows.filter(row => row.length > 0).join('');
 
-        if (data.Value && data.Value.length > 0) {
+        if (guide?.D) {
             commentsSection!.style.display = 'block';
-            commentsContent!.innerHTML = data.Value.map(v => `<p>${v}</p>`).join('');
+            commentsContent!.innerHTML = `<p>${guide.D}</p>`;
         } else {
             commentsSection!.style.display = 'none';
         }
@@ -524,11 +525,10 @@ class ScribeApp {
 
         // Find matching nodes
         Object.values(this.data.Nodes).forEach(node => {
-            const guideText = node.Comment?.Guide?.T?.toLowerCase() || "";
-            const rawText = node.Value?.join(' ').toLowerCase() || "";
-            const tags = node.Comment?.Guide?.Tags?.map(t => t.toLowerCase()) || [];
+            const guideText = node.Guides?.T?.toLowerCase() || "";
+            const tags = node.Guides?.Tags?.map(t => t.toLowerCase()) || [];
             
-            if (guideText.includes(term) || rawText.includes(term) || tags.some(t => t.includes(term))) {
+            if (guideText.includes(term) || tags.some(t => t.includes(term))) {
                 // Match found
                 this.searchResults.push(node.Id);
                 // Reveal path
