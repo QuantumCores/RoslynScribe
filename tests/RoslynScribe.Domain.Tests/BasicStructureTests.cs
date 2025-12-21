@@ -33,21 +33,21 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S001 namespace comment]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S001 namespace comment`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S001 BasicTestClass]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S001 BasicTestClass`]" },
                                 ChildNodes = new List<ScribeNode> {
                                     new ScribeNode
                                     {
-                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S001 BasicMethod]" },
+                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S001 BasicMethod`]" },
                                         ChildNodes = new List<ScribeNode>
                                         {
                                             new ScribeNode
                                             {
-                                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S001 result]" },
+                                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S001 result`]" },
                                                 ChildNodes = new List<ScribeNode> { },
                                             },
                                         },
@@ -64,7 +64,7 @@ namespace RoslynScribe.Domain.Tests
 
              var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -78,21 +78,21 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S002 namespace comment]", $"// {ScribeAnalyzer.CommentLabel}[S002 second namespace comment]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S002 namespace comment`]", $"// {ScribeAnalyzer.CommentLabel}[T:`S002 second namespace comment`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S002 class comment]", $"// {ScribeAnalyzer.CommentLabel}[S002 second class comment]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S002 class comment`]", $"// {ScribeAnalyzer.CommentLabel}[T:`S002 second class comment`]" },
                                 ChildNodes = new List<ScribeNode> {
                                     new ScribeNode
                                     {
-                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S002 BasicMethod]", $"// {ScribeAnalyzer.CommentLabel}[S002 second method comment]" },
+                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S002 BasicMethod`]", $"// {ScribeAnalyzer.CommentLabel}[T:`S002 second method comment`]" },
                                         ChildNodes = new List<ScribeNode>
                                         {
                                             new ScribeNode
                                             {
-                                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S002 result]", $"// {ScribeAnalyzer.CommentLabel}[S002 seconod result]" },
+                                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S002 result`]", $"// {ScribeAnalyzer.CommentLabel}[T:`S002 seconod result`]" },
                                             },
                                         },
                                     },
@@ -108,7 +108,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -122,30 +122,30 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S003 basicMethod]" },
+                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S003 basicMethod`]" },
                         ChildNodes = new List<ScribeNode> {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S003 basic result]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S003 basic result`]" },
                             },
                         },
                     },
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S003 second method]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S003 second method`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S003 call basicMethod]" },                                
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S003 call basicMethod`]" },                                
                                 ChildNodes = new List<ScribeNode> {
                                     new ScribeNode
                                     {
-                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S003 basicMethod]" },
+                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S003 basicMethod`]" },
                                         ChildNodes = new List<ScribeNode> {
                                             new ScribeNode
                                             {
-                                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S003 basic result]" },
+                                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S003 basic result`]" },
                                             },
                                         },
                                     },
@@ -161,7 +161,7 @@ namespace RoslynScribe.Domain.Tests
 
             //var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -175,20 +175,20 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S004 return addition]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S004 return addition`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S004 Nodes shared comment get logic data]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S004 Nodes shared comment get logic data`]" },
                             },
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[Logic Add two numbers]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`Logic Add two numbers,L:`2`]" },
                                 ChildNodes = new List<ScribeNode> {
                                     new ScribeNode
                                     {
-                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[Logic This is add result]" },
+                                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`Logic This is add result`]" },
                                     },
                                 },
                             },
@@ -202,7 +202,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -216,20 +216,20 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[Check condition value]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`Check condition value`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S005 If condition is one then 1]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S005 If condition is one then 1`]" },
                             },
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S005 If condition is two then 2]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S005 If condition is two then 2`]" },
                             },
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[S005 If condition is other then -1]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S005 If condition is other then -1`]" },
                             },
                         },
                     },
@@ -241,7 +241,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -255,7 +255,7 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S006 call external method to add days]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S006 call external method to add days`]" },
                     },
                 }
             };
@@ -265,7 +265,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -279,11 +279,11 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S007 prepare lambda]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S007 prepare lambda`]" },
                     },
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S007 add one in lambda expression]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S007 add one in lambda expression`]" },
                     },
                 }
             };
@@ -293,7 +293,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -307,15 +307,15 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S008 Nodes shared comment]" },                        
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S008 Nodes shared comment`]" },                        
                     },
                     new ScribeNode
                     {
-                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[OtherLogic Multiply two numbers]" },
+                        Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`OtherLogic Multiply two numbers`,L:`2`,D:`IrrelevantDescription`]" },
                         ChildNodes = new List<ScribeNode> {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[OtherLogic This is multiplication result]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`OtherLogic This is multiplication result`]" },
                             },
                         },
                     },
@@ -327,7 +327,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -341,29 +341,29 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S009 Method A calls C]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S009 Method A calls C`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S009 Method D called by C]" },
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S009 Method D called by C`]" },
                             },
                         }
                     },
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S009 Method B calls C]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S009 Method B calls C`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S009 Method D called by C]" },
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S009 Method D called by C`]" },
                             },
                         }
                     },
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S009 Method D called by C]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S009 Method D called by C`]" },
                     },
 
                 },
@@ -374,7 +374,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -388,17 +388,17 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S010 Recursive start]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S010 Recursive start`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S010 Recursive method]" },
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S010 Recursive method`]" },
                                 ChildNodes = new List<ScribeNode>()
                                 {
                                     new ScribeNode
                                     {
-                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S010 Call recursive method]" },
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S010 Call recursive method`]" },
                                     },
                                 }
                             },
@@ -406,12 +406,12 @@ namespace RoslynScribe.Domain.Tests
                     },
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S010 Recursive method]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S010 Recursive method`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[S010 Call recursive method]" },
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S010 Call recursive method`]" },
                             },
                         }
 
@@ -424,7 +424,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
 
         [Test]
@@ -475,7 +475,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected));
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
     }
 }

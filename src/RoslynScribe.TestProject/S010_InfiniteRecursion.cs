@@ -2,18 +2,18 @@
 {
     internal class S010_InfiniteRecursion
     {
-        // [ADC][S010 Recursive start]
+        // [ADC][T:`S010 Recursive start`]
         public int RecursiveStart(int start)
         {
             return Recursive(start);
         }
 
-        // [ADC][S010 Recursive method]
+        // [ADC][T:`S010 Recursive method`]
         public int Recursive(int number) 
         {
             if(number < 3)
             {
-                // [ADC][S010 Call recursive method]
+                // [ADC][T:`S010 Call recursive method`]
                 number = Recursive(number + 1);
             }
 

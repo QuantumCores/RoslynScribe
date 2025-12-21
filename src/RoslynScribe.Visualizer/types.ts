@@ -46,7 +46,8 @@ interface MetaInfo {
 
 interface ViewConfig {
     activeTreeId: string | null;
-    expandedNodeIds: string[]; // List of IDs that are manually expanded
+    expandedNodeLevels?: Record<string, number>; // Node ID to max visible level
+    expandedNodeIds?: string[]; // Legacy: list of IDs that are manually expanded
     activeSearchTerm: string;
     tagColors?: Record<string, string>;
 }

@@ -9,7 +9,7 @@ namespace RoslynScribe.Domain.Models
         public ScribeNodeData(Guid id, string[] value)
         {
             Id = id;
-            ScribeCommnetParser.Parse(value);
+            Guides = ScribeCommnetParser.Parse(value);
         }
 
         public Guid Id { get; set; }

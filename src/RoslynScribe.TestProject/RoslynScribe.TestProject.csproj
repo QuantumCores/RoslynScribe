@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Logic.cs~RF5fc3aea.TMP" />
     <None Remove="S011_InterfaceImpl.cs~RFfb2dc2.TMP" />
   </ItemGroup>
 

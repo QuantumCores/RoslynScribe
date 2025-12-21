@@ -47,7 +47,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
 
         [Test]
@@ -95,7 +95,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
 
 
@@ -112,7 +112,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
 
 
@@ -161,7 +161,7 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected));
+            Assert.IsTrue(result.IsTheSame(expected).Result);
         }
     }
 }

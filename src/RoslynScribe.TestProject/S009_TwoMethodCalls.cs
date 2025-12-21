@@ -5,13 +5,13 @@
     /// </summary>
     internal class S009_TwoMethodCalls
     {
-        // [ADC][S009 Method A calls C]
+        // [ADC][T:`S009 Method A calls C`]
         public int S009_Method_A(int start)
         {
             return S009_Method_C(start + 1);
         }
 
-        // [ADC][S009 Method B calls C]
+        // [ADC][T:`S009 Method B calls C`]
         public int S009_Method_B(int start)
         {
             return S009_Method_C(start - 1);
@@ -22,7 +22,7 @@
             return S009_Method_D(start);
         }
 
-        // [ADC][S009 Method D called by C]
+        // [ADC][T:`S009 Method D called by C`]
         public int S009_Method_D(int start)
         {
             return start + 1;

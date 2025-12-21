@@ -9,9 +9,10 @@ class ScribeApp {
     constructor() {
         this.data = null;
         this.childToParentMap = new Map();
-        this.visibleNodeIds = new Set();
+        this.expandedNodeMaxLevels = new Map();
         this.activeTreeId = null;
         this.panZoomInstance = null;
+        this.baseVisibleLevel = 1;
         this.searchResults = [];
         this.currentSearchIndex = -1;
         this.initializeEventListeners();
@@ -62,6 +63,9 @@ class ScribeApp {
             const file = e.target.files?.[0];
             if (file)
                 this.loadConfigFile(file);
+        });
+        document.getElementById('btn-close-details')?.addEventListener('click', () => {
+            this.hideNodeDetails();
         });
         document.getElementById('mermaid-output')?.addEventListener('click', (e) => {
             let target = e.target;
@@ -166,7 +170,7 @@ class ScribeApp {
         await this.renderGraph();
     }
     async resetView() {
-        this.visibleNodeIds.clear();
+        this.expandedNodeMaxLevels.clear();
         this.searchResults = [];
         this.currentSearchIndex = -1;
         document.getElementById('search-input').value = '';
@@ -175,19 +179,9 @@ class ScribeApp {
     async expandNode(nodeId) {
         if (!this.data)
             return;
-        const nodeData = this.data.Nodes[nodeId];
-        if (nodeData && nodeData.ChildNodeIds) {
-            let hasChanges = false;
-            for (const childId of nodeData.ChildNodeIds) {
-                if (!this.visibleNodeIds.has(childId)) {
-                    this.visibleNodeIds.add(childId);
-                    hasChanges = true;
-                }
-            }
-            if (hasChanges) {
-                await this.renderGraph();
-            }
-        }
+        const currentMax = this.getCurrentAllowedMax(nodeId);
+        this.expandedNodeMaxLevels.set(nodeId, currentMax + 1);
+        await this.renderGraph();
     }
     findTreeNode(root, id) {
         if (root.Id === id)
@@ -199,31 +193,50 @@ class ScribeApp {
         }
         return null;
     }
-    calculateVisibleSet(trees) {
+    getNodeLevel(nodeId) {
+        const level = this.data?.Nodes[nodeId]?.Comment?.Guide?.L;
+        return typeof level === 'number' ? level : 0;
+    }
+    getCurrentAllowedMax(nodeId) {
+        let maxLevel = this.baseVisibleLevel;
+        let curr = nodeId;
+        while (curr) {
+            const expandedMax = this.expandedNodeMaxLevels.get(curr);
+            if (expandedMax !== undefined && expandedMax > maxLevel) {
+                maxLevel = expandedMax;
+            }
+            const parent = this.childToParentMap.get(curr);
+            if (!parent)
+                break;
+            curr = parent;
+        }
+        return maxLevel;
+    }
+    computeVisibilityInfo(trees) {
         const visibleSet = new Set();
-        const targetNodes = new Set();
-        const scan = (node) => {
-            const data = this.data.Nodes[node.Id];
-            const level = data.Comment?.Guide?.L ?? 0;
-            if (level <= 1 || this.visibleNodeIds.has(node.Id)) {
-                targetNodes.add(node.Id);
+        const edges = [];
+        const traverse = (node, allowedMax, nearestVisibleAncestor) => {
+            const nodeId = node.Id;
+            const level = this.getNodeLevel(nodeId);
+            const isVisible = level <= allowedMax;
+            if (isVisible) {
+                visibleSet.add(nodeId);
+                if (nearestVisibleAncestor) {
+                    edges.push({ from: nearestVisibleAncestor, to: nodeId });
+                }
+                nearestVisibleAncestor = nodeId;
+            }
+            let nextAllowedMax = allowedMax;
+            const expandedMax = this.expandedNodeMaxLevels.get(nodeId);
+            if (expandedMax !== undefined && expandedMax > nextAllowedMax) {
+                nextAllowedMax = expandedMax;
             }
             for (const child of node.ChildNodes) {
-                scan(child);
+                traverse(child, nextAllowedMax, nearestVisibleAncestor);
             }
         };
-        trees.forEach(t => scan(t));
-        targetNodes.forEach(targetId => {
-            let curr = targetId;
-            while (curr) {
-                visibleSet.add(curr);
-                const parent = this.childToParentMap.get(curr);
-                if (!parent)
-                    break;
-                curr = parent;
-            }
-        });
-        return visibleSet;
+        trees.forEach(tree => traverse(tree, this.baseVisibleLevel, null));
+        return { visibleSet, edges };
     }
     async renderGraph() {
         await this.showLoading(true);
@@ -239,10 +252,11 @@ class ScribeApp {
             this.showLoading(false);
             return;
         }
-        const nodesToRender = this.calculateVisibleSet(treesToRender);
+        const visibility = this.computeVisibilityInfo(treesToRender);
+        const nodesToRender = visibility.visibleSet;
         let graphDef = "graph TD\n";
         const processedNodes = new Set();
-        const generateNode = (treeNode) => {
+        const generateNodeDefinition = (treeNode) => {
             const id = treeNode.Id;
             const data = this.data.Nodes[id];
             const guide = data.Comment?.Guide;
@@ -289,22 +303,27 @@ class ScribeApp {
             if (styles.length > 0) {
                 graphDef += `    class ${id} ${styles.join(',')}\n`;
             }
+        };
+        const traverseNodes = (treeNode) => {
+            if (nodesToRender.has(treeNode.Id) && !processedNodes.has(treeNode.Id)) {
+                processedNodes.add(treeNode.Id);
+                generateNodeDefinition(treeNode);
+            }
             for (const child of treeNode.ChildNodes) {
-                if (nodesToRender.has(child.Id)) {
-                    graphDef += `    ${id} --> ${child.Id}\n`;
-                    if (!processedNodes.has(child.Id)) {
-                        processedNodes.add(child.Id);
-                        generateNode(child);
-                    }
-                }
+                traverseNodes(child);
             }
         };
         treesToRender.forEach(tree => {
-            if (!processedNodes.has(tree.Id) && nodesToRender.has(tree.Id)) {
-                processedNodes.add(tree.Id);
-                generateNode(tree);
-            }
+            traverseNodes(tree);
         });
+        const edgeSet = new Set();
+        for (const edge of visibility.edges) {
+            const key = `${edge.from}-->${edge.to}`;
+            if (!edgeSet.has(key)) {
+                edgeSet.add(key);
+                graphDef += `    ${edge.from} --> ${edge.to}\n`;
+            }
+        }
         graphDef += `\n    classDef default fill:#e3f2fd,stroke:#333,stroke-width:1px;\n`;
         graphDef += `    classDef highlighted stroke:#ff9800,stroke-width:3px;\n`;
         graphDef += `    classDef tagwarning fill:#fff3e0,stroke:#ffb74d;\n`;
@@ -337,6 +356,18 @@ class ScribeApp {
             this.showLoading(false);
         }
     }
+    renderMetaRow(label, value) {
+        if (value === undefined || value === null || value === '')
+            return '';
+        return `<div class="meta-item"><span class="meta-label">${label}</span><span class="meta-value">${value}</span></div>`;
+    }
+    hideNodeDetails() {
+        const panel = document.getElementById('side-panel');
+        if (!panel)
+            return;
+        panel.classList.remove('open');
+        panel.style.display = 'none';
+    }
     showNodeDetails(id) {
         const data = this.data?.Nodes[id];
         const panel = document.getElementById('side-panel');
@@ -348,15 +379,27 @@ class ScribeApp {
         panel.classList.add('open');
         panel.style.display = 'block';
         const meta = data.MetaInfo;
-        content.innerHTML = `
-            <div class="meta-item"><span class="meta-label">ID</span><span class="meta-value">${data.Id}</span></div>
-            <div class="meta-item"><span class="meta-label">Project</span><span class="meta-value">${meta.ProjectName}</span></div>
-            <div class="meta-item"><span class="meta-label">Namespace</span><span class="meta-value">${meta.NameSpace}</span></div>
-            <div class="meta-item"><span class="meta-label">Class</span><span class="meta-value">${meta.TypeName}</span></div>
-            <div class="meta-item"><span class="meta-label">Member</span><span class="meta-value">${meta.MemberName}</span></div>
-            <div class="meta-item"><span class="meta-label">File</span><span class="meta-value">${meta.DocumentName}:${meta.Line}</span></div>
-            <div class="meta-item"><span class="meta-label">Kind</span><span class="meta-value">${data.Kind}</span></div>
-        `;
+        const guide = data.Comment?.Guide;
+        const tags = guide?.Tags?.length ? guide.Tags.join(', ') : '';
+        const rows = [
+            this.renderMetaRow('ID', data.Id),
+            this.renderMetaRow('Kind', data.Kind),
+            this.renderMetaRow('Level', guide?.L),
+            this.renderMetaRow('Identifier', guide?.I),
+            this.renderMetaRow('Text', guide?.T),
+            this.renderMetaRow('Description', guide?.D),
+            this.renderMetaRow('Path', guide?.P),
+            this.renderMetaRow('Tags', tags),
+            this.renderMetaRow('Project', meta.ProjectName),
+            this.renderMetaRow('Namespace', meta.NameSpace),
+            this.renderMetaRow('Class', meta.TypeName),
+            this.renderMetaRow('Member', meta.MemberName),
+            this.renderMetaRow('Identifier (Meta)', meta.Identifier),
+            this.renderMetaRow('Document', meta.DocumentName),
+            this.renderMetaRow('Document Path', meta.DocumentPath),
+            this.renderMetaRow('Line', meta.Line),
+        ];
+        content.innerHTML = rows.filter(row => row.length > 0).join('');
         if (data.Value && data.Value.length > 0) {
             commentsSection.style.display = 'block';
             commentsContent.innerHTML = data.Value.map(v => `<p>${v}</p>`).join('');
@@ -392,9 +435,15 @@ class ScribeApp {
         }
     }
     revealNode(id) {
+        const targetLevel = this.getNodeLevel(id);
+        if (targetLevel <= this.baseVisibleLevel)
+            return;
         let curr = id;
         while (curr) {
-            this.visibleNodeIds.add(curr);
+            const existing = this.expandedNodeMaxLevels.get(curr) ?? this.baseVisibleLevel;
+            if (targetLevel > existing) {
+                this.expandedNodeMaxLevels.set(curr, targetLevel);
+            }
             const parent = this.childToParentMap.get(curr);
             if (!parent)
                 break;
@@ -429,9 +478,13 @@ class ScribeApp {
         }
     }
     saveConfig() {
+        const expandedNodeLevels = {};
+        this.expandedNodeMaxLevels.forEach((value, key) => {
+            expandedNodeLevels[key] = value;
+        });
         const config = {
             activeTreeId: this.activeTreeId,
-            expandedNodeIds: Array.from(this.visibleNodeIds),
+            expandedNodeLevels,
             activeSearchTerm: document.getElementById('search-input').value
         };
         const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
@@ -447,8 +500,19 @@ class ScribeApp {
             const config = JSON.parse(text);
             if (config.activeTreeId)
                 this.activeTreeId = config.activeTreeId;
-            if (config.expandedNodeIds) {
-                config.expandedNodeIds.forEach(id => this.visibleNodeIds.add(id));
+            this.expandedNodeMaxLevels.clear();
+            if (config.expandedNodeLevels) {
+                Object.entries(config.expandedNodeLevels).forEach(([id, level]) => {
+                    if (typeof level === 'number') {
+                        this.expandedNodeMaxLevels.set(id, level);
+                    }
+                });
+            }
+            else if (config.expandedNodeIds) {
+                config.expandedNodeIds.forEach(id => {
+                    const current = this.getCurrentAllowedMax(id);
+                    this.expandedNodeMaxLevels.set(id, current + 1);
+                });
             }
             if (config.activeSearchTerm) {
                 document.getElementById('search-input').value = config.activeSearchTerm;
