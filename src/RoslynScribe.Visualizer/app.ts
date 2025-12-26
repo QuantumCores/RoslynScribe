@@ -280,14 +280,10 @@ class ScribeApp {
         return maxLevel;
     }
 
-    private computeVisibilityInfo(trees: ScribeTreeNode[]): {
-        visibleSet: Set<string>;
-        edges: Array<{ from: string; to: string }>;
-    } {
+    private computeVisibleSet(trees: ScribeTreeNode[]): Set<string> {
         const visibleSet = new Set<string>();
-        const edges: Array<{ from: string; to: string }> = [];
 
-        const traverse = (node: ScribeTreeNode, allowedMax: number, nearestVisibleAncestor: string | null, collapseActive: boolean) => {
+        const traverse = (node: ScribeTreeNode, allowedMax: number, collapseActive: boolean) => {
             const nodeId = node.Id;
             const level = this.getNodeLevel(nodeId);
             const isCollapsed = collapseActive || this.collapsedNodeIds.has(nodeId);
@@ -296,10 +292,6 @@ class ScribeApp {
 
             if (isVisible) {
                 visibleSet.add(nodeId);
-                if (nearestVisibleAncestor) {
-                    edges.push({ from: nearestVisibleAncestor, to: nodeId });
-                }
-                nearestVisibleAncestor = nodeId;
             }
 
             let nextAllowedMax = effectiveAllowedMax;
@@ -310,13 +302,39 @@ class ScribeApp {
                 }
             }
             for (const child of node.ChildNodes) {
-                traverse(child, nextAllowedMax, nearestVisibleAncestor, isCollapsed);
+                traverse(child, nextAllowedMax, isCollapsed);
             }
         };
 
-        trees.forEach(tree => traverse(tree, this.baseVisibleLevel, null, false));
+        trees.forEach(tree => traverse(tree, this.baseVisibleLevel, false));
 
-        return { visibleSet, edges };
+        return visibleSet;
+    }
+
+    private computeEdges(trees: ScribeTreeNode[], visibleSet: Set<string>): Array<{ from: string; to: string }> {
+        const edges: Array<{ from: string; to: string }> = [];
+
+        const traverse = (node: ScribeTreeNode, nearestVisibleAncestor: string | null, collapseActive: boolean) => {
+            const nodeId = node.Id;
+            const isCollapsed = collapseActive || this.collapsedNodeIds.has(nodeId);
+            const suppressForCollapse = collapseActive && this.getNodeLevel(nodeId) > this.baseVisibleLevel;
+            const isVisibleHere = visibleSet.has(nodeId) && !suppressForCollapse;
+
+            if (isVisibleHere) {
+                if (nearestVisibleAncestor) {
+                    edges.push({ from: nearestVisibleAncestor, to: nodeId });
+                }
+                nearestVisibleAncestor = nodeId;
+            }
+
+            for (const child of node.ChildNodes) {
+                traverse(child, nearestVisibleAncestor, isCollapsed);
+            }
+        };
+
+        trees.forEach(tree => traverse(tree, null, false));
+
+        return edges;
     }
 
     private async renderGraph() {
@@ -339,8 +357,8 @@ class ScribeApp {
         }
 
         // Calculate Visibility
-        const visibility = this.computeVisibilityInfo(treesToRender);
-        const nodesToRender = visibility.visibleSet;
+        const nodesToRender = this.computeVisibleSet(treesToRender);
+        const edges = this.computeEdges(treesToRender, nodesToRender);
 
         let graphDef = "graph TD\n";
         
@@ -447,7 +465,7 @@ class ScribeApp {
         });
 
         const edgeSet = new Set<string>();
-        for (const edge of visibility.edges) {
+        for (const edge of edges) {
             const key = `${edge.from}-->${edge.to}`;
             if (!edgeSet.has(key)) {
                 edgeSet.add(key);
