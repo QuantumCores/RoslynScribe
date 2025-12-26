@@ -43,6 +43,7 @@ interface ViewConfig {
     activeTreeId: string | null;
     expandedNodeLevels?: Record<string, number>; // Node ID to max visible level
     expandedNodeIds?: string[]; // Legacy: list of IDs that are manually expanded
+    collapsedNodeIds?: string[]; // Node IDs with retracted higher-level nodes
     activeSearchTerm: string;
     tagColors?: Record<string, string>;
 }

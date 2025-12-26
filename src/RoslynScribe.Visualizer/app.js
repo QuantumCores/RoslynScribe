@@ -10,6 +10,7 @@ class ScribeApp {
         this.data = null;
         this.childToParentMap = new Map();
         this.expandedNodeMaxLevels = new Map();
+        this.collapsedNodeIds = new Set();
         this.activeTreeId = null;
         this.panZoomInstance = null;
         this.baseVisibleLevel = 1;
@@ -80,6 +81,11 @@ class ScribeApp {
                     }
                     if (action === 'details' && id) {
                         this.showNodeDetails(id);
+                        e.stopPropagation();
+                        return;
+                    }
+                    if (action === 'collapse' && id) {
+                        this.retractNode(id);
                         e.stopPropagation();
                         return;
                     }
@@ -171,6 +177,7 @@ class ScribeApp {
     }
     async resetView() {
         this.expandedNodeMaxLevels.clear();
+        this.collapsedNodeIds.clear();
         this.searchResults = [];
         this.currentSearchIndex = -1;
         document.getElementById('search-input').value = '';
@@ -179,8 +186,15 @@ class ScribeApp {
     async expandNode(nodeId) {
         if (!this.data)
             return;
+        this.clearCollapsedAncestors(nodeId);
         const currentMax = this.getCurrentAllowedMax(nodeId);
         this.expandedNodeMaxLevels.set(nodeId, currentMax + 1);
+        await this.renderGraph();
+    }
+    async retractNode(nodeId) {
+        if (!this.data)
+            return;
+        this.collapsedNodeIds.add(nodeId);
         await this.renderGraph();
     }
     findTreeNode(root, id) {
@@ -196,6 +210,16 @@ class ScribeApp {
     getNodeLevel(nodeId) {
         const level = this.data?.Nodes[nodeId]?.Guides?.L;
         return typeof level === 'number' ? level : 0;
+    }
+    clearCollapsedAncestors(nodeId) {
+        let curr = nodeId;
+        while (curr) {
+            this.collapsedNodeIds.delete(curr);
+            const parent = this.childToParentMap.get(curr);
+            if (!parent)
+                break;
+            curr = parent;
+        }
     }
     getCurrentAllowedMax(nodeId) {
         let maxLevel = this.baseVisibleLevel;
@@ -215,10 +239,12 @@ class ScribeApp {
     computeVisibilityInfo(trees) {
         const visibleSet = new Set();
         const edges = [];
-        const traverse = (node, allowedMax, nearestVisibleAncestor) => {
+        const traverse = (node, allowedMax, nearestVisibleAncestor, collapseActive) => {
             const nodeId = node.Id;
             const level = this.getNodeLevel(nodeId);
-            const isVisible = level <= allowedMax;
+            const isCollapsed = collapseActive || this.collapsedNodeIds.has(nodeId);
+            const effectiveAllowedMax = isCollapsed ? this.baseVisibleLevel : allowedMax;
+            const isVisible = level <= effectiveAllowedMax;
             if (isVisible) {
                 visibleSet.add(nodeId);
                 if (nearestVisibleAncestor) {
@@ -226,16 +252,18 @@ class ScribeApp {
                 }
                 nearestVisibleAncestor = nodeId;
             }
-            let nextAllowedMax = allowedMax;
-            const expandedMax = this.expandedNodeMaxLevels.get(nodeId);
-            if (expandedMax !== undefined && expandedMax > nextAllowedMax) {
-                nextAllowedMax = expandedMax;
+            let nextAllowedMax = effectiveAllowedMax;
+            if (!isCollapsed) {
+                const expandedMax = this.expandedNodeMaxLevels.get(nodeId);
+                if (expandedMax !== undefined && expandedMax > nextAllowedMax) {
+                    nextAllowedMax = expandedMax;
+                }
             }
             for (const child of node.ChildNodes) {
-                traverse(child, nextAllowedMax, nearestVisibleAncestor);
+                traverse(child, nextAllowedMax, nearestVisibleAncestor, isCollapsed);
             }
         };
-        trees.forEach(tree => traverse(tree, this.baseVisibleLevel, null));
+        trees.forEach(tree => traverse(tree, this.baseVisibleLevel, null, false));
         return { visibleSet, edges };
     }
     async renderGraph() {
@@ -260,6 +288,10 @@ class ScribeApp {
             const id = treeNode.Id;
             const data = this.data.Nodes[id];
             const guide = data.Guides;
+            const nodeLevel = this.getNodeLevel(id);
+            const directHigherChildren = treeNode.ChildNodes.filter(child => this.getNodeLevel(child.Id) > nodeLevel);
+            const hasDirectHigherHidden = directHigherChildren.some(child => !nodesToRender.has(child.Id));
+            const hasDirectHigherVisible = directHigherChildren.some(child => nodesToRender.has(child.Id));
             const labelText = (guide?.T || data.MetaInfo?.MemberName || "Unknown").replace(/"/g, "'");
             const cleanLabelText = labelText.replace(/[\n\r]+/g, ' ').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             let hiddenCount = 0;
@@ -273,8 +305,13 @@ class ScribeApp {
             const badgesHtml = hiddenCount > 0
                 ? `<div class='badge'>+${hiddenCount}</div>`
                 : '';
-            const expandBtnHtml = (treeNode.ChildNodes.length > 0 && hiddenCount > 0)
+            const canExpand = hasDirectHigherHidden;
+            const expandBtnHtml = canExpand
                 ? `<button class='node-icon-btn' data-action='expand' data-id='${id}' title='Expand'>${ICONS.EXPAND.replace(/"/g, "'")}</button>`
+                : '';
+            const canRetract = hasDirectHigherVisible;
+            const collapseBtnHtml = canRetract
+                ? `<button class='node-icon-btn' data-action='collapse' data-id='${id}' title='Retract'>${ICONS.COLLAPSE.replace(/"/g, "'")}</button>`
                 : '';
             const detailsBtnHtml = `<button class='node-icon-btn' data-action='details' data-id='${id}' title='Details'>${ICONS.DETAILS.replace(/"/g, "'")}</button>`;
             const htmlLabel = `
@@ -283,6 +320,7 @@ class ScribeApp {
                     <div class='node-title'>${cleanLabelText}</div>
                     <div class='node-controls'>
                         ${expandBtnHtml}
+                        ${collapseBtnHtml}
                         ${detailsBtnHtml}
                     </div>
                 </div>
@@ -485,6 +523,7 @@ class ScribeApp {
         const config = {
             activeTreeId: this.activeTreeId,
             expandedNodeLevels,
+            collapsedNodeIds: Array.from(this.collapsedNodeIds),
             activeSearchTerm: document.getElementById('search-input').value
         };
         const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
@@ -513,6 +552,10 @@ class ScribeApp {
                     const current = this.getCurrentAllowedMax(id);
                     this.expandedNodeMaxLevels.set(id, current + 1);
                 });
+            }
+            this.collapsedNodeIds.clear();
+            if (config.collapsedNodeIds) {
+                config.collapsedNodeIds.forEach(id => this.collapsedNodeIds.add(id));
             }
             if (config.activeSearchTerm) {
                 document.getElementById('search-input').value = config.activeSearchTerm;
