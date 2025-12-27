@@ -11,6 +11,8 @@ const ICONS = {
     SEARCH: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`
 };
 
+type SubgraphMode = 'project' | 'folder' | 'none';
+
 class ScribeApp {
     private data: ScribeResult | null = null;
     private childToParentMap: Map<string, string> = new Map();
@@ -19,6 +21,12 @@ class ScribeApp {
     private activeTreeId: string | null = null;
     private panZoomInstance: any = null;
     private readonly baseVisibleLevel = 1;
+    private subgraphMode: SubgraphMode = 'project';
+    private subgraphColors: { project: Record<string, string>; folder: Record<string, string> } = {
+        project: {},
+        folder: {}
+    };
+    private readonly subgraphPalette = ['#e8f5e9', '#e3f2fd', '#fff3e0', '#f3e5f5', '#e0f7fa', '#fce4ec'];
     
     // Search State
     private searchResults: string[] = [];
@@ -82,6 +90,19 @@ class ScribeApp {
         document.getElementById('config-input')?.addEventListener('change', (e: Event) => {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) this.loadConfigFile(file);
+        });
+        document.getElementById('btn-edit-config')?.addEventListener('click', () => {
+            this.openConfigModal();
+        });
+        document.getElementById('btn-config-close')?.addEventListener('click', () => {
+            this.closeConfigModal();
+        });
+        document.getElementById('btn-config-apply')?.addEventListener('click', () => {
+            this.applyConfigModal();
+        });
+        document.getElementById('subgraph-mode-select')?.addEventListener('change', (e: Event) => {
+            const select = e.target as HTMLSelectElement;
+            this.renderSubgraphColorList(select.value as SubgraphMode);
         });
         document.getElementById('btn-close-details')?.addEventListener('click', () => {
             this.hideNodeDetails();
@@ -159,7 +180,7 @@ class ScribeApp {
     }
 
     private enableControls() {
-        const ids = ['tree-select', 'search-input', 'btn-reset', 'btn-save-config', 'btn-load-config'];
+        const ids = ['tree-select', 'search-input', 'btn-reset', 'btn-save-config', 'btn-load-config', 'btn-edit-config'];
         ids.forEach(id => {
             const el = document.getElementById(id);
             if (el) (el as any).disabled = false;
@@ -278,6 +299,216 @@ class ScribeApp {
         }
 
         return maxLevel;
+    }
+
+    private openConfigModal() {
+        if (!this.data) return;
+        const modal = document.getElementById('config-modal');
+        const select = document.getElementById('subgraph-mode-select') as HTMLSelectElement | null;
+        if (!modal || !select) return;
+        select.value = this.subgraphMode;
+        this.renderSubgraphColorList(this.subgraphMode);
+        modal.classList.add('open');
+    }
+
+    private closeConfigModal() {
+        const modal = document.getElementById('config-modal');
+        if (!modal) return;
+        modal.classList.remove('open');
+    }
+
+    private applyConfigModal() {
+        const select = document.getElementById('subgraph-mode-select') as HTMLSelectElement | null;
+        if (!select) return;
+        const mode = select.value as SubgraphMode;
+        this.subgraphMode = mode;
+        this.applySubgraphColorsFromModal(mode);
+        this.closeConfigModal();
+        this.renderGraph();
+    }
+
+    private applySubgraphColorsFromModal(mode: SubgraphMode) {
+        if (mode === 'none') return;
+        const list = document.getElementById('subgraph-colors-list');
+        if (!list) return;
+        const inputs = Array.from(list.querySelectorAll('input[type="color"]')) as HTMLInputElement[];
+        const map: Record<string, string> = { ...(this.subgraphColors[mode] || {}) };
+        inputs.forEach(input => {
+            const group = input.dataset.group;
+            if (group) {
+                map[group] = input.value;
+            }
+        });
+        this.subgraphColors[mode] = map;
+    }
+
+    private renderSubgraphColorList(mode: SubgraphMode) {
+        const list = document.getElementById('subgraph-colors-list');
+        if (!list) return;
+        list.innerHTML = '';
+        if (mode === 'none') {
+            const empty = document.createElement('p');
+            empty.className = 'modal-note';
+            empty.textContent = 'Subgraphs are disabled.';
+            list.appendChild(empty);
+            return;
+        }
+        const groups = this.getSubgraphGroups(mode);
+        if (groups.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'modal-note';
+            empty.textContent = 'Load data to edit subgraph colors.';
+            list.appendChild(empty);
+            return;
+        }
+
+        groups.forEach((group, index) => {
+            const row = document.createElement('div');
+            row.className = 'color-row';
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            const inputId = `subgraph-color-${mode}-${index}`;
+            label.setAttribute('for', inputId);
+            label.textContent = group;
+            input.type = 'color';
+            input.id = inputId;
+            input.dataset.group = group;
+            input.value = this.subgraphColors[mode]?.[group] ?? this.getDefaultSubgraphColor(group);
+            row.appendChild(label);
+            row.appendChild(input);
+            list.appendChild(row);
+        });
+    }
+
+    private getSubgraphGroups(mode: SubgraphMode): string[] {
+        if (!this.data || mode === 'none') return [];
+        const treesToRender = (this.activeTreeId === 'all')
+            ? this.data.Trees
+            : this.data.Trees.filter(t => t.Id === this.activeTreeId);
+        const ids = this.collectTreeNodeIds(treesToRender);
+        const groups = new Set<string>();
+
+        ids.forEach(id => {
+            const node = this.data!.Nodes[id];
+            if (!node) return;
+            const group = this.getSubgraphGroup(node, mode);
+            groups.add(group);
+        });
+
+        return Array.from(groups).sort((a, b) => a.localeCompare(b));
+    }
+
+    private collectTreeNodeIds(trees: ScribeTreeNode[]): Set<string> {
+        const ids = new Set<string>();
+        const traverse = (node: ScribeTreeNode) => {
+            ids.add(node.Id);
+            node.ChildNodes.forEach(child => traverse(child));
+        };
+        trees.forEach(tree => traverse(tree));
+        return ids;
+    }
+
+    private getSubgraphGroup(node: ScribeNodeData, mode: SubgraphMode): string {
+        if (mode === 'project') {
+            return this.normalizeGroupName(node.MetaInfo?.ProjectName);
+        }
+        if (mode === 'folder') {
+            return this.normalizeGroupName(this.getFirstLevelFolder(node.MetaInfo));
+        }
+        return '(None)';
+    }
+
+    private normalizeGroupName(name: string | undefined | null): string {
+        const trimmed = name?.trim();
+        return trimmed && trimmed.length > 0 ? trimmed : '(Unknown)';
+    }
+
+    private getFirstLevelFolder(meta: MetaInfo): string {
+        const path = (meta.DocumentPath || '').replace(/\\/g, '/');
+        const segments = path.split('/').filter(Boolean);
+        if (segments.length === 0) return '(Root)';
+
+        const projectName = meta.ProjectName?.toLowerCase();
+        if (projectName) {
+            const index = segments.findIndex(seg => seg.toLowerCase() === projectName);
+            if (index >= 0 && segments.length > index + 1) {
+                return segments[index + 1];
+            }
+        }
+
+        if (segments.length >= 2) {
+            return segments[segments.length - 2];
+        }
+        return '(Root)';
+    }
+
+    private getDefaultSubgraphColor(group: string): string {
+        const hash = this.hashString(group);
+        return this.subgraphPalette[hash % this.subgraphPalette.length];
+    }
+
+    private getSubgraphColor(mode: SubgraphMode, group: string): string {
+        if (mode === 'none') {
+            return this.getDefaultSubgraphColor(group);
+        }
+        const map = this.subgraphColors[mode] || {};
+        if (map[group]) return map[group];
+        const color = this.getDefaultSubgraphColor(group);
+        map[group] = color;
+        this.subgraphColors[mode] = map;
+        return color;
+    }
+
+    private hashString(value: string): number {
+        let hash = 0;
+        for (let i = 0; i < value.length; i++) {
+            hash = ((hash << 5) - hash) + value.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+
+    private buildSubgraphGroups(nodesToRender: Set<string>, mode: SubgraphMode): Map<string, string[]> {
+        const groups = new Map<string, string[]>();
+        if (!this.data || mode === 'none') return groups;
+
+        nodesToRender.forEach(id => {
+            const node = this.data!.Nodes[id];
+            if (!node) return;
+            const group = this.getSubgraphGroup(node, mode);
+            const list = groups.get(group);
+            if (list) {
+                list.push(id);
+            } else {
+                groups.set(group, [id]);
+            }
+        });
+
+        return groups;
+    }
+
+    private buildSubgraphDefinitions(groups: Map<string, string[]>, mode: SubgraphMode): { blocks: string; styles: string; classDefs: string } {
+        let blocks = '';
+        let styles = '';
+        let classDefs = '';
+        const entries = Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+        entries.forEach(([group, ids], index) => {
+            const labelPrefix = mode === 'project' ? 'Project' : 'Folder';
+            const label = `${labelPrefix}: ${group}`.replace(/"/g, "'");
+            const subgraphId = `${mode}_${this.hashString(group)}_${index}`;
+            const className = `sg_${this.hashString(group)}_${index}`;
+            blocks += `    subgraph ${subgraphId}["${label}"]\n`;
+            blocks += `        direction TB\n`;
+            ids.forEach(id => {
+                blocks += `        ${id}\n`;
+            });
+            blocks += `    end\n`;
+            const color = this.getSubgraphColor(mode, group);
+            styles += `    style ${subgraphId} fill:${color},stroke:#9e9e9e,stroke-width:1px\n`;
+            styles += `    class ${subgraphId} ${className}\n`;
+            classDefs += `    classDef ${className} fill:${color},stroke:#9e9e9e,stroke-width:1px;\n`;
+        });
+        return { blocks, styles, classDefs };
     }
 
     private computeVisibleSet(trees: ScribeTreeNode[]): Set<string> {
@@ -464,6 +695,15 @@ class ScribeApp {
             traverseNodes(tree);
         });
 
+        let subgraphClassDefs = '';
+        if (this.subgraphMode !== 'none') {
+            const subgraphGroups = this.buildSubgraphGroups(nodesToRender, this.subgraphMode);
+            const subgraphDefs = this.buildSubgraphDefinitions(subgraphGroups, this.subgraphMode);
+            graphDef += subgraphDefs.blocks;
+            graphDef += subgraphDefs.styles;
+            subgraphClassDefs = subgraphDefs.classDefs;
+        }
+
         const edgeSet = new Set<string>();
         for (const edge of edges) {
             const key = `${edge.from}-->${edge.to}`;
@@ -478,6 +718,7 @@ class ScribeApp {
         graphDef += `    classDef highlighted stroke:#ff9800,stroke-width:3px;\n`;
         graphDef += `    classDef tagwarning fill:#fff3e0,stroke:#ffb74d;\n`;
         graphDef += `    classDef tagerror fill:#ffebee,stroke:#ef5350;\n`;
+        graphDef += subgraphClassDefs;
 
         // Render
         try {
@@ -680,6 +921,8 @@ class ScribeApp {
             activeTreeId: this.activeTreeId,
             expandedNodeLevels,
             collapsedNodeIds: Array.from(this.collapsedNodeIds),
+            subgraphMode: this.subgraphMode,
+            subgraphColors: this.subgraphColors,
             activeSearchTerm: (document.getElementById('search-input') as HTMLInputElement).value
         };
         const blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
@@ -712,6 +955,15 @@ class ScribeApp {
             this.collapsedNodeIds.clear();
             if (config.collapsedNodeIds) {
                 config.collapsedNodeIds.forEach(id => this.collapsedNodeIds.add(id));
+            }
+            if (config.subgraphMode) {
+                this.subgraphMode = config.subgraphMode;
+            }
+            if (config.subgraphColors) {
+                this.subgraphColors = {
+                    project: config.subgraphColors.project || {},
+                    folder: config.subgraphColors.folder || {}
+                };
             }
             if (config.activeSearchTerm) {
                 (document.getElementById('search-input') as HTMLInputElement).value = config.activeSearchTerm;

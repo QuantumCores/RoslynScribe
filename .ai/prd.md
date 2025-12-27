@@ -22,7 +22,6 @@ Currently, users face these specific issues:
 
 ### 3.2 Graph Rendering
 *   The application must render the execution flow using the Mermaid.js library with the `dagre` layout engine.
-*   The application must visually deduplicate nodes that appear multiple times in the execution flow (DAG topology) while maintaining logical flow connections.
 *   Nodes must support HTML content (`htmlLabels: true`) to embed interactive icons.
 *   The graph must support subgraphs for the Project level (default) and 1st-Level Folders (optional toggle).
 *   Recursive calls or backward flow edges must be styled with dashed lines.
