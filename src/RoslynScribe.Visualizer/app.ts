@@ -757,8 +757,13 @@ class ScribeApp {
     }
 
     private renderMetaRow(label: string, value: string | number | null | undefined): string {
-        if (value === undefined || value === null || value === '') return '';
-        return `<div class="meta-item"><span class="meta-label">${label}</span><span class="meta-value">${value}</span></div>`;
+        const isEmpty = value === undefined || value === null || value === '';
+        const displayValue = isEmpty ? '(empty)' : value;
+        return `<div class="meta-item"><span class="meta-label">${label}</span><span class="meta-value">${displayValue}</span></div>`;
+    }
+
+    private renderMetaSection(title: string, rows: string[]): string {
+        return `<div class="meta-section"><h4 class="meta-section-title">${title}</h4><hr class="meta-section-divider">${rows.join('')}</div>`;
     }
 
     private hideNodeDetails() {
@@ -784,32 +789,45 @@ class ScribeApp {
         const meta = data.MetaInfo;
         const guide = data.Guides;
         const tags = guide?.Tags?.length ? guide.Tags.join(', ') : '';
-        const rows = [
-            this.renderMetaRow('ID', data.Id),
-            this.renderMetaRow('Kind', data.Kind),
-            this.renderMetaRow('Level', guide?.L),
-            this.renderMetaRow('Identifier', guide?.Id),
-            this.renderMetaRow('User Id', guide?.Uid),
-            this.renderMetaRow('Text', guide?.T),
-            this.renderMetaRow('Description', guide?.D),
-            this.renderMetaRow('Path', guide?.P),
-            this.renderMetaRow('Tags', tags),
-            this.renderMetaRow('Project', meta.ProjectName),
-            this.renderMetaRow('Namespace', meta.NameSpace),
-            this.renderMetaRow('Class', meta.TypeName),
-            this.renderMetaRow('Member', meta.MemberName),
-            this.renderMetaRow('Identifier (Meta)', meta.Identifier),
-            this.renderMetaRow('Document', meta.DocumentName),
-            this.renderMetaRow('Document Path', meta.DocumentPath),
-            this.renderMetaRow('Line', meta.Line),
-        ];
-        content.innerHTML = rows.filter(row => row.length > 0).join('');
+        const originIds = guide?.O?.length ? guide.O.join(', ') : '';
+        const destinationUserIds = guide?.DUI?.length ? guide.DUI.join(', ') : '';
+        const childNodeIds = data.ChildNodeIds?.length ? data.ChildNodeIds.join(', ') : '';
 
-        if (guide?.D) {
-            commentsSection!.style.display = 'block';
-            commentsContent!.innerHTML = `<p>${guide.D}</p>`;
-        } else {
-            commentsSection!.style.display = 'none';
+        const sections = [
+            this.renderMetaSection('ScribeNodeData', [
+                this.renderMetaRow('Id', data.Id),
+                this.renderMetaRow('User Id', guide?.Uid),
+                this.renderMetaRow('Kind', data.Kind),
+                this.renderMetaRow('Level', guide?.L),
+                this.renderMetaRow('ChildNodeIds', childNodeIds),
+            ]),
+            this.renderMetaSection('Guides', [
+                this.renderMetaRow('Text', guide?.T),
+                this.renderMetaRow('Description', guide?.D),
+                this.renderMetaRow('Path', guide?.P),
+                this.renderMetaRow('OriginIds', originIds),
+                this.renderMetaRow('DestinationUserIds', destinationUserIds),
+                this.renderMetaRow('Tags', tags),
+            ]),
+            this.renderMetaSection('MetaInfo', [
+                this.renderMetaRow('ProjectName', meta.ProjectName),
+                this.renderMetaRow('DocumentName', meta.DocumentName),
+                this.renderMetaRow('DocumentPath', meta.DocumentPath),
+                this.renderMetaRow('NameSpace', meta.NameSpace),
+                this.renderMetaRow('TypeName', meta.TypeName),
+                this.renderMetaRow('Member Name', meta.MemberName),
+                this.renderMetaRow('Identifier (Meta)', meta.Identifier),
+                this.renderMetaRow('Line', meta.Line),
+            ])
+        ];
+
+        content.innerHTML = sections.join('');
+
+        if (commentsSection) {
+            commentsSection.style.display = 'none';
+        }
+        if (commentsContent) {
+            commentsContent.innerHTML = '';
         }
     }
 
