@@ -1,7 +1,9 @@
 ﻿using NUnit.Framework;
 using RoslynScribe.Domain.Extensions;
+using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Models;
 using RoslynScribe.Domain.Services;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -43,7 +45,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert
@@ -59,7 +61,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert
@@ -75,7 +77,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert
@@ -91,7 +93,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert
@@ -108,7 +110,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert
@@ -124,7 +126,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert
@@ -140,7 +142,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert
@@ -157,7 +159,7 @@ namespace RoslynScribe.Domain.Tests
             var expected = JsonSerializer.Deserialize<ScribeNode>(json);
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
             OverrideResults(path, result);
 
             // Assert

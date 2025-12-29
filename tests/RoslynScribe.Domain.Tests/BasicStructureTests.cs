@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
+using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Models;
 using RoslynScribe.Domain.Services;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RoslynScribe.Domain.Extensions;
@@ -60,9 +62,9 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
-             var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result);
             // Assert
             Assert.IsTrue(result.IsEquivalent(expected).Result);
         }
@@ -104,7 +106,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -137,7 +139,7 @@ namespace RoslynScribe.Domain.Tests
                         {
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S003 call basicMethod`]" },                                
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`S003 call basicMethod`]" },
                                 ChildNodes = new List<ScribeNode> {
                                     new ScribeNode
                                     {
@@ -157,7 +159,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             //var json = JsonSerializer.Serialize(result);
             // Assert
@@ -198,7 +200,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -237,7 +239,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -261,7 +263,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -289,7 +291,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -307,7 +309,7 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S008 Nodes shared comment`]" },                        
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S008 Nodes shared comment`]" },
                     },
                     new ScribeNode
                     {
@@ -323,7 +325,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -370,7 +372,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S009_TwoMethodCalls.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S009_TwoMethodCalls.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -420,7 +422,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S010_InfiniteRecursion.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S010_InfiniteRecursion.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -443,7 +445,7 @@ namespace RoslynScribe.Domain.Tests
                         {
                             new ScribeNode
                             {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class property`]" },                                
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class property`]" },
                             },
                             new ScribeNode
                             {
@@ -471,7 +473,72 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S011_InterfaceImpl.cs");
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S011_InterfaceImpl.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            Assert.IsTrue(result.IsEquivalent(expected).Result);
+        }
+
+        [Test]
+        public async Task S012_returns_valid_tree()
+        {
+            // Arrange
+            var adcConfig = new AdcConfig
+            {
+                Types = new AdcType[1]{
+                    new AdcType
+                    {
+                        TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
+                        Methods = new AdcMethod[1]{
+                            new AdcMethod {
+                                MethodName = "Handle", Level = 2 }
+                        }
+                    }
+                }
+            };
+
+            var expected = new ScribeNode
+            {
+                Value = null,
+                ChildNodes = new List<ScribeNode>()
+                {
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class`]" },
+                        ChildNodes = new List<ScribeNode>()
+                        {
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class property`]" },
+                            },
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class method`]" },
+                            },
+                        }
+                    },
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface`]" },
+                        ChildNodes = new List<ScribeNode>()
+                        {
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface property`]" },
+                            },
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface method`]" },
+                            },
+                        }
+
+                    },
+                },
+            };
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S012_AdcConfiguration.cs", adcConfig);
 
             // var json = JsonSerializer.Serialize(result);
             // Assert

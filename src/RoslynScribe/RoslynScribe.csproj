@@ -20,4 +20,10 @@
     <ProjectReference Include="..\RoslynScribe.Domain\RoslynScribe.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="adc.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

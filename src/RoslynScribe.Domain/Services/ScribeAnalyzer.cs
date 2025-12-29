@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
+using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
 using System;
@@ -19,7 +20,7 @@ namespace RoslynScribe.Domain.Services
 
         private static readonly string[] Starts = { $"//{CommentLabel}", $"// {CommentLabel}" };
 
-        public static async Task<List<ScribeNode>> Analyze(MSBuildWorkspace workspace, Solution solution)
+        public static async Task<List<ScribeNode>> Analyze(MSBuildWorkspace workspace, Solution solution, AdcConfig adcConfig)
         {
             var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
             var result = new List<ScribeNode>();
@@ -31,7 +32,7 @@ namespace RoslynScribe.Domain.Services
                 {
                     foreach (var document in project.Documents)
                     {
-                        var node = await Analyze(project, documents, document, trackers);
+                        var node = await Analyze(project, documents, document, trackers, adcConfig);
                         if (node != null)
                         {
                             result.Add(node);
@@ -49,19 +50,20 @@ namespace RoslynScribe.Domain.Services
             return result;
         }
 
-        internal static Task<ScribeNode> Analyze(Solution solution, string projectName, string documentName)
+        internal static Task<ScribeNode> Analyze(Solution solution, string projectName, string documentName, AdcConfig adcConfig)
         {
             var project = solution.Projects.Single(x => x.Name == projectName);
             var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
             var document = project.Documents.Single(x => x.Name == documentName);
-            return Analyze(project, documents, document, new Trackers());
+            return Analyze(project, documents, document, new Trackers(), adcConfig);
         }
 
         private static async Task<ScribeNode> Analyze(
             Project project,
             Dictionary<string, Document> documents,
             Document document,
-            Trackers trackers)
+            Trackers trackers,
+            AdcConfig adcConfig)
         {
             if (document.Name.EndsWith(".AssemblyInfo.cs") 
                 || document.Name.EndsWith(".GlobalUsings.g.cs") 
@@ -92,7 +94,7 @@ namespace RoslynScribe.Domain.Services
 
             trackers.SemanticModelCache.Add(document.FilePath, semanticModel);
 
-            Traverse(rootNode, scribeNode, semanticModel, documents, trackers);
+            Traverse(rootNode, scribeNode, semanticModel, documents, trackers, adcConfig);
 
             // SyntaxTreePrinter.Print(rootNode);            
             // ScribeTreePrinter.Print(scribeNode);
@@ -219,7 +221,8 @@ namespace RoslynScribe.Domain.Services
             ScribeNode parentNode,
             SemanticModel semanticModel,
             Dictionary<string, Document> documents,
-            Trackers trackers)
+            Trackers trackers,
+            AdcConfig adcConfig)
         {
             var nodes = node.ChildNodes();
             foreach (var syntaxNode in nodes)
@@ -230,7 +233,7 @@ namespace RoslynScribe.Domain.Services
                     continue;
                 }
 
-                ProcessNode(syntaxNode, kind, parentNode, semanticModel, documents, trackers);
+                ProcessNode(syntaxNode, kind, parentNode, semanticModel, documents, trackers, adcConfig);
             }
         }
 
@@ -240,7 +243,8 @@ namespace RoslynScribe.Domain.Services
             ScribeNode parentNode,
             SemanticModel semanticModel,
             Dictionary<string, Document> documents,
-            Trackers trackers)
+            Trackers trackers,
+            AdcConfig adcConfig)
         {
             SetMetaInfo(syntaxNode, syntaxKind, parentNode);
             var lTrivias = syntaxNode.GetLeadingTrivia();
@@ -283,7 +287,7 @@ namespace RoslynScribe.Domain.Services
                         var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
                         var syntaxReference = syntaxReferences[i];
                         var methodNode = syntaxReference.GetSyntax();
-                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, contextSemanticModel, documents, trackers);
+                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, contextSemanticModel, documents, trackers, adcConfig);
                     }
 
                     trackers.RecursionStack.Remove(methodKey);
@@ -297,7 +301,7 @@ namespace RoslynScribe.Domain.Services
                 return;
             }
 
-            Traverse(syntaxNode, childNode ?? parentNode, semanticModel, documents, trackers);
+            Traverse(syntaxNode, childNode ?? parentNode, semanticModel, documents, trackers, adcConfig);
         }
 
         private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
@@ -381,11 +385,6 @@ namespace RoslynScribe.Domain.Services
         {
             var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line);
             var id = metaInfo.GetDeterministicId();
-
-            if(value.Any(x => x.Contains("T:`S011 This is interface method`")))
-            {
-                int u = 0;
-            }
 
             if (parentNode.ChildNodes.Any(x => x.Id == id) || parentNode.Id == id)
             {
