@@ -2,7 +2,6 @@
   "Id": "38806d1d-1a4d-fc41-1aee-48f2f72d4d0c",
   "TargetNodeId": null,
   "Value": null,
-  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -19,22 +18,8 @@
       "Id": "6ddff3b7-c279-2d25-63e1-93b21c2789d1",
       "TargetNodeId": null,
       "Value": [
-        "// [ADC][S004 return addition]"
+        "// [ADC][T:`S004 return addition`]"
       ],
-      "Comment": {
-        "Comments": [
-          "// ",
-          "[S004 return addition]"
-        ],
-        "Guide": {
-          "I": null,
-          "L": 0,
-          "P": null,
-          "O": null,
-          "D": null,
-          "T": null
-        }
-      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -51,22 +36,8 @@
           "Id": "5b107038-7969-d1df-2127-7c65ac6c5c41",
           "TargetNodeId": null,
           "Value": [
-            "// [ADC][S004 Nodes shared comment get logic data]"
+            "// [ADC][T:`S004 Nodes shared comment get logic data`]"
           ],
-          "Comment": {
-            "Comments": [
-              "// ",
-              "[S004 Nodes shared comment get logic data]"
-            ],
-            "Guide": {
-              "I": null,
-              "L": 0,
-              "P": null,
-              "O": null,
-              "D": null,
-              "T": null
-            }
-          },
           "Kind": "LocalDeclarationStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -84,22 +55,8 @@
           "Id": "66000eb4-b4bc-a587-fbdc-3c6de6bf13b1",
           "TargetNodeId": null,
           "Value": [
-            "// [ADC][Logic Add two numbers]"
+            "// [ADC][T:`Logic Add two numbers`,L:`2`]"
           ],
-          "Comment": {
-            "Comments": [
-              "// ",
-              "[Logic Add two numbers]"
-            ],
-            "Guide": {
-              "I": null,
-              "L": 0,
-              "P": null,
-              "O": null,
-              "D": null,
-              "T": null
-            }
-          },
           "Kind": "MethodDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -116,22 +73,8 @@
               "Id": "963e1dbd-4669-d278-6260-69f22b22b703",
               "TargetNodeId": null,
               "Value": [
-                "// [ADC][Logic This is add result]"
+                "// [ADC][T:`Logic This is add result`]"
               ],
-              "Comment": {
-                "Comments": [
-                  "// ",
-                  "[Logic This is add result]"
-                ],
-                "Guide": {
-                  "I": null,
-                  "L": 0,
-                  "P": null,
-                  "O": null,
-                  "D": null,
-                  "T": null
-                }
-              },
               "Kind": "ReturnStatement",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",

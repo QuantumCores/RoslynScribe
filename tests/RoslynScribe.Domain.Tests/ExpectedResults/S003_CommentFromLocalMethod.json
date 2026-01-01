@@ -2,7 +2,6 @@
   "Id": "52e94e25-12d2-3780-2efd-40b081ba4225",
   "TargetNodeId": null,
   "Value": null,
-  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -19,22 +18,8 @@
       "Id": "26e8c0c1-7b4a-8e4b-9d72-d78693a61125",
       "TargetNodeId": null,
       "Value": [
-        "// [ADC][S003 basicMethod]"
+        "// [ADC][T:`S003 basicMethod`]"
       ],
-      "Comment": {
-        "Comments": [
-          "// ",
-          "[S003 basicMethod]"
-        ],
-        "Guide": {
-          "I": null,
-          "L": 0,
-          "P": null,
-          "O": null,
-          "D": null,
-          "T": null
-        }
-      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -51,22 +36,8 @@
           "Id": "c2fc9872-0179-edc7-aa15-fb82ba9559f5",
           "TargetNodeId": null,
           "Value": [
-            "// [ADC][S003 basic result]"
+            "// [ADC][T:`S003 basic result`]"
           ],
-          "Comment": {
-            "Comments": [
-              "// ",
-              "[S003 basic result]"
-            ],
-            "Guide": {
-              "I": null,
-              "L": 0,
-              "P": null,
-              "O": null,
-              "D": null,
-              "T": null
-            }
-          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -86,22 +57,8 @@
       "Id": "964f3576-b21d-dac9-1a03-42a4aa82554a",
       "TargetNodeId": null,
       "Value": [
-        "// [ADC][S003 second method]"
+        "// [ADC][T:`S003 second method`]"
       ],
-      "Comment": {
-        "Comments": [
-          "// ",
-          "[S003 second method]"
-        ],
-        "Guide": {
-          "I": null,
-          "L": 0,
-          "P": null,
-          "O": null,
-          "D": null,
-          "T": null
-        }
-      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -118,22 +75,8 @@
           "Id": "6ad38714-66fc-5f0e-fa35-a58b6823732b",
           "TargetNodeId": null,
           "Value": [
-            "// [ADC][S003 call basicMethod]"
+            "// [ADC][T:`S003 call basicMethod`]"
           ],
-          "Comment": {
-            "Comments": [
-              "// ",
-              "[S003 call basicMethod]"
-            ],
-            "Guide": {
-              "I": null,
-              "L": 0,
-              "P": null,
-              "O": null,
-              "D": null,
-              "T": null
-            }
-          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -150,22 +93,8 @@
               "Id": "26e8c0c1-7b4a-8e4b-9d72-d78693a61125",
               "TargetNodeId": null,
               "Value": [
-                "// [ADC][S003 basicMethod]"
+                "// [ADC][T:`S003 basicMethod`]"
               ],
-              "Comment": {
-                "Comments": [
-                  "// ",
-                  "[S003 basicMethod]"
-                ],
-                "Guide": {
-                  "I": null,
-                  "L": 0,
-                  "P": null,
-                  "O": null,
-                  "D": null,
-                  "T": null
-                }
-              },
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -182,22 +111,8 @@
                   "Id": "c2fc9872-0179-edc7-aa15-fb82ba9559f5",
                   "TargetNodeId": null,
                   "Value": [
-                    "// [ADC][S003 basic result]"
+                    "// [ADC][T:`S003 basic result`]"
                   ],
-                  "Comment": {
-                    "Comments": [
-                      "// ",
-                      "[S003 basic result]"
-                    ],
-                    "Guide": {
-                      "I": null,
-                      "L": 0,
-                      "P": null,
-                      "O": null,
-                      "D": null,
-                      "T": null
-                    }
-                  },
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",

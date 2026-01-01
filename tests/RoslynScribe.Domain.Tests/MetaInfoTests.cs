@@ -13,11 +13,11 @@ namespace RoslynScribe.Domain.Tests
     public class MetaInfoTests
     {
         private string _expectedDirectory;
-        private static bool overriddeResults = true;
+        private static bool overrideResults = true;
 
         private static void OverrideResults(string path, ScribeNode result)
         {
-            if (overriddeResults)
+            if (overrideResults)
             {         
                 File.WriteAllText(path, JsonSerializer.Serialize(result, new JsonSerializerOptions() { WriteIndented = true }));
             }
@@ -49,7 +49,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
 
         [Test]
@@ -65,7 +66,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
 
         [Test]
@@ -81,7 +83,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
 
         [Test]
@@ -97,7 +100,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
 
 
@@ -114,7 +118,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
 
         [Test]
@@ -130,7 +135,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
 
         [Test]
@@ -146,7 +152,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
 
 
@@ -163,7 +170,8 @@ namespace RoslynScribe.Domain.Tests
             OverrideResults(path, result);
 
             // Assert
-            Assert.IsTrue(result.IsTheSame(expected).Result);
+            var isTheSame = result.IsTheSame(expected);
+            Assert.IsTrue(isTheSame.Result, isTheSame.Text);
         }
     }
 }

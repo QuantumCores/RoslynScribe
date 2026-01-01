@@ -2,7 +2,6 @@
   "Id": "c2f3e95c-4367-0d01-9742-90bc282a8580",
   "TargetNodeId": null,
   "Value": null,
-  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -19,25 +18,9 @@
       "Id": "f24c035d-8a5c-a4cd-2c76-8560da830369",
       "TargetNodeId": null,
       "Value": [
-        "// [ADC][S002 namespace comment]",
-        "// [ADC][S002 second namespace comment]"
+        "// [ADC][T:`S002 namespace comment`]",
+        "// [ADC][T:`S002 second namespace comment`]"
       ],
-      "Comment": {
-        "Comments": [
-          "// ",
-          "[S002 namespace comment]",
-          "// ",
-          "[S002 second namespace comment]"
-        ],
-        "Guide": {
-          "I": null,
-          "L": 0,
-          "P": null,
-          "O": null,
-          "D": null,
-          "T": null
-        }
-      },
       "Kind": "NamespaceDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -54,25 +37,9 @@
           "Id": "0aab0ec4-1095-3646-17da-6a439f56c15c",
           "TargetNodeId": null,
           "Value": [
-            "// [ADC][S002 class comment]",
-            "// [ADC][S002 second class comment]"
+            "// [ADC][T:`S002 class comment`]",
+            "// [ADC][T:`S002 second class comment`]"
           ],
-          "Comment": {
-            "Comments": [
-              "// ",
-              "[S002 class comment]",
-              "// ",
-              "[S002 second class comment]"
-            ],
-            "Guide": {
-              "I": null,
-              "L": 0,
-              "P": null,
-              "O": null,
-              "D": null,
-              "T": null
-            }
-          },
           "Kind": "ClassDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
@@ -89,25 +56,9 @@
               "Id": "31242687-197a-6a2d-1fe6-8cc900c23b37",
               "TargetNodeId": null,
               "Value": [
-                "// [ADC][S002 BasicMethod]",
-                "// [ADC][S002 second method comment]"
+                "// [ADC][T:`S002 BasicMethod`]",
+                "// [ADC][T:`S002 second method comment`]"
               ],
-              "Comment": {
-                "Comments": [
-                  "// ",
-                  "[S002 BasicMethod]",
-                  "// ",
-                  "[S002 second method comment]"
-                ],
-                "Guide": {
-                  "I": null,
-                  "L": 0,
-                  "P": null,
-                  "O": null,
-                  "D": null,
-                  "T": null
-                }
-              },
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
@@ -124,25 +75,9 @@
                   "Id": "9a3b4156-49ef-9bae-8bb2-c29d43728e08",
                   "TargetNodeId": null,
                   "Value": [
-                    "// [ADC][S002 result]",
-                    "// [ADC][S002 seconod result]"
+                    "// [ADC][T:`S002 result`]",
+                    "// [ADC][T:`S002 seconod result`]"
                   ],
-                  "Comment": {
-                    "Comments": [
-                      "// ",
-                      "[S002 result]",
-                      "// ",
-                      "[S002 seconod result]"
-                    ],
-                    "Guide": {
-                      "I": null,
-                      "L": 0,
-                      "P": null,
-                      "O": null,
-                      "D": null,
-                      "T": null
-                    }
-                  },
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",

@@ -2,7 +2,6 @@
   "Id": "8839ee25-814b-d27f-82f6-c4c9bc14d465",
   "TargetNodeId": null,
   "Value": null,
-  "Comment": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
@@ -19,22 +18,8 @@
       "Id": "157f25c5-3cbf-a5eb-0cd6-a84af65c331b",
       "TargetNodeId": null,
       "Value": [
-        "// [ADC][S008 Nodes shared comment]"
+        "// [ADC][T:`S008 Nodes shared comment`]"
       ],
-      "Comment": {
-        "Comments": [
-          "// ",
-          "[S008 Nodes shared comment]"
-        ],
-        "Guide": {
-          "I": null,
-          "L": 0,
-          "P": null,
-          "O": null,
-          "D": null,
-          "T": null
-        }
-      },
       "Kind": "LocalDeclarationStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
@@ -52,22 +37,8 @@
       "Id": "ecae8230-6a03-2950-51e7-866518330c3d",
       "TargetNodeId": null,
       "Value": [
-        "// [ADC][OtherLogic Multiply two numbers]"
+        "// [ADC][T:`OtherLogic Multiply two numbers`,L:`2`,D:`IrrelevantDescription`]"
       ],
-      "Comment": {
-        "Comments": [
-          "// ",
-          "[OtherLogic Multiply two numbers]"
-        ],
-        "Guide": {
-          "I": null,
-          "L": 0,
-          "P": null,
-          "O": null,
-          "D": null,
-          "T": null
-        }
-      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.OtherTestProject",
@@ -84,22 +55,8 @@
           "Id": "87c5ee91-5102-11f0-d9f6-6df10a8eb444",
           "TargetNodeId": null,
           "Value": [
-            "// [ADC][OtherLogic This is multiplication result]"
+            "// [ADC][T:`OtherLogic This is multiplication result`]"
           ],
-          "Comment": {
-            "Comments": [
-              "// ",
-              "[OtherLogic This is multiplication result]"
-            ],
-            "Guide": {
-              "I": null,
-              "L": 0,
-              "P": null,
-              "O": null,
-              "D": null,
-              "T": null
-            }
-          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.OtherTestProject",

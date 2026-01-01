@@ -66,7 +66,8 @@ namespace RoslynScribe.Domain.Tests
 
             var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -110,7 +111,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -163,7 +165,8 @@ namespace RoslynScribe.Domain.Tests
 
             //var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -186,7 +189,7 @@ namespace RoslynScribe.Domain.Tests
                             },
                             new ScribeNode
                             {
-                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`Logic Add two numbers,L:`2`]" },
+                                Value = new string[]{ $"// {ScribeAnalyzer.CommentLabel}[T:`Logic Add two numbers`,L:`2`]" },
                                 ChildNodes = new List<ScribeNode> {
                                     new ScribeNode
                                     {
@@ -204,7 +207,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -243,7 +247,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -267,7 +272,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -295,7 +301,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -329,7 +336,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -376,7 +384,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -426,7 +435,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -477,7 +487,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
 
         [Test]
@@ -486,13 +497,14 @@ namespace RoslynScribe.Domain.Tests
             // Arrange
             var adcConfig = new AdcConfig
             {
-                Types = new AdcType[1]{
+                Types = new AdcType[1]
+                {
                     new AdcType
                     {
                         TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
-                        Methods = new AdcMethod[1]{
-                            new AdcMethod {
-                                MethodName = "Handle", Level = 2 }
+                        Methods = new AdcMethod[1]
+                        {
+                            new AdcMethod { MethodName = "Handle", Level = 2 }
                         }
                     }
                 }
@@ -505,34 +517,21 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class`]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S012 This is class`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class property`]" },
-                            },
-                            new ScribeNode
-                            {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is class method`]" },
-                            },
-                        }
-                    },
-                    new ScribeNode
-                    {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface`]" },
-                        ChildNodes = new List<ScribeNode>()
-                        {
-                            new ScribeNode
-                            {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface property`]" },
-                            },
-                            new ScribeNode
-                            {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S011 This is interface method`]" },
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S012 This is class method`]" },
+                                ChildNodes = new List<ScribeNode>()
+                                {
+                                    new ScribeNode
+                                    {
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[C:`RoslynScribe.OtherTestProject.IHandler.Handle`,L:`2`]" },
+                                    }
+                                }
                             },
                         }
-
                     },
                 },
             };
@@ -542,7 +541,8 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.IsTrue(result.IsEquivalent(expected).Result);
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
     }
 }

@@ -57,7 +57,7 @@ namespace RoslynScribe.Domain.Extensions
             {
 
                 var traverseResult = Traverse(leftNode.ChildNodes[i], rightNode.ChildNodes[i], compareMetaInfo);
-                if (traverseResult.Result)
+                if (!traverseResult.Result)
                 {
                     return traverseResult;
                 }
