@@ -2,16 +2,19 @@ using RoslynScribe.OtherTestProject;
 
 namespace RoslynScribe.TestProject
 {
-    // [ADC][T:`S012 This is class`]
-    public class S012_AdcConfiguration
+    // [ADC][T:`S012 This is handler test class`]
+    public class S012_Adc_SimpleInterface
     {
-        // [ADC][T:`S012 This is class method`]
+        private readonly IHandler _ihandler = new Handler();
+        private readonly Handler _handler = new Handler();
+
+
+        // [ADC][T:`S012 These are handler invocations`]
         public void Method()
         {
-            var handler = new Handler();
             var msg = new Message();
-            handler.Handle(msg);
-            handler.OtherMethod(msg.Value);
+            _ihandler.Handle(msg);
+            _handler.Handle(msg);
         }
     }
 

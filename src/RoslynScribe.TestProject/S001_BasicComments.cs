@@ -10,5 +10,10 @@ namespace RoslynScribe.TestProject
             // [ADC][T:`S001 result`]
             return start + 1;
         }
+
+        public int ZZZ_MethodShouldNotOverWriteNodeMetaInfo(int start)
+        {
+            return start + 2;
+        }
     }
 }

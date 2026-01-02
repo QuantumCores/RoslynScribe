@@ -65,8 +65,8 @@ namespace RoslynScribe.Domain.Services
             Trackers trackers,
             AdcConfig adcConfig)
         {
-            if (document.Name.EndsWith(".AssemblyInfo.cs") 
-                || document.Name.EndsWith(".GlobalUsings.g.cs") 
+            if (document.Name.EndsWith(".AssemblyInfo.cs")
+                || document.Name.EndsWith(".GlobalUsings.g.cs")
                 || document.Name.EndsWith("AssemblyAttributes.cs"))
             {
                 return null;
@@ -252,12 +252,12 @@ namespace RoslynScribe.Domain.Services
             ScribeNode childNode = null;
             if (lTrivias.Count != 0)
             {
-                childNode = FindCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel, trackers);
+                childNode = GetNodeFromCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel, trackers);
 
                 if (childNode != null)
                 {
                     // if trackers contains node with that id it means that this path was already processed
-                    if(trackers.Nodes.ContainsKey(childNode.Id))
+                    if (trackers.Nodes.ContainsKey(childNode.Id))
                     {
                         return;
                     }
@@ -266,45 +266,323 @@ namespace RoslynScribe.Domain.Services
                 }
             }
 
+            var currentParent = childNode ?? parentNode;
+
+            // if it's an invocation expand into the invoked method to capture comments inside it
             if (syntaxKind == SyntaxKind.InvocationExpression)
             {
-                var invokedMethod = GetMethodInfo(syntaxNode as InvocationExpressionSyntax, semanticModel);
+                var invocation = syntaxNode as InvocationExpressionSyntax;
+                var invokedMethod = invocation.GetMethodSymbol(semanticModel);
                 if (invokedMethod != null)
                 {
                     var methodKey = invokedMethod.GetMethodKey();
+                    TryProcessInvocation(invocation, currentParent, semanticModel, documents, trackers, adcConfig);
 
-                    // Avoid infinite recursion
-                    if (!trackers.RecursionStack.Add(methodKey))
-                    {
-                        return;
-                    }
-
-                    var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
-                    for (int i = 0; i < syntaxReferences.Length; i++)
-                    {
-                        var location = invokedMethod.Locations[i].GetLineSpan().Path;
-                        var isLocal = string.Equals(location, parentNode.MetaInfo.DocumentPath, StringComparison.OrdinalIgnoreCase);
-                        var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
-                        var syntaxReference = syntaxReferences[i];
-                        var methodNode = syntaxReference.GetSyntax();
-                        ProcessNode(methodNode, methodNode.Kind(), childNode ?? parentNode, contextSemanticModel, documents, trackers, adcConfig);
-                    }
-
-                    trackers.RecursionStack.Remove(methodKey);
+                    //// UNCOMMENT ////
+                    ////var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
+                    ////for (int i = 0; i < syntaxReferences.Length; i++)
+                    ////{
+                    ////    var location = invokedMethod.Locations[i].GetLineSpan().Path;
+                    ////    var isLocal = string.Equals(location, parentNode.MetaInfo.DocumentPath, StringComparison.OrdinalIgnoreCase);
+                    ////    var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
+                    ////    var syntaxReference = syntaxReferences[i];
+                    ////    var methodNode = syntaxReference.GetSyntax();
+                    ////    ProcessNode(methodNode, methodNode.Kind(), currentParent, contextSemanticModel, documents, trackers, adcConfig);
+                    ////}
                 }
             }
-            //var tTrivias = syntaxNode.GetTrailingTrivia();
-            //FindCommentTrivia(syntaxNode, parentNode, tTrivias);
 
-            if (KindSkipTraverse(syntaxNode, syntaxKind))
+            Traverse(syntaxNode, currentParent, semanticModel, documents, trackers, adcConfig);
+        }
+
+        private static void TryProcessInvocation(
+            InvocationExpressionSyntax invocation,
+            ScribeNode parentNode,
+            SemanticModel semanticModel,
+            Dictionary<string, Document> documents,
+            Trackers trackers,
+            AdcConfig adcConfig)
+        {
+            var invokedMethod = invocation.GetMethodSymbol(semanticModel);
+            if (invokedMethod == null)
             {
                 return;
             }
 
-            Traverse(syntaxNode, childNode ?? parentNode, semanticModel, documents, trackers, adcConfig);
+            var configuredNode = GetNodeFromConfiguration(invocation, parentNode, invokedMethod, adcConfig, trackers);
+            var currentParent = configuredNode ?? parentNode;
+
+            // Expand into the invoked method so comments inside it become part of the tree under the configured node.
+            var methodKey = invokedMethod.GetMethodKey();
+
+            // Avoid infinite recursion
+            if (!trackers.RecursionStack.Add(methodKey))
+            {
+                return;
+            }
+
+            var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
+            for (int i = 0; i < syntaxReferences.Length; i++)
+            {
+                var location = invokedMethod.Locations[i].GetLineSpan().Path;
+                var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
+                var methodNode = syntaxReferences[i].GetSyntax();
+                ProcessNode(methodNode, methodNode.Kind(), currentParent, contextSemanticModel, documents, trackers, adcConfig);
+            }
+
+            trackers.RecursionStack.Remove(methodKey);
+            return;
         }
 
-        private static ScribeNode FindCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
+        /// <summary>
+        /// Attempts to locate a method configuration for the specified invoked method within the provided ADC
+        /// configuration.
+        /// </summary>
+        /// <remarks>If multiple candidate methods exist, the first matching configuration is returned.
+        /// The search prioritizes method identifier matches over method name matches.</remarks>
+        /// <param name="invokedMethod">The method symbol representing the invoked method to search for in the configuration.</param>
+        /// <param name="adcConfig">The ADC configuration containing type and method settings to search against. Cannot be null.</param>
+        /// <param name="configuredTypeFullName">When this method returns <see langword="true"/>, contains the full name of the configured type associated
+        /// with the matched method; otherwise, null.</param>
+        /// <param name="configuredMethodName">When this method returns <see langword="true"/>, contains the name of the configured method that was
+        /// matched; otherwise, null.</param>
+        /// <param name="configuredLevel">When this method returns <see langword="true"/>, contains the configuration level associated with the
+        /// matched method; otherwise, 0.</param>
+        /// <returns>true if a matching method configuration is found; otherwise, false.</returns>
+        private static ScribeNode GetNodeFromConfiguration(
+            InvocationExpressionSyntax invocation,
+            ScribeNode parentNode,
+            IMethodSymbol invokedMethod,
+            AdcConfig adcConfig,
+            Trackers trackers)
+        {
+            if (adcConfig?.Types == null || adcConfig.Types.Count == 0)
+            {
+                return null;
+            }
+
+            // var candidates = GetCandidateMethods(invokedMethod);
+
+            AdcType adcType = null;
+            AdcMethod adcMethod = null;
+            var info = invokedMethod.GetMethodInfo();
+            if (TryFindConfiguredType(adcConfig, info, out adcType))
+            {
+                if(TryFindConfiguredMethod(info, adcType, out adcMethod))
+                {
+                    return AddConfiguredInvocationNode(invocation, parentNode, trackers, adcType, adcMethod, info);
+                }
+            }
+
+            // if method is not found directly on containing type, try interfaces
+            var containingType = invokedMethod.ContainingType;
+            if (containingType != null)
+            {
+                foreach (var iface in containingType.AllInterfaces)
+                {
+                    // this might not work with nested namespaces
+                    var fullName = iface.ContainingNamespace + "." + iface.Name;
+                    if (!adcConfig.Types.ContainsKey(fullName))
+                    {
+                        continue;
+                    }
+
+                    foreach (var member in iface.GetMembers(invokedMethod.Name))
+                    {
+                        if (member is IMethodSymbol ifaceMethod)
+                        {
+                            var impl = containingType.FindImplementationForInterfaceMember(ifaceMethod) as IMethodSymbol;
+                            if (SymbolEqualityComparer.Default.Equals(impl, invokedMethod))
+                            {
+                                info = ifaceMethod.GetMethodInfo();
+                                if (TryFindConfiguredType(adcConfig, info, out adcType))
+                                {
+                                    if (TryFindConfiguredMethod(info, adcType, out adcMethod))
+                                    {
+                                        return AddConfiguredInvocationNode(invocation, parentNode, trackers, adcType, adcMethod, info);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static ScribeNode AddConfiguredInvocationNode(InvocationExpressionSyntax invocation, ScribeNode parentNode, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodInfo info)
+        {
+            var line = invocation.GetLocation().GetLineSpan().Span.Start.Line;
+            var level = adcMethod != null ? adcMethod.Level : 1;
+            var configuredNode = AddConfiguredInvocationNode(parentNode, adcType.TypeFullName, info.MethodName, level, line, trackers);
+            return configuredNode;
+        }
+
+        private static bool TryFindConfiguredMethod(MethodInfo info, AdcType adcType, out AdcMethod adcMethod)
+        {
+            adcMethod = null;
+            var cfgType = MethodInfo.NormalizeTypeFullName(adcType.TypeFullName);
+
+            if (adcType.Methods.Length == 0)
+            {
+                return true;
+            }
+
+            foreach (var method in adcType.Methods)
+            {
+                if (method == null ||
+                    (string.IsNullOrWhiteSpace(method.MethodName) && string.IsNullOrWhiteSpace(method.MethodIdentifier)))
+                {
+                    continue;
+                }
+
+                // Prefer matching by MethodIdentifier if provided; fallback to MethodName.
+                if (!string.IsNullOrWhiteSpace(method.MethodIdentifier))
+                {
+                    if (string.Equals(method.MethodIdentifier, info.MethodIdentifier, StringComparison.Ordinal))
+                    {
+                        adcMethod = method;
+                        return true;
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(method.MethodName))
+                {
+                    if (string.Equals(method.MethodName, info.MethodName, StringComparison.Ordinal))
+                    {
+                        adcMethod = method;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryFindConfiguredType(AdcConfig adcConfig, MethodInfo candidate, out AdcType adcType)
+        {
+            adcType = null;
+
+            if (candidate is null)
+            {
+                return false;
+            }
+
+            if (!adcConfig.Types.ContainsKey(candidate.TypeFullName))
+            {
+                return false;
+            }
+
+            adcType = adcConfig.Types[candidate.TypeFullName];
+            return true;
+        }
+
+        /// <summary>
+        /// Identifies candidate methods for configuration matching based on the specified invoked method. Invoked method can be part of class or implemented trough one of the many interfaces.
+        /// We have to consider both cases when looking for configuration matches.
+        /// </summary>
+        /// <remarks>This method is useful when configuration or analysis needs to target either a
+        /// concrete method implementation or its interface definition. Interface methods are included only if the
+        /// containing type provides an implementation that matches the invoked method.
+        /// </remarks>
+        /// <param name="invokedMethod">The method symbol representing the invoked method for which candidate matches are to be found. Cannot be
+        /// null.</param>
+        /// <returns>A list of tuples containing the full type name, method name, and method identifier for each candidate
+        /// method. The list may include the invoked method and any interface methods implemented by its containing type
+        /// that correspond to the invoked method.</returns>
+        private static List<MethodInfo> GetCandidateMethods(IMethodSymbol invokedMethod)
+        {
+            var candidates = new List<MethodInfo>(4);
+
+            AddCandidate(candidates, invokedMethod);
+
+            // Also allow config to target an interface method even if the invocation binds to the concrete implementation.
+            var containingType = invokedMethod.ContainingType;
+            if (containingType != null)
+            {
+                foreach (var iface in containingType.AllInterfaces)
+                {
+                    foreach (var member in iface.GetMembers(invokedMethod.Name))
+                    {
+                        if (member is IMethodSymbol ifaceMethod)
+                        {
+                            var impl = containingType.FindImplementationForInterfaceMember(ifaceMethod) as IMethodSymbol;
+                            if (SymbolEqualityComparer.Default.Equals(impl, invokedMethod))
+                            {
+                                AddCandidate(candidates, ifaceMethod);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return candidates;
+        }
+
+        private static void AddCandidate(List<MethodInfo> candidates, IMethodSymbol method)
+        {
+            var info = method.GetMethodInfo();
+            if (info is null)
+            {
+                return;
+            }
+
+            candidates.Add(info);
+        }
+
+        private static ScribeNode AddConfiguredInvocationNode(
+            ScribeNode parentNode,
+            string configuredTypeFullName,
+            string configuredMethodName,
+            int configuredLevel,
+            int line,
+            Trackers trackers)
+        {
+            if (parentNode == null)
+            {
+                return null;
+            }
+
+            // Use the call site's document + line for uniqueness, but keep the configured target in Identifier.
+            var metaInfo = new MetaInfo
+            {
+                ProjectName = parentNode.MetaInfo.ProjectName,
+                DocumentName = parentNode.MetaInfo.DocumentName,
+                DocumentPath = parentNode.MetaInfo.DocumentPath,
+                NameSpace = parentNode.MetaInfo.NameSpace,
+                TypeName = configuredTypeFullName,
+                MemberName = configuredMethodName,
+                Identifier = $"{configuredTypeFullName}.{configuredMethodName}",
+                Line = line
+            };
+
+            var id = metaInfo.GetDeterministicId();
+            if (parentNode.ChildNodes.Any(x => x.Id == id) || parentNode.Id == id)
+            {
+                return null;
+            }
+
+            if (!trackers.Nodes.TryGetValue(id, out var node))
+            {
+                node = new ScribeNode
+                {
+                    Id = id,
+                    MetaInfo = metaInfo,
+                    Kind = "ConfiguredInvocation",
+                    Value = new[]
+                    {
+                        $"// {CommentLabel}[C:`{configuredTypeFullName}.{configuredMethodName}`,L:`{configuredLevel}`]"
+                    }
+                };
+
+                trackers.Nodes.Add(id, node);
+            }
+
+            parentNode.ChildNodes.Add(node);
+            return node;
+        }
+
+        private static ScribeNode GetNodeFromCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
         {
             var line = -1;
             var comments = new List<string>();
@@ -401,7 +679,7 @@ namespace RoslynScribe.Domain.Services
                     //ParentNode = parentNode,
                     MetaInfo = metaInfo,
                     Kind = syntaxKind.ToString(),
-                    Value = value,                    
+                    Value = value,
                 };
             }
             else
@@ -443,13 +721,6 @@ namespace RoslynScribe.Domain.Services
                 default:
                     break;
             }
-        }
-
-        private static IMethodSymbol GetMethodInfo(InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)
-        {
-            var symbolInfo = semanticModel.GetSymbolInfo(syntaxNode);
-            var methodSymbol = symbolInfo.Symbol as IMethodSymbol;
-            return methodSymbol;
         }
 
         private static SemanticModel GetSemanticModel(string documentPath, SemanticModel currentSemanticModel, Dictionary<string, Document> documents, Dictionary<string, SemanticModel> cache)

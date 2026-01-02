@@ -1,10 +1,10 @@
-using System;
+using System.Collections.Generic;
 
 namespace RoslynScribe.Domain.Configuration
 {
     public class AdcConfig
     {
-        public AdcType[] Types { get; set; }
+        public Dictionary<string, AdcType> Types { get; set; } = new Dictionary<string, AdcType>();
     }
 
     public class AdcType

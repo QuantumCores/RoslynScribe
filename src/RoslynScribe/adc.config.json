@@ -1,0 +1,13 @@
+{
+  "Types": {
+    "RoslynScribe.OtherTestProject.IHandler": {
+      "TypeFullName": "RoslynScribe.OtherTestProject.IHandler",
+      "Methods": [
+        {
+          "MethodName": "Handle",
+          "Level": 2
+        }
+      ]
+    }
+  }
+}

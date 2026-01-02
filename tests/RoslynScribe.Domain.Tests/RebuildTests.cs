@@ -29,7 +29,7 @@ namespace RoslynScribe.Domain.Tests
         public async Task S003_finds_duplicated_nodes()
         {
             // Arrange
-            var tree = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var tree = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig());
 
             // Act
             var result = ScribeAnalyzer.FindDuplicatedNodes(new List<ScribeNode> { tree });
@@ -42,7 +42,7 @@ namespace RoslynScribe.Domain.Tests
         public async Task S003_returns_valid_tree()
         {
             // Arrange
-            var tree = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var tree = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig());
 
             // Act
             var result = ScribeAnalyzer.Rebuild(new List<ScribeNode> { tree });
@@ -61,8 +61,8 @@ namespace RoslynScribe.Domain.Tests
         [Test]
         public async Task RegisterNodes_is_deterministic_for_same_document()
         {
-            var tree1 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
-            var tree2 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var tree1 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig());
+            var tree2 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig());
 
             var map1 = ScribeAnalyzer.FindDuplicatedNodes(new List<ScribeNode> { tree1 });
             var map2 = ScribeAnalyzer.FindDuplicatedNodes(new List<ScribeNode> { tree2 });
@@ -74,8 +74,8 @@ namespace RoslynScribe.Domain.Tests
         [Test]
         public async Task Rebuild_targets_are_deterministic()
         {
-            var tree1 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
-            var tree2 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var tree1 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig());
+            var tree2 = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig());
 
             var rebuilt1 = ScribeAnalyzer.Rebuild(new List<ScribeNode> { tree1 });
             var rebuilt2 = ScribeAnalyzer.Rebuild(new List<ScribeNode> { tree2 });

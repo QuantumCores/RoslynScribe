@@ -62,7 +62,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act            
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S001_BasicComments.cs", new AdcConfig());
 
             var json = JsonSerializer.Serialize(result);
             // Assert
@@ -107,7 +107,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S002_MultiLineComments.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -161,7 +161,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S003_CommentFromLocalMethod.cs", new AdcConfig());
 
             //var json = JsonSerializer.Serialize(result);
             // Assert
@@ -203,7 +203,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S004_CommentFromOtherClassMethod.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -243,7 +243,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S005_IfStatementBlockComment.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -268,7 +268,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S006_ThirdPartyLibrary.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -297,7 +297,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S007_CallLambda.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -332,7 +332,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S008_CommentFromOtherProject.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -380,7 +380,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S009_TwoMethodCalls.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S009_TwoMethodCalls.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -431,7 +431,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S010_InfiniteRecursion.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S010_InfiniteRecursion.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -483,7 +483,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S011_InterfaceImpl.cs", new AdcConfig { Types = Array.Empty<AdcType>() });
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S011_InterfaceImpl.cs", new AdcConfig());
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
@@ -497,14 +497,17 @@ namespace RoslynScribe.Domain.Tests
             // Arrange
             var adcConfig = new AdcConfig
             {
-                Types = new AdcType[1]
+                Types =
                 {
-                    new AdcType
-                    {
-                        TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
-                        Methods = new AdcMethod[1]
+                    { 
+                        "RoslynScribe.OtherTestProject.IHandler",
+                        new AdcType
                         {
-                            new AdcMethod { MethodName = "Handle", Level = 2 }
+                            TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
+                            Methods = new AdcMethod[1]
+                            {
+                                new AdcMethod { MethodName = "Handle", Level = 2 }
+                            }
                         }
                     }
                 }
@@ -517,14 +520,18 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S012 This is class`]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S012 This is handler test class`]" },
                         ChildNodes = new List<ScribeNode>()
                         {
                             new ScribeNode
                             {
-                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S012 This is class method`]" },
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S012 These are handler invocations`]" },
                                 ChildNodes = new List<ScribeNode>()
                                 {
+                                    new ScribeNode
+                                    {
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[C:`RoslynScribe.OtherTestProject.IHandler.Handle`,L:`2`]" },
+                                    },
                                     new ScribeNode
                                     {
                                         Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[C:`RoslynScribe.OtherTestProject.IHandler.Handle`,L:`2`]" },
@@ -537,7 +544,129 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S012_AdcConfiguration.cs", adcConfig);
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S012_Adc_SimpleInterface.cs", adcConfig);
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
+        }
+
+        [Test]
+        public async Task S013_returns_valid_tree()
+        {
+            // Arrange
+            var adcConfig = new AdcConfig
+            {
+                Types =
+                {
+                    {
+                        "RoslynScribe.OtherTestProject.IHandler",
+                        new AdcType
+                        {
+                            TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
+                            Methods = new AdcMethod[1]
+                            {
+                                new AdcMethod { MethodName = "Handle", Level = 2 }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var expected = new ScribeNode
+            {
+                Value = null,
+                ChildNodes = new List<ScribeNode>()
+                {
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S013 This is handler test class`]" },
+                        ChildNodes = new List<ScribeNode>()
+                        {
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S013 These are expanded handler invocations`]" },
+                                ChildNodes = new List<ScribeNode>()
+                                {
+                                    new ScribeNode
+                                    {
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[C:`RoslynScribe.OtherTestProject.IHandler.Handle`,L:`2`]" },
+                                    },
+                                    new ScribeNode
+                                    {
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[C:`RoslynScribe.OtherTestProject.IHandler.Handle`,L:`2`]" },
+                                    }
+                                }
+                            },
+                        }
+                    },
+                },
+            };
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S013_Adc_ExtendedInterface.cs", adcConfig);
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
+        }
+
+        [Test]
+        public async Task S014_returns_valid_tree()
+        {
+            // Arrange
+            var adcConfig = new AdcConfig
+            {
+                Types =
+                {
+                    {
+                        "RoslynScribe.OtherTestProject.IExpandedHandler",
+                        new AdcType
+                        {
+                            TypeFullName = "RoslynScribe.OtherTestProject.IExpandedHandler",
+                            Methods = new AdcMethod[1]
+                            {
+                                new AdcMethod { MethodName = "HandleWithResult", Level = 2 }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var expected = new ScribeNode
+            {
+                Value = null,
+                ChildNodes = new List<ScribeNode>()
+                {
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S014 This is handler test class`]" },
+                        ChildNodes = new List<ScribeNode>()
+                        {
+                            new ScribeNode
+                            {
+                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S014 These are expanded handler with result invocations`]" },
+                                ChildNodes = new List<ScribeNode>()
+                                {
+                                    new ScribeNode
+                                    {
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[C:`RoslynScribe.OtherTestProject.IExpandedHandler.HandleWithResult`,L:`2`]" },
+                                    },
+                                    new ScribeNode
+                                    {
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[C:`RoslynScribe.OtherTestProject.IExpandedHandler.HandleWithResult`,L:`2`]" },
+                                    }
+                                }
+                            },
+                        }
+                    },
+                },
+            };
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S014_Adc_ExtendedInterfaceWithResult.cs", adcConfig);
 
             // var json = JsonSerializer.Serialize(result);
             // Assert

@@ -6,4 +6,9 @@ namespace RoslynScribe.OtherTestProject
 
         void OtherMethod(int value);
     }
+
+    public interface IExpandedHandler : IHandler
+    {
+        int HandleWithResult(object message);
+    }
 }
