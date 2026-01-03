@@ -14,7 +14,7 @@ namespace RoslynScribe.Domain.ScribeConsole
                 projectDisplay += $" ({loadProgress.TargetFramework})";
             }
 
-            Console.WriteLine($"{loadProgress.Operation,-15} {loadProgress.ElapsedTime,-15:m\\:ss\\.fffffff} {projectDisplay}");
+            System.Console.WriteLine($"{loadProgress.Operation,-15} {loadProgress.ElapsedTime,-15:m\\:ss\\.fffffff} {projectDisplay}");
         }
     }
 }

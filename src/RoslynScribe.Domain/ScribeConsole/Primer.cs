@@ -18,7 +18,7 @@ namespace RoslynScribe.Domain.ScribeConsole
 
             //MSBuildLocator.RegisterDefaults();
 
-            Console.WriteLine($"Using MSBuild at '{instance.MSBuildPath}' to load projects.");
+            System.Console.WriteLine($"Using MSBuild at '{instance.MSBuildPath}' to load projects.");
 
             // NOTE: Be sure to register an instance with the MSBuildLocator 
             //       before calling MSBuildWorkspace.Create()
@@ -28,25 +28,25 @@ namespace RoslynScribe.Domain.ScribeConsole
 
         private static VisualStudioInstance SelectVisualStudioInstance(VisualStudioInstance[] visualStudioInstances)
         {
-            Console.WriteLine("Multiple installs of MSBuild detected please select one:");
+            System.Console.WriteLine("Multiple installs of MSBuild detected please select one:");
             for (int i = 0; i < visualStudioInstances.Length; i++)
             {
-                Console.WriteLine($"Instance {i + 1}");
-                Console.WriteLine($"    Name: {visualStudioInstances[i].Name}");
-                Console.WriteLine($"    Version: {visualStudioInstances[i].Version}");
-                Console.WriteLine($"    MSBuild Path: {visualStudioInstances[i].MSBuildPath}");
+                System.Console.WriteLine($"Instance {i + 1}");
+                System.Console.WriteLine($"    Name: {visualStudioInstances[i].Name}");
+                System.Console.WriteLine($"    Version: {visualStudioInstances[i].Version}");
+                System.Console.WriteLine($"    MSBuild Path: {visualStudioInstances[i].MSBuildPath}");
             }
 
             while (true)
             {
-                var userResponse = Console.ReadLine();
+                var userResponse = System.Console.ReadLine();
                 if (int.TryParse(userResponse, out int instanceNumber) &&
                     instanceNumber > 0 &&
                     instanceNumber <= visualStudioInstances.Length)
                 {
                     return visualStudioInstances[instanceNumber - 1];
                 }
-                Console.WriteLine("Input not accepted, try again.");
+                System.Console.WriteLine("Input not accepted, try again.");
             }
         }
     }
