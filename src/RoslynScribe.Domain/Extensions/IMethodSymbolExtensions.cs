@@ -16,20 +16,27 @@ namespace RoslynScribe.Domain.Extensions
             if (symbol is null)
             {
                 return null;
-            }
+            }           
 
             var methodInfo = new MethodInfo
             {
                 TypeFullName = MethodInfo.NormalizeTypeFullName(symbol.ContainingType?.ToDisplayString()),
                 MethodName = symbol.Name,
-                MethodIdentifier = symbol.GetMethodKey()
+                MethodIdentifier = symbol.GetMethodIdentifier()
             };
 
             return methodInfo;
         }
+
+        private static string GetMethodIdentifier(this IMethodSymbol symbol)
+        {
+            var key = symbol.GetMethodKey();
+            var index = key.LastIndexOf('.');
+            return index >= 0 && index < key.Length - 1 ? key.Substring(index + 1) : key;
+        }
     }
 
-    
+
 
     internal class MethodInfo
     {

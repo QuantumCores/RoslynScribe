@@ -7,8 +7,8 @@ namespace RoslynScribe.Domain.Extensions
     {
         internal static IMethodSymbol GetMethodSymbol(this InvocationExpressionSyntax syntaxNode, SemanticModel semanticModel)
         {
-            if(syntaxNode == null)
-            {                 
+            if (syntaxNode == null)
+            {
                 return null;
             }
 
