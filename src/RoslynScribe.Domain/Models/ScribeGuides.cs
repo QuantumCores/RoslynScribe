@@ -7,56 +7,56 @@ namespace RoslynScribe.Domain.Models
         /// <summary>
         /// Unique node identifier
         /// </summary>
-        [JsonPropertyName("Id")]
+        [JsonPropertyName(ScribeGuidesTokens.Id)]
         public string Id { get; set; }
 
         /// <summary>
         /// Unique user defined node identifier
         /// </summary>
-        [JsonPropertyName("Uid")]
+        [JsonPropertyName(ScribeGuidesTokens.UserDefinedId)]
         public string UserDefinedId { get; set; }
 
         /// <summary>
         /// Describes the maximum level of details for which this node should be printed. 
         /// E.g. if level 2 is printed then only nodes of level 1 and 2 are included
         /// </summary>
-        [JsonPropertyName("L")]
+        [JsonPropertyName(ScribeGuidesTokens.Level)]
         public int Level { get; set; } = 1;
 
         /// <summary>
         /// This text is used to describe the node.
         /// </summary>
-        [JsonPropertyName("T")]
+        [JsonPropertyName(ScribeGuidesTokens.Text)]
         public string Text { get; set; }
 
         /// <summary>
         /// This text is used to describe the node.
         /// </summary>
-        [JsonPropertyName("D")]
+        [JsonPropertyName(ScribeGuidesTokens.Description)]
         public string Description { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [JsonPropertyName("P")]
+        [JsonPropertyName(ScribeGuidesTokens.Path)]
         public string Path { get; set; }
 
         /// <summary>
         /// This property contains node ids that should be pointing this node
         /// </summary>
-        [JsonPropertyName("O")]
+        [JsonPropertyName(ScribeGuidesTokens.OriginIds)]
         public string[] OriginIds { get; set; }
 
         /// <summary>
         /// This property contains node ids which this node should be pointing
         /// </summary>
-        [JsonPropertyName("DUI")]
+        [JsonPropertyName(ScribeGuidesTokens.DestinationUserIds)]
         public string[] DestinationUserIds { get; set; }
 
         /// <summary>
         /// Tags for given node
         /// </summary>
-        [JsonPropertyName("Tags")]
+        [JsonPropertyName(ScribeGuidesTokens.Tags)]
         public string[] Tags { get; set; }
 
         public static ScribeGuides Default()

@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using RoslynScribe.Domain.Extensions;
+using RoslynScribe.Domain.Models;
 
 namespace RoslynScribe.Domain.Tests
 {
@@ -10,7 +11,7 @@ namespace RoslynScribe.Domain.Tests
         {
             var parsed = ScribeCommnetParser.Parse(new[]
             {
-                "// [ADC][D:`this is some comment`]"
+                $"// [ADC][{ScribeGuidesTokens.Description}:`this is some comment`]"
             });
 
             Assert.That(parsed.Description, Is.EqualTo("this is some comment"));
@@ -21,7 +22,7 @@ namespace RoslynScribe.Domain.Tests
         {
             var parsed = ScribeCommnetParser.Parse(new[]
             {
-                "// [ADC][T:`Lorem ipsum`]"
+                $"// [ADC][{ScribeGuidesTokens.Text}:`Lorem ipsum`]"
             });
 
             Assert.That(parsed.Text, Is.EqualTo("Lorem ipsum"));
@@ -32,7 +33,9 @@ namespace RoslynScribe.Domain.Tests
         {
             var parsed = ScribeCommnetParser.Parse(new[]
             {
-                "// [ADC][D:`this is some comment`, Tags:`processA; processB`, Id:`identifier`, Uid:`userIdentifier`, T:`text`, P:`path`, L:`2`, O:`origin`, Dui:`destination1; destination2`]"
+                $"// [ADC][{ScribeGuidesTokens.Description}:`this is some comment`, {ScribeGuidesTokens.Tags}:`processA; processB`, {ScribeGuidesTokens.Id}:`identifier`,"
+                + $" {ScribeGuidesTokens.UserDefinedId}:`userIdentifier`, {ScribeGuidesTokens.Text}:`text`, {ScribeGuidesTokens.Path}:`path`, {ScribeGuidesTokens.Level}:`2`, "
+                + $"{ScribeGuidesTokens.OriginIds}:`origin`, {ScribeGuidesTokens.DestinationUserIds}:`destination1; destination2`]"
             });
 
             Assert.That(parsed.Description, Is.EqualTo("this is some comment"));
@@ -52,7 +55,7 @@ namespace RoslynScribe.Domain.Tests
         {
             var parsed = ScribeCommnetParser.Parse(new[]
             {
-                "// [ADC][D:`don't escape this`]"
+                $"// [ADC][{ScribeGuidesTokens.Description}:`don't escape this`]"
             });
 
             Assert.That(parsed.Description, Is.EqualTo("don't escape this"));
@@ -63,7 +66,7 @@ namespace RoslynScribe.Domain.Tests
         {
             var parsed = ScribeCommnetParser.Parse(new[]
             {
-                "// [ADC][D:`use \\`backticks\\` sometimes`]"
+                $"// [ADC][{ScribeGuidesTokens.Description}:`use \\`backticks\\` sometimes`]"
             });
 
             Assert.That(parsed.Description, Is.EqualTo("use `backticks` sometimes"));
