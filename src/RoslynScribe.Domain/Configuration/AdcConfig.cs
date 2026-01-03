@@ -16,6 +16,8 @@ namespace RoslynScribe.Domain.Configuration
 
     public class AdcMethod
     {
+        public bool IncludeMethodDeclaration { get; set; } = true;
+
         public string MethodName { get; set; }
 
         public string MethodIdentifier { get; set; }

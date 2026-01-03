@@ -5,6 +5,16 @@
       "Methods": [
         {
           "MethodName": "Handle",
+          "Level": 2,
+          "IncludeMethodDeclaration" : true
+        }
+      ]
+    },
+    "RoslynScribe.OtherTestProject.IGenericHandler<T123>": {
+      "TypeFullName": "RoslynScribe.OtherTestProject.IGenericHandler<T123>",
+      "Methods": [
+        {
+          "MethodName": "Handle",
           "Level": 2
         }
       ]
