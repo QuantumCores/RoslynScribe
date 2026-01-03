@@ -27,38 +27,30 @@ namespace RoslynScribe
             var nodes = new List<ScribeNode>();
             using (var workspace = MSBuildWorkspace.Create())
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Reading configuration from '{ADCConfigFileName}' if available");
+                Domain.ScribeConsole.Console.WriteLine($"Reading configuration from '{ADCConfigFileName}' if available", ConsoleColor.Green);
                 var adcConfig = LoadAdcConfig(Path.Combine(AppContext.BaseDirectory, ADCConfigFileName));
 
                 // Print message for WorkspaceFailed event to help diagnosing project load failures.
-                workspace.WorkspaceFailed += (o, e) => Console.WriteLine(e.Diagnostic.Message);
+                workspace.WorkspaceFailed += (o, e) => Domain.ScribeConsole.Console.WriteLine(e.Diagnostic.Message, ConsoleColor.Red);
                 workspace.LoadMetadataForReferencedProjects = true;
 
-                Console.ForegroundColor = ConsoleColor.Blue;
                 // var solutionPath = "D:\\Source\\TheGame\\TheGame.Town.Api\\TheGame.Town.Api.sln";//args[0];
                 var solutionPath = "D:\\Source\\RoslynScribe\\RoslynScribe.sln";//args[0];
-                Console.WriteLine($"Loading solution '{solutionPath}'");
+                Domain.ScribeConsole.Console.WriteLine($"Loading solution '{solutionPath}'", ConsoleColor.Blue);
 
-                // Attach progress reporter so we print projects as they are loaded.
-                Console.ForegroundColor = ConsoleColor.Gray;
+                // Attach progress reporter so we print projects as they are loaded.                
                 var solution = await workspace.OpenSolutionAsync(solutionPath, new ConsoleProgressReporter());
-                Console.WriteLine($"Finished loading solution '{solutionPath}'");
+                Domain.ScribeConsole.Console.WriteLine($"Finished loading solution '{solutionPath}'");
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Analyzing solution '{solutionPath}'");
 
-                Console.ForegroundColor = ConsoleColor.Gray;
+                Domain.ScribeConsole.Console.WriteLine($"Analyzing solution '{solutionPath}'", ConsoleColor.Green);
                 nodes = await ScribeAnalyzer.Analyze(workspace, solution, adcConfig);
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Finished analyzing solution '{solutionPath}'");                
+                Domain.ScribeConsole.Console.WriteLine($"Finished analyzing solution '{solutionPath}'", ConsoleColor.Green);
             }
 
-            Console.WriteLine($"Rebuilding nodes");
+            Domain.ScribeConsole.Console.WriteLine($"Rebuilding nodes", ConsoleColor.Green);
             var result = ScribeAnalyzer.Rebuild(nodes);
-
-            Console.ForegroundColor = ConsoleColor.Gray;
 
             File.WriteAllText("result.json", JsonSerializer.Serialize(result));
 
