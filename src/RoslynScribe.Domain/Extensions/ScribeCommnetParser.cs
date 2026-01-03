@@ -22,7 +22,7 @@ namespace RoslynScribe.Domain.Extensions
                 }
             }
 
-            return guide;            
+            return guide;
         }
 
         private static void ParseCommentLine(string value, ScribeGuides guide, List<string> comments)
@@ -191,50 +191,50 @@ namespace RoslynScribe.Domain.Extensions
 
         private static void ApplyGuideValue(ScribeGuides guide, string key, string value)
         {
-            if (key.Equals("D", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("Description", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.Description, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.Description), StringComparison.OrdinalIgnoreCase))
             {
                 guide.Description = value;
                 return;
             }
 
-            if (key.Equals("T", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("Text", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.Text, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.Text), StringComparison.OrdinalIgnoreCase))
             {
                 guide.Text = value;
                 return;
             }
 
-            if (key.Equals("Tags", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("Tag", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.Tags, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.Tags), StringComparison.OrdinalIgnoreCase))
             {
                 guide.Tags = MergeStringList(guide.Tags, SplitList(value));
                 return;
             }
 
-            if (key.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("Identifier", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.Id, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.Id), StringComparison.OrdinalIgnoreCase))
             {
                 guide.Id = value;
                 return;
             }
 
-            if (key.Equals("Uid", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("UserIdentifier", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.UserDefinedId, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.UserDefinedId), StringComparison.OrdinalIgnoreCase))
             {
                 guide.UserDefinedId = value;
                 return;
             }
 
-            if (key.Equals("P", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("Path", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.Path, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.Path), StringComparison.OrdinalIgnoreCase))
             {
                 guide.Path = value;
                 return;
             }
 
-            if (key.Equals("L", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("Level", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.Level, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.Level), StringComparison.OrdinalIgnoreCase))
             {
                 if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var level))
                 {
@@ -243,19 +243,21 @@ namespace RoslynScribe.Domain.Extensions
                 return;
             }
 
-            if (key.Equals("O", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("OriginIds", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.OriginIds, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.OriginIds), StringComparison.OrdinalIgnoreCase))
             {
                 guide.OriginIds = MergeStringList(guide.OriginIds, SplitList(value));
                 return;
             }
 
-            if (key.Equals("Dui", StringComparison.OrdinalIgnoreCase) ||
-                key.Equals("DestinationUserIds", StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.DestinationUserIds, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.DestinationUserIds), StringComparison.OrdinalIgnoreCase))
             {
                 guide.DestinationUserIds = MergeStringList(guide.DestinationUserIds, SplitList(value));
                 return;
             }
+
+            ScribeConsole.Console.WriteLine($"Could not find comment key: {key} with value: {value}", ConsoleColor.Yellow);
         }
 
         private static string[] SplitList(string value)
