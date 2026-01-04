@@ -117,7 +117,7 @@ namespace RoslynScribe.Domain.Tests
         }
 
         [Test]
-        public async Task GuidesAreEmptyIfNoOverrides()
+        public async Task GuideOverride_applies_adc_config_attribute_replacements_to_UserDefinedId()
         {
             // Arrange
             var adcConfig = new AdcConfig
@@ -128,12 +128,14 @@ namespace RoslynScribe.Domain.Tests
                         "Microsoft.AspNetCore.Mvc.ControllerBase",
                         new AdcType
                         {
+                            GetAttributes = new HashSet<string> { "Route" },
                             GetMethods = new AdcMethod[]
                             {
                                 new AdcMethod { 
                                     MethodName = "LoadSomething", 
                                     SetDefaultLevel = 2, 
                                     IncludeMethodDeclaration = true,
+                                    GetAttributes = new HashSet<string> { "HttpPost" },
                                     SetGuidesOverrides = new Dictionary<string, string>
                                     {
                                         { ScribeGuidesTokens.UserDefinedId, $"{{{nameof(MethodContext.ContainingTypeAttributes)}[Route]}}/{{{nameof(MethodContext.MethodAttributes)}[HttpPost]}}" },

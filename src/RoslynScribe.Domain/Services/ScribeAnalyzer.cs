@@ -310,18 +310,18 @@ namespace RoslynScribe.Domain.Services
             {
                 foreach (var bType in containingType.GetAllBaseTypesWithGenerics())
                 {
-                    if (TryFindConfiguredTypeAndMethod(bType, containingType, adcConfig, adcType, originalContext, methodSymbol, expressionKind, out adcMethod))
+                    if (TryFindConfiguredTypeAndMethod(bType, containingType, adcConfig, originalContext, methodSymbol, expressionKind, out adcType, out adcMethod))
                     {
-                        methodSymbol.EnrichMethodContext(originalContext, adcMethod);
+                        methodSymbol.EnrichMethodContext(originalContext, adcType, adcMethod);
                         return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
                     }
                 }
 
                 foreach (var iface in containingType.GetAllInterfacesWithGenerics())
                 {
-                    if (TryFindConfiguredTypeAndMethod(iface, containingType, adcConfig, adcType, originalContext, methodSymbol, expressionKind, out adcMethod))
+                    if (TryFindConfiguredTypeAndMethod(iface, containingType, adcConfig, originalContext, methodSymbol, expressionKind, out adcType, out adcMethod))
                     {
-                        methodSymbol.EnrichMethodContext(originalContext, adcMethod);
+                        methodSymbol.EnrichMethodContext(originalContext, adcType, adcMethod);
                         return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
                     }
                 }
@@ -348,7 +348,7 @@ namespace RoslynScribe.Domain.Services
             return true;
         }
 
-        private static bool TryFindConfiguredTypeAndMethod(INamedTypeSymbol type, INamedTypeSymbol containingType, AdcConfig adcConfig, AdcType adcType, MethodContext originalContext, IMethodSymbol methodSymbol, SyntaxKind expressionKind, out AdcMethod adcMethod)
+        private static bool TryFindConfiguredTypeAndMethod(INamedTypeSymbol type, INamedTypeSymbol containingType, AdcConfig adcConfig, MethodContext originalContext, IMethodSymbol methodSymbol, SyntaxKind expressionKind, out AdcType adcType, out AdcMethod adcMethod)
         {
             adcMethod = null;
             var typeFullName = type.ToDisplayString();

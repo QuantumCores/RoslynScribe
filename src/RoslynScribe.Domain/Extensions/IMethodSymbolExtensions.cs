@@ -14,15 +14,23 @@ namespace RoslynScribe.Domain.Extensions
             return symbol.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
         }
 
-        internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, AdcMethod adcMethod)
+        internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, AdcType adcType, AdcMethod adcMethod)
         {
             // enrich only if there are overrides to set
             if (adcMethod != null && adcMethod.SetGuidesOverrides != null && adcMethod.SetGuidesOverrides.Count != 0)
             {
-                methodContext.ContainingTypeAttributes = GetAttributes(symbol.ContainingType);
                 methodContext.ContainingTypeGenericParameters = GetGenericTypeParameters(symbol);
-                methodContext.MethodAttributes = GetAttributes(symbol);
                 methodContext.MethodParametersTypes = GetParameterTypes(symbol);
+
+                if (adcType.GetAttributes != null)
+                {
+                    methodContext.ContainingTypeAttributes = GetAttributes(symbol.ContainingType, adcType.GetAttributes);
+                }
+
+                if (adcMethod.GetAttributes != null)
+                {
+                    methodContext.MethodAttributes = GetAttributes(symbol, adcMethod.GetAttributes);
+                }
             }
         }
 
@@ -75,8 +83,9 @@ namespace RoslynScribe.Domain.Extensions
             return types.ToArray();
         }
 
-        private static Dictionary<string, string> GetAttributes(ISymbol symbol)
+        private static Dictionary<string, string> GetAttributes(ISymbol symbol, HashSet<string> requiredAttributes)
         {
+            var requiredIsEmpty = requiredAttributes.Count == 0;
             var result = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var attribute in symbol.GetAttributes())
             {
@@ -86,7 +95,7 @@ namespace RoslynScribe.Domain.Extensions
                     continue;
                 }
 
-                if (!result.ContainsKey(name))
+                if (!result.ContainsKey(name) && (requiredIsEmpty || requiredAttributes.Contains(name)))
                 {
                     result.Add(name, GetAttributeValue(attribute));
                 }

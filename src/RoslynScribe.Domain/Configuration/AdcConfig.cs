@@ -4,7 +4,7 @@ namespace RoslynScribe.Domain.Configuration
 {
     public class AdcConfig
     {
-        public bool DiscardDocumentRootNode { get; set; }
+        public bool DiscardDocumentRootNode { get; set; } = false;
 
         public Dictionary<string, AdcType> Types { get; set; } = new Dictionary<string, AdcType>();
     }
@@ -15,7 +15,7 @@ namespace RoslynScribe.Domain.Configuration
 
         public AdcMethod[] GetMethods { get; set; }
 
-        public string[] GetAttributes { get; set; }
+        public HashSet<string> GetAttributes { get; set; }
     }
 
     public class AdcMethod
@@ -26,7 +26,7 @@ namespace RoslynScribe.Domain.Configuration
 
         public string MethodIdentifier { get; set; }
 
-        public string[] GetAttributes { get; set; }
+        public HashSet<string> GetAttributes { get; set; }
 
         public int SetDefaultLevel { get; set; } = 1;
 
