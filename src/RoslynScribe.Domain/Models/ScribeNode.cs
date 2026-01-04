@@ -8,10 +8,12 @@ namespace RoslynScribe.Domain.Models
         public Guid Id { get; set; }
 
         // This is id of node which this node represents
-        public Guid? TargetNodeId { get; set; }
+        // public Guid? TargetNodeId { get; set; }
 
         // commens in their original form
         public string[] Value { get; set; }
+
+        public ScribeGuides Guides { get; set; }
 
         public string Kind { get; set; }
 

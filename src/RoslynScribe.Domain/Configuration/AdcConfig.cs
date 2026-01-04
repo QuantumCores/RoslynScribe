@@ -4,6 +4,8 @@ namespace RoslynScribe.Domain.Configuration
 {
     public class AdcConfig
     {
+        public bool DiscardDocumentRootNode { get; set; }
+
         public Dictionary<string, AdcType> Types { get; set; } = new Dictionary<string, AdcType>();
     }
 
@@ -23,5 +25,7 @@ namespace RoslynScribe.Domain.Configuration
         public string MethodIdentifier { get; set; }
 
         public int Level { get; set; }
+
+        public Dictionary<string, string> GuidesOverrides { get; set; }
     }
 }

@@ -1,9 +1,8 @@
 ﻿using NUnit.Framework;
-using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Configuration;
+using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
 using RoslynScribe.Domain.Services;
-using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;

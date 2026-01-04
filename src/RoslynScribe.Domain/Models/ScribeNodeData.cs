@@ -6,10 +6,10 @@ namespace RoslynScribe.Domain.Models
 {
     public class ScribeNodeData : IScribeNode
     {
-        public ScribeNodeData(Guid id, string[] value)
+        public ScribeNodeData(Guid id, ScribeGuides guides)
         {
             Id = id;
-            Guides = ScribeCommnetParser.Parse(value);
+            Guides = guides;
         }
 
         public Guid Id { get; set; }

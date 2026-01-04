@@ -45,28 +45,28 @@ namespace RoslynScribe.Domain.Models
                 Line.ToString());
         }
 
-        public override int GetHashCode()
-        {
-            return ComputeStableHash(GetIdentityKey());
-        }
+        //public override int GetHashCode()
+        //{
+        //    return ComputeStableHash(GetIdentityKey());
+        //}
 
         private static string Normalize(string value) => value ?? string.Empty;
 
         // Deterministic, platform-independent hash (FNV-1a 32-bit)
-        private static int ComputeStableHash(string value)
-        {
-            unchecked
-            {
-                const int offset = unchecked((int)2166136261);
-                const int prime = 16777619;
-                var hash = offset;
-                foreach (var c in value)
-                {
-                    hash ^= c;
-                    hash *= prime;
-                }
-                return hash;
-            }
-        }
+        //private static int ComputeStableHash(string value)
+        //{
+        //    unchecked
+        //    {
+        //        const int offset = unchecked((int)2166136261);
+        //        const int prime = 16777619;
+        //        var hash = offset;
+        //        foreach (var c in value)
+        //        {
+        //            hash ^= c;
+        //            hash *= prime;
+        //        }
+        //        return hash;
+        //    }
+        //}
     }
 }

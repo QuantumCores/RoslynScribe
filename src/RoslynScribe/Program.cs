@@ -50,7 +50,7 @@ namespace RoslynScribe
             }
 
             Domain.ScribeConsole.Console.WriteLine($"Rebuilding nodes", ConsoleColor.Green);
-            var result = ScribeAnalyzer.Rebuild(nodes);
+            var result = ScribeBuilder.Rebuild(nodes);
 
             File.WriteAllText("result.json", JsonSerializer.Serialize(result));
 

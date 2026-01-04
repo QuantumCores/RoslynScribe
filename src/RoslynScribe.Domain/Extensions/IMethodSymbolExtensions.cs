@@ -23,7 +23,7 @@ namespace RoslynScribe.Domain.Extensions
             var methodInfo = new MethodInfo
             {
                 ContainingType = MethodInfo.NormalizeTypeFullName(symbol.ContainingType?.ToDisplayString()),
-                GenericTypeParameters = GetGenericTypeParameters(symbol),
+                ContainingTypeGenericParameters = GetGenericTypeParameters(symbol),
                 MethodName = symbol.Name,
                 MethodIdentifier = symbol.GetMethodIdentifier()
             };
@@ -61,7 +61,9 @@ namespace RoslynScribe.Domain.Extensions
     {
         internal string ContainingType { get; set; }
 
-        internal string[] GenericTypeParameters { get; set; }
+        internal string[] ContainingTypeGenericParameters { get; set; }
+
+        internal string[] ParametersTypes { get; set; }
 
         internal string MethodName { get; set; }
 

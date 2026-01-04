@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
+using Newtonsoft.Json.Linq;
 using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
@@ -102,118 +103,6 @@ namespace RoslynScribe.Domain.Services
             // Console.WriteLine();
 
             return scribeNode;
-        }
-
-        public static ScribeResult Rebuild(List<ScribeNode> nodes)
-        {
-            var nodeData = BuildNodeDataMap(nodes);
-            var trees = new List<ScribeTreeNode>(nodes.Count);
-            foreach (var node in nodes)
-            {
-                trees.Add(BuildTree(node, new HashSet<Guid>()));
-            }
-
-            return new ScribeResult { Nodes = nodeData, Trees = trees };
-        }
-
-        private static Dictionary<Guid, ScribeNodeData> BuildNodeDataMap(List<ScribeNode> roots)
-        {
-            var byId = new Dictionary<Guid, ScribeNode>();
-            var visited = new HashSet<Guid>();
-            var stack = new Stack<ScribeNode>(roots);
-
-            while (stack.Count != 0)
-            {
-                var node = stack.Pop();
-                var id = node.TargetNodeId ?? node.Id;
-                if (!visited.Add(id))
-                {
-                    continue;
-                }
-
-                if (!byId.ContainsKey(id))
-                {
-                    byId.Add(id, node);
-                }
-
-                foreach (var child in node.ChildNodes)
-                {
-                    stack.Push(child);
-                }
-            }
-
-            var result = new Dictionary<Guid, ScribeNodeData>(byId.Count);
-            foreach (var pair in byId)
-            {
-                var node = pair.Value;
-                var childNodeIds = new List<Guid>(node.ChildNodes.Count);
-                var seenChildIds = new HashSet<Guid>();
-                foreach (var child in node.ChildNodes)
-                {
-                    var childId = child.TargetNodeId ?? child.Id;
-                    if (seenChildIds.Add(childId))
-                    {
-                        childNodeIds.Add(childId);
-                    }
-                }
-
-                result[pair.Key] = new ScribeNodeData(node.Id, node.Value)
-                {
-                    Kind = node.Kind,
-                    MetaInfo = node.MetaInfo,
-                    ChildNodeIds = childNodeIds
-                };
-            }
-
-            return result;
-        }
-
-        private static ScribeTreeNode BuildTree(ScribeNode node, HashSet<Guid> recursionGuard)
-        {
-            var id = node.TargetNodeId ?? node.Id;
-            var treeNode = new ScribeTreeNode { Id = id };
-
-            if (!recursionGuard.Add(id))
-            {
-                return treeNode;
-            }
-
-            foreach (var child in node.ChildNodes)
-            {
-                treeNode.ChildNodes.Add(BuildTree(child, recursionGuard));
-            }
-
-            recursionGuard.Remove(id);
-            return treeNode;
-        }
-
-        internal static Dictionary<Guid, ScribeNode> FindDuplicatedNodes(List<ScribeNode> nodes)
-        {
-            var result = new Dictionary<Guid, NodeCounter>();
-            foreach (var node in nodes)
-            {
-                RegisterNode(node, result);
-            }
-
-            return result.Where(x => x.Value.Count > 1).ToDictionary(x => x.Key, x => x.Value.Node);
-        }
-
-        private static void RegisterNode(ScribeNode node, Dictionary<Guid, NodeCounter> dictionary)
-        {
-            var key = node.Id;
-            if (dictionary.TryGetValue(key, out var registered))
-            {
-                registered.Count++;
-            }
-            else
-            {
-                dictionary.Add(key, new NodeCounter(node));
-            }
-
-            foreach (var child in node.ChildNodes)
-            {
-                RegisterNode(child, dictionary);
-            }
         }
 
         private static void Traverse(
@@ -487,13 +376,21 @@ namespace RoslynScribe.Domain.Services
 
         private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodInfo info)
         {
+            var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
             var level = adcMethod != null ? adcMethod.Level : 1;
-            var value = new List<string> {
-                $"// {CommentLabel}[{ScribeGuidesTokens.Text}:`{info.ContainingType}.{info.MethodIdentifier}`,{ScribeGuidesTokens.Level}:`{level}`]",
+
+            var guideText = $"{info.ContainingType}.{info.MethodIdentifier}";
+            var value = new string[] {
+                $"// {CommentLabel}[{ScribeGuidesTokens.Text}:`{guideText}`,{ScribeGuidesTokens.Level}:`{level}`]",
                 // $"// {CommentLabel}[{ScribeGuidesTokens.Tags}:`{info.TypeFullName}.{info.MethodIdentifier}`]"
             };
-            var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
-            var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value.ToArray(), semanticModel, line, trackers);
+            var guides = new ScribeGuides { 
+                Level = level,
+                Text = guideText,
+            };
+            guides = GuidesOverridesParser.Apply(adcMethod.GuidesOverrides, guides, info);
+            
+            var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
             return configuredNode;
         }
         private static ScribeNode ProcessCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
@@ -515,7 +412,9 @@ namespace RoslynScribe.Domain.Services
 
             if (comments.Count != 0)
             {
-                return AddChildNode(syntaxNode, syntaxKind, parentNode, comments.ToArray(), semanticModel, line, trackers);
+                var array = comments.ToArray();
+                var guides = ScribeCommnetParser.Parse(array);
+                return AddChildNode(syntaxNode, syntaxKind, parentNode, array, guides, semanticModel, line, trackers);
             }
 
             return null;
@@ -530,10 +429,30 @@ namespace RoslynScribe.Domain.Services
                 kind == SyntaxKind.AttributeTargetSpecifier ||
                 kind == SyntaxKind.CompilationUnit ||
                 kind == SyntaxKind.PredefinedType ||
-                kind == SyntaxKind.ParameterList;
+                kind == SyntaxKind.ParameterList; // TODO verify if method invocation inside parameter list is processed
         }
 
-        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, SemanticModel semanticModel, int line, Trackers trackers)
+        /// <summary>
+        /// Adds a child node to the specified parent node if it does not already exist, and returns the added or
+        /// existing child node.
+        /// </summary>
+        /// <remarks>
+        /// If a child node with the same identifier already exists under the parent node, or if
+        /// the parent node has the same identifier, the method returns null and does not add a new node. The method
+        /// does not update the trackers object.
+        /// </remarks>
+        /// <param name="syntaxNode">The syntax node from which to create the child node.</param>
+        /// <param name="syntaxKind">The kind of syntax represented by the child node.</param>
+        /// <param name="parentNode">The parent node to which the child node will be added.</param>
+        /// <param name="value">An array of string values associated with the child node. May be null.</param>
+        /// <param name="semanticModel">The semantic model used to provide additional context for the syntax node.</param>
+        /// <param name="line">The line number in the source code associated with the child node.</param>
+        /// <param name="trackers">The trackers object used to manage and look up existing nodes.</param>
+        /// <returns>
+        /// The added or existing child node if it was successfully added; otherwise, null if a node with the same
+        /// identifier already exists as a child or is the parent node itself.
+        /// </returns>
+        private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, ScribeGuides guides, SemanticModel semanticModel, int line, Trackers trackers)
         {
             var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line);
             var id = metaInfo.GetDeterministicId();
@@ -550,10 +469,10 @@ namespace RoslynScribe.Domain.Services
                 childNode = new ScribeNode
                 {
                     Id = id,
-                    //ParentNode = parentNode,
                     MetaInfo = metaInfo,
                     Kind = syntaxKind.ToString(),
                     Value = value,
+                    Guides = guides,                    
                 };
             }
             else

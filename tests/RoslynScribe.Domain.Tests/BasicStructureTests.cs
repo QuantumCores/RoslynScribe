@@ -1,12 +1,11 @@
 ﻿using NUnit.Framework;
 using RoslynScribe.Domain.Configuration;
+using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
 using RoslynScribe.Domain.Services;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using RoslynScribe.Domain.Extensions;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace RoslynScribe.Domain.Tests
 {
