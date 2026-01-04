@@ -25,10 +25,18 @@ namespace RoslynScribe.Domain.Extensions
                 ContainingType = MethodInfo.NormalizeTypeFullName(symbol.ContainingType?.ToDisplayString()),
                 ContainingTypeGenericParameters = GetGenericTypeParameters(symbol),
                 MethodName = symbol.Name,
-                MethodIdentifier = symbol.GetMethodIdentifier()
+                MethodIdentifier = symbol.GetMethodIdentifier(),
+                ParametersTypes = GetParameterTypes(symbol)
             };
 
             return methodInfo;
+        }
+
+        private static string[] GetParameterTypes(IMethodSymbol symbol)
+        {
+            return symbol.Parameters
+                                .Select(p => MethodInfo.NormalizeTypeFullName(p.Type.ToDisplayString()))
+                                .ToArray();
         }
 
         private static string GetMethodIdentifier(this IMethodSymbol symbol)
@@ -53,7 +61,7 @@ namespace RoslynScribe.Domain.Extensions
                 }
             }
 
-            return types.Distinct().ToArray();
+            return types.ToArray();
         }
     }
 

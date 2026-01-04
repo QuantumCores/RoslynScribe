@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
-using Newtonsoft.Json.Linq;
 using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
@@ -374,25 +373,6 @@ namespace RoslynScribe.Domain.Services
             return false;
         }
 
-        private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodInfo info)
-        {
-            var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
-            var level = adcMethod != null ? adcMethod.Level : 1;
-
-            var guideText = $"{info.ContainingType}.{info.MethodIdentifier}";
-            var value = new string[] {
-                $"// {CommentLabel}[{ScribeGuidesTokens.Text}:`{guideText}`,{ScribeGuidesTokens.Level}:`{level}`]",
-                // $"// {CommentLabel}[{ScribeGuidesTokens.Tags}:`{info.TypeFullName}.{info.MethodIdentifier}`]"
-            };
-            var guides = new ScribeGuides { 
-                Level = level,
-                Text = guideText,
-            };
-            guides = GuidesOverridesParser.Apply(adcMethod.GuidesOverrides, guides, info);
-            
-            var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
-            return configuredNode;
-        }
         private static ScribeNode ProcessCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
         {
             var line = -1;
@@ -420,16 +400,25 @@ namespace RoslynScribe.Domain.Services
             return null;
         }
 
-        private static bool KindToSkip(SyntaxKind kind)
+        private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodInfo info)
         {
-            return kind == SyntaxKind.Attribute ||
-                kind == SyntaxKind.AttributeArgument ||
-                kind == SyntaxKind.AttributeArgumentList ||
-                kind == SyntaxKind.AttributeList ||
-                kind == SyntaxKind.AttributeTargetSpecifier ||
-                kind == SyntaxKind.CompilationUnit ||
-                kind == SyntaxKind.PredefinedType ||
-                kind == SyntaxKind.ParameterList; // TODO verify if method invocation inside parameter list is processed
+            var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
+            var level = adcMethod != null ? adcMethod.Level : 1;
+
+            var guideText = $"{info.ContainingType}.{info.MethodIdentifier}";
+            var value = new string[] {
+                $"// {CommentLabel}[{ScribeGuidesTokens.Text}:`{guideText}`,{ScribeGuidesTokens.Level}:`{level}`]",
+                // $"// {CommentLabel}[{ScribeGuidesTokens.Tags}:`{info.TypeFullName}.{info.MethodIdentifier}`]"
+            };
+            var guides = new ScribeGuides
+            {
+                Level = level,
+                Text = guideText,
+            };
+            guides = GuidesOverridesParser.Apply(adcMethod.GuidesOverrides, guides, info);
+
+            var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
+            return configuredNode;
         }
 
         /// <summary>
@@ -596,6 +585,18 @@ namespace RoslynScribe.Domain.Services
             metaInfo.Line = line;
 
             return metaInfo;
+        }
+
+        private static bool KindToSkip(SyntaxKind kind)
+        {
+            return kind == SyntaxKind.Attribute ||
+                kind == SyntaxKind.AttributeArgument ||
+                kind == SyntaxKind.AttributeArgumentList ||
+                kind == SyntaxKind.AttributeList ||
+                kind == SyntaxKind.AttributeTargetSpecifier ||
+                kind == SyntaxKind.CompilationUnit ||
+                kind == SyntaxKind.PredefinedType ||
+                kind == SyntaxKind.ParameterList; // TODO verify if method invocation inside parameter list is processed
         }
     }
 }
