@@ -14,7 +14,7 @@
 
         internal const string Path = "P";
 
-        internal const string OriginIds = "O";
+        internal const string OriginUserIds = "OUI";
 
         internal const string DestinationUserIds = "DUI";
 

@@ -252,7 +252,7 @@ namespace RoslynScribe.Domain.Services
             ScribeNode childNode = null;
             if (lTrivias.Count != 0)
             {
-                childNode = GetNodeFromCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel, trackers);
+                childNode = ProcessCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel, trackers);
 
                 if (childNode != null)
                 {
@@ -270,17 +270,17 @@ namespace RoslynScribe.Domain.Services
 
             if (syntaxKind == SyntaxKind.InvocationExpression)
             {
-                var invocation = syntaxNode as InvocationExpressionSyntax;                
-                ProcessInvocation(invocation, currentParent, semanticModel, documents, trackers, adcConfig);                
+                var invocation = syntaxNode as InvocationExpressionSyntax;
+                ProcessInvocation(invocation, currentParent, semanticModel, documents, trackers, adcConfig);
             }
 
             if (syntaxKind == SyntaxKind.MethodDeclaration)
             {
                 var declaration = syntaxNode as MethodDeclarationSyntax;
-                ProcessDeclaration(declaration, parentNode, semanticModel,documents, trackers, adcConfig);
+                ProcessDeclaration(declaration, parentNode, semanticModel, documents, trackers, adcConfig);
             }
 
-             Traverse(syntaxNode, currentParent, semanticModel, documents, trackers, adcConfig);
+            Traverse(syntaxNode, currentParent, semanticModel, documents, trackers, adcConfig);
         }
 
         private static void ProcessInvocation(
@@ -299,7 +299,7 @@ namespace RoslynScribe.Domain.Services
 
             var configuredNode = GetNodeFromConfiguration(invocation, parentNode, invokedMethod, adcConfig, semanticModel, trackers);
             var currentParent = configuredNode ?? parentNode;
-            
+
             // Avoid infinite recursion
             var methodKey = invokedMethod.GetMethodKey();
             if (!trackers.RecursionStack.Add(methodKey))
@@ -322,11 +322,11 @@ namespace RoslynScribe.Domain.Services
         }
 
         private static void ProcessDeclaration(
-            MethodDeclarationSyntax declaration, 
-            ScribeNode parentNode, 
+            MethodDeclarationSyntax declaration,
+            ScribeNode parentNode,
             SemanticModel semanticModel,
             Dictionary<string, Document> documents,
-            Trackers trackers, 
+            Trackers trackers,
             AdcConfig adcConfig)
         {
             var declaredMethod = semanticModel.GetDeclaredSymbol(declaration);
@@ -379,7 +379,7 @@ namespace RoslynScribe.Domain.Services
             {
                 if (TryFindConfiguredMethod(adcType, originalInfo, out adcMethod))
                 {
-                    if(expressionKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
+                    if (expressionKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
                     {
                         return null;
                     }
@@ -417,7 +417,7 @@ namespace RoslynScribe.Domain.Services
                                         {
                                             return null;
                                         }
-                                        return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, info);
+                                        return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalInfo);
                                     }
                                 }
                             }
@@ -438,20 +438,18 @@ namespace RoslynScribe.Domain.Services
                 return false;
             }
 
-            if (!adcConfig.Types.ContainsKey(candidate.TypeFullName))
+            if (!adcConfig.Types.ContainsKey(candidate.ContainingType))
             {
                 return false;
             }
 
-            adcType = adcConfig.Types[candidate.TypeFullName];
+            adcType = adcConfig.Types[candidate.ContainingType];
             return true;
         }
 
         private static bool TryFindConfiguredMethod(AdcType adcType, MethodInfo candidate, out AdcMethod adcMethod)
         {
             adcMethod = null;
-            var cfgType = MethodInfo.NormalizeTypeFullName(adcType.TypeFullName);
-
             if (adcType.Methods.Length == 0)
             {
                 return true;
@@ -490,67 +488,15 @@ namespace RoslynScribe.Domain.Services
         private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodInfo info)
         {
             var level = adcMethod != null ? adcMethod.Level : 1;
-            var value = new[] { $"// {CommentLabel}[{ScribeGuidesTokens.Text}:`{adcType.TypeFullName}.{info.MethodIdentifier}`,{ScribeGuidesTokens.Level}:`{level}`]" };
+            var value = new List<string> {
+                $"// {CommentLabel}[{ScribeGuidesTokens.Text}:`{info.ContainingType}.{info.MethodIdentifier}`,{ScribeGuidesTokens.Level}:`{level}`]",
+                // $"// {CommentLabel}[{ScribeGuidesTokens.Tags}:`{info.TypeFullName}.{info.MethodIdentifier}`]"
+            };
             var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
-            var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, semanticModel, line, trackers);
-            //var level = adcMethod != null ? adcMethod.Level : 1;
-            //var configuredNode = AddConfiguredNode(parentNode, adcType.TypeFullName, info.MethodIdentifier, level, line, trackers);
+            var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value.ToArray(), semanticModel, line, trackers);
             return configuredNode;
         }
-
-        private static ScribeNode AddConfiguredNode(
-            ScribeNode parentNode,
-            string configuredTypeFullName,
-            string configuredMethodName,
-            int configuredLevel,
-            int line,
-            Trackers trackers)
-        {
-            if (parentNode == null)
-            {
-                return null;
-            }
-
-            // Use the call site's document + line for uniqueness, but keep the configured target in Identifier.
-            var metaInfo = new MetaInfo
-            {
-                ProjectName = parentNode.MetaInfo.ProjectName,
-                DocumentName = parentNode.MetaInfo.DocumentName,
-                DocumentPath = parentNode.MetaInfo.DocumentPath,
-                NameSpace = parentNode.MetaInfo.NameSpace,
-                TypeName = configuredTypeFullName,
-                MemberName = configuredMethodName,
-                Identifier = $"{configuredTypeFullName}.{configuredMethodName}",
-                Line = line
-            };
-
-            var id = metaInfo.GetDeterministicId();
-            if (parentNode.ChildNodes.Any(x => x.Id == id) || parentNode.Id == id)
-            {
-                return null;
-            }
-
-            if (!trackers.Nodes.TryGetValue(id, out var node))
-            {
-                node = new ScribeNode
-                {
-                    Id = id,
-                    MetaInfo = metaInfo,
-                    Kind = "ConfiguredInvocation",
-                    Value = new[]
-                    {
-                        $"// {CommentLabel}[C:`{configuredTypeFullName}.{configuredMethodName}`,L:`{configuredLevel}`]"
-                    }
-                };
-
-                trackers.Nodes.Add(id, node);
-            }
-
-            parentNode.ChildNodes.Add(node);
-            return node;
-        }
-
-        private static ScribeNode GetNodeFromCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
+        private static ScribeNode ProcessCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
         {
             var line = -1;
             var comments = new List<string>();
@@ -575,12 +521,6 @@ namespace RoslynScribe.Domain.Services
             return null;
         }
 
-        private static bool IsCommentType(SyntaxKind kind)
-        {
-            return kind == SyntaxKind.SingleLineCommentTrivia
-                || kind == SyntaxKind.MultiLineCommentTrivia;
-        }
-
         private static bool KindToSkip(SyntaxKind kind)
         {
             return kind == SyntaxKind.Attribute ||
@@ -591,40 +531,6 @@ namespace RoslynScribe.Domain.Services
                 kind == SyntaxKind.CompilationUnit ||
                 kind == SyntaxKind.PredefinedType ||
                 kind == SyntaxKind.ParameterList;
-        }
-
-        private static bool KindSkipTraverse(SyntaxNode syntaxNode, SyntaxKind kind)
-        {
-            return kind == SyntaxKind.ExpressionStatement ||
-                kind == SyntaxKind.LocalDeclarationStatement && !IsMultiline(syntaxNode);
-        }
-
-        private static bool IsMultiline(SyntaxNode syntaxNode)
-        {
-            var text = syntaxNode.GetText();
-
-            var start = 0;
-            foreach (var line in text.Lines)
-            {
-                if (!line.ToString().Trim().StartsWith("//"))
-                {
-                    break;
-                }
-                start++;
-            }
-
-            var stop = text.Lines.Count - 1;
-            for (int i = text.Lines.Count - 1; i >= 0; i--)
-            {
-                var line = text.Lines[i];
-                if (!string.IsNullOrWhiteSpace(line.ToString()))
-                {
-                    break;
-                }
-                stop--;
-            }
-
-            return start != stop;
         }
 
         private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, SemanticModel semanticModel, int line, Trackers trackers)

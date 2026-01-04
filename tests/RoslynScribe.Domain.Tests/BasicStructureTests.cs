@@ -503,10 +503,10 @@ namespace RoslynScribe.Domain.Tests
                         "RoslynScribe.OtherTestProject.IHandler",
                         new AdcType
                         {
-                            TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
+                            // TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
                             Methods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", Level = 2 }
+                                new AdcMethod { MethodName = "Handle", Level = 2, IncludeMethodDeclaration = true }
                             }
                         }
                     }
@@ -541,12 +541,12 @@ namespace RoslynScribe.Domain.Tests
                                     },
                                     new ScribeNode
                                     {
-                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IHandler.Handle(object)`,L:`2`]" },
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.Handler.Handle(object)`,L:`2`]" },
                                         ChildNodes = new List<ScribeNode>()
                                         {
                                             new ScribeNode
                                             {
-                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IHandler.Handle(object)`,L:`2`]" },
+                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.Handler.Handle(object)`,L:`2`]" },
                                             },
                                         },
                                     }
@@ -556,7 +556,7 @@ namespace RoslynScribe.Domain.Tests
                     },
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IHandler.Handle(object)`,L:`2`]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.Handler.Handle(object)`,L:`2`]" },
                     },
                 },
             };
@@ -582,7 +582,7 @@ namespace RoslynScribe.Domain.Tests
                         "RoslynScribe.OtherTestProject.IHandler",
                         new AdcType
                         {
-                            TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
+                            // TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
                             Methods = new AdcMethod[1]
                             {
                                 new AdcMethod { MethodName = "Handle", Level = 2, IncludeMethodDeclaration = false }
@@ -613,7 +613,7 @@ namespace RoslynScribe.Domain.Tests
                                     },
                                     new ScribeNode
                                     {
-                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IHandler.Handle(object)`,L:`2`]" },
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S013_Adc_ExtendedInterface.ExpandedHandler.Handle(object)`,L:`2`]" },
                                     }
                                 }
                             },
@@ -643,7 +643,7 @@ namespace RoslynScribe.Domain.Tests
                         "RoslynScribe.OtherTestProject.IExpandedHandler",
                         new AdcType
                         {
-                            TypeFullName = "RoslynScribe.OtherTestProject.IExpandedHandler",
+                            // TypeFullName = "RoslynScribe.OtherTestProject.IExpandedHandler",
                             Methods = new AdcMethod[1]
                             {
                                 new AdcMethod { MethodName = "HandleWithResult", Level = 2, IncludeMethodDeclaration = false }
@@ -674,7 +674,7 @@ namespace RoslynScribe.Domain.Tests
                                     },
                                     new ScribeNode
                                     {
-                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IExpandedHandler.HandleWithResult(object)`,L:`2`]" },
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S014_Adc_ExtendedInterfaceWithResult.ExpandedHandler.HandleWithResult(object)`,L:`2`]" },
                                     }
                                 }
                             },
@@ -704,7 +704,7 @@ namespace RoslynScribe.Domain.Tests
                         "RoslynScribe.OtherTestProject.IGenericHandler<T123>",
                         new AdcType
                         {
-                            TypeFullName = "RoslynScribe.OtherTestProject.IGenericHandler<T123>",
+                            // TypeFullName = "RoslynScribe.OtherTestProject.IGenericHandler<T123>",
                             Methods = new AdcMethod[1]
                             {
                                 new AdcMethod { MethodName = "Handle", Level = 2, IncludeMethodDeclaration = false }
@@ -731,11 +731,11 @@ namespace RoslynScribe.Domain.Tests
                                 {
                                     new ScribeNode
                                     {
-                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IGenericHandler<T123>.Handle(T123)`,L:`2`]" },
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IGenericHandler<RoslynScribe.TestProject.Message>.Handle(T123)`,L:`2`]" },
                                     },
                                     new ScribeNode
                                     {
-                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IGenericHandler<T123>.Handle(T123)`,L:`2`]" },
+                                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.GenericHandler<RoslynScribe.TestProject.Message>.Handle(T)`,L:`2`]" },
                                     }
                                 }
                             },
@@ -746,6 +746,57 @@ namespace RoslynScribe.Domain.Tests
 
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S015_Adc_GenericInterface.cs", adcConfig);
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
+        }
+
+        [Test]
+        public async Task S016_returns_valid_tree()
+        {
+            // Arrange
+            var adcConfig = new AdcConfig
+            {
+                Types =
+                {
+                    {
+                        "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>",
+                        new AdcType
+                        {
+                            // TypeFullName = "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>",
+                            Methods = new AdcMethod[1]
+                            {
+                                new AdcMethod { MethodName = "Handle", Level = 3, IncludeMethodDeclaration = true }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var expected = new ScribeNode
+            {
+                Value = null,
+                ChildNodes = new List<ScribeNode>()
+                {
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`S016 This is nuget test class without invocations`]" },                        
+                    },
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.NugetHandler<T>.Handle(T)`,L:`3`]" },
+                    },
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.NugetMessageHandler.Handle(RoslynScribe.TestProject.NugetMessage)`,L:`3`]" },
+                    },
+                },
+            };
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S016_Adc_NugetInterface.cs", adcConfig);
 
             // var json = JsonSerializer.Serialize(result);
             // Assert

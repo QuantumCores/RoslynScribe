@@ -24,13 +24,13 @@ namespace RoslynScribe.Domain.Models
         public int Level { get; set; } = 1;
 
         /// <summary>
-        /// This text is used to describe the node.
+        /// This text is used as presented text on the node.
         /// </summary>
         [JsonPropertyName(ScribeGuidesTokens.Text)]
         public string Text { get; set; }
 
         /// <summary>
-        /// This text is used to describe the node.
+        /// This text is used to give more description to the node if needed.
         /// </summary>
         [JsonPropertyName(ScribeGuidesTokens.Description)]
         public string Description { get; set; }
@@ -44,8 +44,8 @@ namespace RoslynScribe.Domain.Models
         /// <summary>
         /// This property contains node ids that should be pointing this node
         /// </summary>
-        [JsonPropertyName(ScribeGuidesTokens.OriginIds)]
-        public string[] OriginIds { get; set; }
+        [JsonPropertyName(ScribeGuidesTokens.OriginUserIds)]
+        public string[] OriginUserIds { get; set; }
 
         /// <summary>
         /// This property contains node ids which this node should be pointing

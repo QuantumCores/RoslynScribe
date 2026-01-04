@@ -6,7 +6,7 @@
         {
           "MethodName": "Handle",
           "Level": 2,
-          "IncludeMethodDeclaration" : true
+          "IncludeMethodDeclaration": true
         }
       ]
     },
@@ -16,6 +16,15 @@
         {
           "MethodName": "Handle",
           "Level": 2
+        }
+      ]
+    },
+    "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>" : {
+      "TypeFullName": "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>",
+      "Methods": [
+        {
+          "MethodName": "Handle",
+          "Level": 1
         }
       ]
     }

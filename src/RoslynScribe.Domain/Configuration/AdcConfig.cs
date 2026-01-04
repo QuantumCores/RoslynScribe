@@ -9,7 +9,7 @@ namespace RoslynScribe.Domain.Configuration
 
     public class AdcType
     {
-        public string TypeFullName { get; set; }
+        // public string TypeFullName { get; set; }
 
         public AdcMethod[] Methods { get; set; }
     }

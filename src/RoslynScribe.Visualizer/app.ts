@@ -789,7 +789,7 @@ class ScribeApp {
         const meta = data.MetaInfo;
         const guide = data.Guides;
         const tags = guide?.Tags?.length ? guide.Tags.join(', ') : '';
-        const originIds = guide?.O?.length ? guide.O.join(', ') : '';
+        const originIds = guide?.OUI?.length ? guide.OUI.join(', ') : '';
         const destinationUserIds = guide?.DUI?.length ? guide.DUI.join(', ') : '';
         const childNodeIds = data.ChildNodeIds?.length ? data.ChildNodeIds.join(', ') : '';
 

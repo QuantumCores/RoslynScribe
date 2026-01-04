@@ -35,7 +35,7 @@ namespace RoslynScribe.Domain.Tests
             {
                 $"// [ADC][{ScribeGuidesTokens.Description}:`this is some comment`, {ScribeGuidesTokens.Tags}:`processA; processB`, {ScribeGuidesTokens.Id}:`identifier`,"
                 + $" {ScribeGuidesTokens.UserDefinedId}:`userIdentifier`, {ScribeGuidesTokens.Text}:`text`, {ScribeGuidesTokens.Path}:`path`, {ScribeGuidesTokens.Level}:`2`, "
-                + $"{ScribeGuidesTokens.OriginIds}:`origin`, {ScribeGuidesTokens.DestinationUserIds}:`destination1; destination2`]"
+                + $"{ScribeGuidesTokens.OriginUserIds}:`origin`, {ScribeGuidesTokens.DestinationUserIds}:`destination1; destination2`]"
             });
 
             Assert.That(parsed.Description, Is.EqualTo("this is some comment"));
@@ -45,7 +45,7 @@ namespace RoslynScribe.Domain.Tests
             Assert.That(parsed.Text, Is.EqualTo("text"));
             Assert.That(parsed.Path, Is.EqualTo("path"));
             Assert.That(parsed.Level, Is.EqualTo(2));
-            Assert.That(parsed.OriginIds, Is.EquivalentTo(new[] { "origin" }));
+            Assert.That(parsed.OriginUserIds, Is.EquivalentTo(new[] { "origin" }));
             Assert.That(parsed.DestinationUserIds, Is.EquivalentTo(new[] { "destination1", "destination2" }));
             
         }

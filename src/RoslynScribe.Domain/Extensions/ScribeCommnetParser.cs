@@ -243,10 +243,10 @@ namespace RoslynScribe.Domain.Extensions
                 return;
             }
 
-            if (key.Equals(ScribeGuidesTokens.OriginIds, StringComparison.OrdinalIgnoreCase) ||
-                key.Equals(nameof(ScribeGuidesTokens.OriginIds), StringComparison.OrdinalIgnoreCase))
+            if (key.Equals(ScribeGuidesTokens.OriginUserIds, StringComparison.OrdinalIgnoreCase) ||
+                key.Equals(nameof(ScribeGuidesTokens.OriginUserIds), StringComparison.OrdinalIgnoreCase))
             {
-                guide.OriginIds = MergeStringList(guide.OriginIds, SplitList(value));
+                guide.OriginUserIds = MergeStringList(guide.OriginUserIds, SplitList(value));
                 return;
             }
 

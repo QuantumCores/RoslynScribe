@@ -1,5 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RoslynScribe.Domain.Extensions
 {
@@ -16,11 +18,12 @@ namespace RoslynScribe.Domain.Extensions
             if (symbol is null)
             {
                 return null;
-            }           
+            }
 
             var methodInfo = new MethodInfo
             {
-                TypeFullName = MethodInfo.NormalizeTypeFullName(symbol.ContainingType?.ToDisplayString()),
+                ContainingType = MethodInfo.NormalizeTypeFullName(symbol.ContainingType?.ToDisplayString()),
+                GenericTypeParameters = GetGenericTypeParameters(symbol),
                 MethodName = symbol.Name,
                 MethodIdentifier = symbol.GetMethodIdentifier()
             };
@@ -31,16 +34,34 @@ namespace RoslynScribe.Domain.Extensions
         private static string GetMethodIdentifier(this IMethodSymbol symbol)
         {
             var key = symbol.GetMethodKey();
-            var index = key.LastIndexOf('.');
-            return index >= 0 && index < key.Length - 1 ? key.Substring(index + 1) : key;
+            return key.Replace(symbol.OriginalDefinition.ContainingType.ToDisplayString() + ".", string.Empty);
+        }
+
+        private static string[] GetGenericTypeParameters(this IMethodSymbol symbol)
+        {
+            var types = new List<string>();
+            if (symbol.ContainingType != null)
+            {
+                types = symbol.ContainingType.Interfaces
+                    .Where(x => !x.IsUnboundGenericType)
+                    .SelectMany(x => x.TypeArguments.Select(y => y.ToDisplayString()))
+                    .ToList();
+
+                if (symbol.ContainingType.BaseType != null && !symbol.ContainingType.BaseType.IsUnboundGenericType)
+                {
+                    types.AddRange(symbol.ContainingType.BaseType.TypeArguments.Select(y => y.ToDisplayString()));
+                }
+            }
+
+            return types.Distinct().ToArray();
         }
     }
 
-
-
     internal class MethodInfo
     {
-        internal string TypeFullName { get; set; }
+        internal string ContainingType { get; set; }
+
+        internal string[] GenericTypeParameters { get; set; }
 
         internal string MethodName { get; set; }
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11312.210 d18.3
+VisualStudioVersion = 18.3.11312.210
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoslynScribe", "src\RoslynScribe\RoslynScribe.csproj", "{E319ED67-CF7C-4802-8ED0-5DE447E70C2E}"
 EndProject
@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RoslynScribe.Visualizer", "
 		src\RoslynScribe.Visualizer\tsconfig.json = src\RoslynScribe.Visualizer\tsconfig.json
 		src\RoslynScribe.Visualizer\types.ts = src\RoslynScribe.Visualizer\types.ts
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoslynScribe.NugetTestProject", "tests\RoslynScribe.NugetTestProject\RoslynScribe.NugetTestProject.csproj", "{54C7C35C-157B-494D-A031-CB0BE4D36AF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{952A7BD4-5604-4F42-9740-8F8D30120E3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{952A7BD4-5604-4F42-9740-8F8D30120E3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{952A7BD4-5604-4F42-9740-8F8D30120E3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54C7C35C-157B-494D-A031-CB0BE4D36AF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54C7C35C-157B-494D-A031-CB0BE4D36AF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54C7C35C-157B-494D-A031-CB0BE4D36AF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54C7C35C-157B-494D-A031-CB0BE4D36AF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Logic.cs~RF5fc3aea.TMP" />
-    <None Remove="S011_InterfaceImpl.cs~RFfb2dc2.TMP" />
+    <PackageReference Include="RoslynScribe.NugetTestProject" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -23,7 +23,7 @@ interface ScribeGuides {
     T?: string; // Text
     D?: string; // Description
     P?: string; // Path
-    O?: string[]; // OriginIds
+    OUI?: string[]; // OriginUserIds
     DUI?: string[]; // DestinationUserIds
     Tags?: string[]; // Tags
 }
