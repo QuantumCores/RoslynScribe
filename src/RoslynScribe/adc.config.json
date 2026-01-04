@@ -2,29 +2,29 @@
   "Types": {
     "RoslynScribe.OtherTestProject.IHandler": {
       "TypeFullName": "RoslynScribe.OtherTestProject.IHandler",
-      "Methods": [
+      "GetMethods": [
         {
           "MethodName": "Handle",
-          "Level": 2,
+          "SetDefaultLevel": 2,
           "IncludeMethodDeclaration": true
         }
       ]
     },
     "RoslynScribe.OtherTestProject.IGenericHandler<T123>": {
       "TypeFullName": "RoslynScribe.OtherTestProject.IGenericHandler<T123>",
-      "Methods": [
+      "GetMethods": [
         {
           "MethodName": "Handle",
-          "Level": 2
+          "SetDefaultLevel": 2
         }
       ]
     },
-    "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>" : {
+    "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>": {
       "TypeFullName": "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>",
-      "Methods": [
+      "GetMethods": [
         {
           "MethodName": "Handle",
-          "Level": 1
+          "SetDefaultLevel": 1
         }
       ]
     }

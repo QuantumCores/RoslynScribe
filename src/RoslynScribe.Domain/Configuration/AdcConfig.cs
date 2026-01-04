@@ -13,7 +13,9 @@ namespace RoslynScribe.Domain.Configuration
     {
         // public string TypeFullName { get; set; }
 
-        public AdcMethod[] Methods { get; set; }
+        public AdcMethod[] GetMethods { get; set; }
+
+        public string[] GetAttributes { get; set; }
     }
 
     public class AdcMethod
@@ -24,8 +26,10 @@ namespace RoslynScribe.Domain.Configuration
 
         public string MethodIdentifier { get; set; }
 
-        public int Level { get; set; }
+        public string[] GetAttributes { get; set; }
 
-        public Dictionary<string, string> GuidesOverrides { get; set; }
+        public int SetDefaultLevel { get; set; } = 1;
+
+        public Dictionary<string, string> SetGuidesOverrides { get; set; }
     }
 }

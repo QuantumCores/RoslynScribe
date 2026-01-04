@@ -7,15 +7,15 @@ namespace RoslynScribe.Domain.Tests
 {
     public class GuidesOverridesParserTests
     {
-        private static MethodInfo CreateMethodInfo()
+        private static MethodContext CreateMethodInfo()
         {
-            return new MethodInfo
+            return new MethodContext
             {
                 MethodName = "DoWork",
                 ContainingType = "My.Namespace.MyType",
                 MethodIdentifier = "DoWork(int x)",
                 ContainingTypeGenericParameters = new[] { "T", "U" },
-                ParametersTypes = new[] { "V", "W" }
+                MethodParametersTypes = new[] { "V", "W" }
             };
         }
 
@@ -43,7 +43,7 @@ namespace RoslynScribe.Domain.Tests
         {
             var info = CreateMethodInfo();
 
-            var value = $"before {{{nameof(MethodInfo.MethodName)}}} after";
+            var value = $"before {{{nameof(MethodContext.MethodName)}}} after";
             var parsed = GuidesOverridesParser.Parse(value, info);
 
             Assert.That(parsed, Is.EqualTo("before DoWork after"));
@@ -54,7 +54,7 @@ namespace RoslynScribe.Domain.Tests
         {
             var info = CreateMethodInfo();
 
-            var value = $"{{{nameof(MethodInfo.ContainingType)}}}.{{{nameof(MethodInfo.MethodName)}}} -> {{{nameof(MethodInfo.MethodIdentifier)}}} <{{{nameof(MethodInfo.ContainingTypeGenericParameters)}}}>({{{nameof(MethodInfo.ParametersTypes)}}})";
+            var value = $"{{{nameof(MethodContext.ContainingType)}}}.{{{nameof(MethodContext.MethodName)}}} -> {{{nameof(MethodContext.MethodIdentifier)}}} <{{{nameof(MethodContext.ContainingTypeGenericParameters)}}}>({{{nameof(MethodContext.MethodParametersTypes)}}})";
             var parsed = GuidesOverridesParser.Parse(value, info);
 
             Assert.That(parsed, Is.EqualTo("My.Namespace.MyType.DoWork -> DoWork(int x) <T|U>(V|W)"));
@@ -92,10 +92,10 @@ namespace RoslynScribe.Domain.Tests
 
             var overrides = new Dictionary<string, string>
             {
-                [ScribeGuidesTokens.Description] = $"desc {{{nameof(MethodInfo.MethodName)}}}",
-                [ScribeGuidesTokens.Text] = $"text {{{nameof(MethodInfo.ContainingType)}}}",
-                [ScribeGuidesTokens.UserDefinedId] = $"uid {{{nameof(MethodInfo.MethodIdentifier)}}}",
-                [ScribeGuidesTokens.Path] = $"/{{{nameof(MethodInfo.ContainingType)}}}/{{{nameof(MethodInfo.MethodName)}}}",
+                [ScribeGuidesTokens.Description] = $"desc {{{nameof(MethodContext.MethodName)}}}",
+                [ScribeGuidesTokens.Text] = $"text {{{nameof(MethodContext.ContainingType)}}}",
+                [ScribeGuidesTokens.UserDefinedId] = $"uid {{{nameof(MethodContext.MethodIdentifier)}}}",
+                [ScribeGuidesTokens.Path] = $"/{{{nameof(MethodContext.ContainingType)}}}/{{{nameof(MethodContext.MethodName)}}}",
                 [ScribeGuidesTokens.Tags] = "tag1;tag2",
                 [ScribeGuidesTokens.OriginUserIds] = "origin1;origin2",
                 [ScribeGuidesTokens.DestinationUserIds] = "dest1;dest2",
@@ -120,10 +120,10 @@ namespace RoslynScribe.Domain.Tests
 
             var overrides = new Dictionary<string, string>
             {
-                ["description"] = $"A {{{nameof(MethodInfo.MethodName)}}}",
-                ["TEXT"] = $"B {{{nameof(MethodInfo.ContainingType)}}}",
-                ["UserDefinedId"] = $"C {{{nameof(MethodInfo.MethodIdentifier)}}}",
-                ["pAtH"] = $"D {{{nameof(MethodInfo.MethodName)}}}",
+                ["description"] = $"A {{{nameof(MethodContext.MethodName)}}}",
+                ["TEXT"] = $"B {{{nameof(MethodContext.ContainingType)}}}",
+                ["UserDefinedId"] = $"C {{{nameof(MethodContext.MethodIdentifier)}}}",
+                ["pAtH"] = $"D {{{nameof(MethodContext.MethodName)}}}",
                 ["OriginUserIds"] = "o1;o2",
                 ["DestinationUserIds"] = "d1;d2",
             };

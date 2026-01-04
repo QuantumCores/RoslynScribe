@@ -7,7 +7,7 @@ namespace RoslynScribe.Domain.Extensions
 {
     internal class GuidesOverridesParser
     {
-        internal static ScribeGuides Apply(Dictionary<string, string> overrides, ScribeGuides guide, MethodInfo info)
+        internal static ScribeGuides Apply(Dictionary<string, string> overrides, ScribeGuides guide, MethodContext context)
         {
             if (overrides == null || overrides.Count == 0)
             {
@@ -16,20 +16,20 @@ namespace RoslynScribe.Domain.Extensions
 
             foreach (var overrideItem in overrides)
             {
-                ApplyGuideValue(overrideItem.Key, overrideItem.Value, guide, info);
+                ApplyGuideValue(overrideItem.Key, overrideItem.Value, guide, context);
             }
 
             return guide;
         }
 
-        internal static string Parse(string value, MethodInfo info)
+        internal static string Parse(string value, MethodContext context)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
                 return string.Empty;
             }
 
-            if (info == null)
+            if (context == null)
             {
                 return value;
             }
@@ -54,28 +54,7 @@ namespace RoslynScribe.Domain.Extensions
                 }
 
                 var token = value.Substring(i + 1, endIndex - i - 1);
-                string replacement = null;
-                switch (token)
-                {
-                    case nameof(MethodInfo.MethodName):
-                        replacement = info.MethodName;
-                        break;
-                    case nameof(MethodInfo.ContainingType):
-                        replacement = info.ContainingType;
-                        break;
-                    case nameof(MethodInfo.MethodIdentifier):
-                        replacement = info.MethodIdentifier;
-                        break;
-                    case nameof(MethodInfo.ContainingTypeGenericParameters):
-                        replacement = string.Join("|", info.ContainingTypeGenericParameters ?? Array.Empty<string>());
-                        break;
-                    case nameof(MethodInfo.ParametersTypes):
-                        replacement = string.Join("|", info.ParametersTypes ?? Array.Empty<string>());
-                        break;
-                    default:
-                        replacement = null;
-                        break;
-                }
+                string replacement = GetReplacement(context, token);
 
                 if (replacement != null)
                 {
@@ -95,7 +74,79 @@ namespace RoslynScribe.Domain.Extensions
             return changed ? sb.ToString() : value;
         }
 
-        private static void ApplyGuideValue(string key, string value, ScribeGuides guide, MethodInfo info)
+        private static string GetReplacement(MethodContext context, string token)
+        {
+            string replacement = null;
+            if (token == nameof(MethodContext.ContainingType))
+            {
+                replacement = context.ContainingType;
+            }
+
+            if (token.StartsWith(nameof(MethodContext.ContainingTypeAttributes)))
+            {
+                var key = GetCollectionKey(token);
+                if (context.ContainingTypeAttributes.TryGetValue(key, out var value))
+                { 
+                    replacement = value;
+                }
+                else
+                {
+                    ScribeConsole.Console.WriteLine($"Guides overrides could not find value in {nameof(MethodContext.ContainingTypeAttributes)} for {key}", ConsoleColor.Yellow);
+                }
+            }
+
+            if (token == nameof(MethodContext.ContainingTypeGenericParameters))
+            {
+                replacement = string.Join("|", context.ContainingTypeGenericParameters ?? Array.Empty<string>());
+            }
+
+            if (token == nameof(MethodContext.MethodName))
+            {
+                replacement = context.MethodName;
+            }
+
+            if (token == nameof(MethodContext.MethodIdentifier))
+            {
+                replacement = context.MethodIdentifier;
+            }
+
+            if (token == nameof(MethodContext.MethodParametersTypes))
+            {
+                replacement = string.Join("|", context.MethodParametersTypes ?? Array.Empty<string>());
+            }
+
+            if (token.StartsWith(nameof(MethodContext.MethodAttributes)))
+            {
+                var key = GetCollectionKey(token);
+                if (context.MethodAttributes.TryGetValue(key, out var value))
+                {
+                    replacement = value;
+                }
+                else
+                {
+                    ScribeConsole.Console.WriteLine($"Guides overrides could not find value in {nameof(MethodContext.MethodAttributes)} for {key}", ConsoleColor.Yellow);
+                }
+            }           
+
+            return replacement;
+        }
+
+
+        private static string GetCollectionKey(string text)
+        {
+            int startIndex = text.IndexOf('[');
+            int endIndex = text.IndexOf("]");
+            if (startIndex >= 0 && endIndex > startIndex)
+            {
+                return text.Substring(startIndex + 1, endIndex - startIndex - 1);
+            }
+
+            ScribeConsole.Console.WriteLine($"Guides overrides could not parse collection key from text: {text}", ConsoleColor.Yellow);
+
+            return null;
+        }
+
+        private static void ApplyGuideValue(string key, string value, ScribeGuides guide, MethodContext info)
         {
             if (key.Equals(ScribeGuidesTokens.Description, StringComparison.OrdinalIgnoreCase) ||
                 key.Equals(nameof(ScribeGuidesTokens.Description), StringComparison.OrdinalIgnoreCase))
@@ -117,7 +168,7 @@ namespace RoslynScribe.Domain.Extensions
                 guide.Tags = Parse(value, info).Split(';');
                 return;
             }
-            
+
             if (key.Equals(ScribeGuidesTokens.UserDefinedId, StringComparison.OrdinalIgnoreCase) ||
                 key.Equals(nameof(ScribeGuidesTokens.UserDefinedId), StringComparison.OrdinalIgnoreCase))
             {

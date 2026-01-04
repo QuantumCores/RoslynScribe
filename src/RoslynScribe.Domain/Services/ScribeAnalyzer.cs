@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 
 namespace RoslynScribe.Domain.Services
@@ -171,6 +173,33 @@ namespace RoslynScribe.Domain.Services
             Traverse(syntaxNode, currentParent, semanticModel, documents, trackers, adcConfig);
         }
 
+        private static ScribeNode ProcessCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
+        {
+            var line = -1;
+            var comments = new List<string>();
+            foreach (var trivia in syntaxTrivias)
+            {
+                var tmp = trivia.ToString();
+                if ((trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia)) && Starts.Any(x => tmp.StartsWith(x)))
+                {
+                    comments.Add(tmp);
+                    if (line == -1)
+                    {
+                        line = trivia.GetLocation().GetLineSpan().Span.Start.Line;
+                    }
+                }
+            }
+
+            if (comments.Count != 0)
+            {
+                var array = comments.ToArray();
+                var guides = ScribeCommnetParser.Parse(array);
+                return AddChildNode(syntaxNode, syntaxKind, parentNode, array, guides, semanticModel, line, trackers);
+            }
+
+            return null;
+        }
+
         private static void ProcessInvocation(
             InvocationExpressionSyntax invocation,
             ScribeNode parentNode,
@@ -257,59 +286,43 @@ namespace RoslynScribe.Domain.Services
                 return null;
             }
 
-            // var candidates = GetCandidateMethods(invokedMethod);
-
             AdcType adcType = null;
             AdcMethod adcMethod = null;
             var expressionKind = expression.Kind();
-            var originalInfo = methodSymbol.GetMethodInfo();
-            if (TryFindConfiguredType(adcConfig, originalInfo, out adcType))
+            var originalContext = methodSymbol.GetMethodContext();
+
+            // check if configured type is containing type and only then check if configured method is part of containing type
+            if (TryFindConfiguredType(adcConfig, originalContext.ContainingType, out adcType))
             {
-                if (TryFindConfiguredMethod(adcType, originalInfo, out adcMethod))
+                if (TryFindConfiguredMethod(adcType, originalContext, out adcMethod))
                 {
                     if (expressionKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
                     {
                         return null;
                     }
-                    return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalInfo);
+                    return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
                 }
             }
 
-            // if method is not found directly on containing type, try interfaces
-            MethodInfo info = null;
+            // if type and method is not found directly on containing type, try interfaces and base types
             var containingType = methodSymbol.ContainingType;
             if (containingType != null)
             {
+                foreach (var bType in containingType.GetAllBaseTypesWithGenerics())
+                {
+                    if (TryFindConfiguredTypeAndMethod(bType, containingType, adcConfig, adcType, originalContext, methodSymbol, expressionKind, out adcMethod))
+                    {
+                        methodSymbol.EnrichMethodContext(originalContext, adcMethod);
+                        return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
+                    }
+                }
+
                 foreach (var iface in containingType.GetAllInterfacesWithGenerics())
                 {
-                    // this might not work with nested namespaces
-                    var fullName = iface.ToDisplayString();
-                    if (!adcConfig.Types.ContainsKey(fullName))
+                    if (TryFindConfiguredTypeAndMethod(iface, containingType, adcConfig, adcType, originalContext, methodSymbol, expressionKind, out adcMethod))
                     {
-                        continue;
-                    }
-
-                    foreach (var member in iface.GetMembers(methodSymbol.Name))
-                    {
-                        if (member is IMethodSymbol ifaceMethod)
-                        {
-                            //var impl = containingType.FindImplementationForInterfaceMember(ifaceMethod) as IMethodSymbol;
-                            //if (SymbolEqualityComparer.Default.Equals(impl, invokedMethod))
-                            {
-                                info = ifaceMethod.GetMethodInfo();
-                                if (TryFindConfiguredType(adcConfig, info, out adcType))
-                                {
-                                    if (TryFindConfiguredMethod(adcType, info, out adcMethod))
-                                    {
-                                        if (expressionKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
-                                        {
-                                            return null;
-                                        }
-                                        return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalInfo);
-                                    }
-                                }
-                            }
-                        }
+                        methodSymbol.EnrichMethodContext(originalContext, adcMethod);
+                        return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
                     }
                 }
             }
@@ -317,33 +330,93 @@ namespace RoslynScribe.Domain.Services
             return null;
         }
 
-        private static bool TryFindConfiguredType(AdcConfig adcConfig, MethodInfo candidate, out AdcType adcType)
+        private static bool TryFindConfiguredType(AdcConfig adcConfig, string typeFullName, out AdcType adcType)
         {
             adcType = null;
 
-            if (candidate is null)
+            if (typeFullName is null)
             {
                 return false;
             }
 
-            if (!adcConfig.Types.ContainsKey(candidate.ContainingType))
+            if (!adcConfig.Types.ContainsKey(typeFullName))
             {
                 return false;
             }
 
-            adcType = adcConfig.Types[candidate.ContainingType];
+            adcType = adcConfig.Types[typeFullName];
             return true;
         }
 
-        private static bool TryFindConfiguredMethod(AdcType adcType, MethodInfo candidate, out AdcMethod adcMethod)
+        private static bool TryFindConfiguredTypeAndMethod(INamedTypeSymbol type, INamedTypeSymbol containingType, AdcConfig adcConfig, AdcType adcType, MethodContext originalContext, IMethodSymbol methodSymbol, SyntaxKind expressionKind, out AdcMethod adcMethod)
         {
             adcMethod = null;
-            if (adcType.Methods.Length == 0)
+            var typeFullName = type.ToDisplayString();
+            if (!TryFindConfiguredType(adcConfig, typeFullName, out adcType))
+            {
+                return false;
+            }
+
+            // if type has no methods this means we add all methods from containing type
+            if (adcType.GetMethods == null || adcType.GetMethods.Length == 0)
+            {
+                return true;                
+            }
+
+            // now that we know that containing type implements the configured type check if configured method is part of the containing type
+            if (TryFindConfiguredMethod(containingType, adcConfig, adcType, methodSymbol.Name, expressionKind, out adcMethod))
             {
                 return true;
             }
 
-            foreach (var method in adcType.Methods)
+            // check if any of the implemented types has the configured method
+            foreach (var member in type.GetMembers(methodSymbol.Name))
+            {
+                if (TryFindConfiguredMethod(type, adcConfig, adcType, methodSymbol.Name, expressionKind, out adcMethod))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryFindConfiguredMethod(INamedTypeSymbol type, AdcConfig adcConfig, AdcType adcType, string methodSymbolName, SyntaxKind expressionKind, out AdcMethod adcMethod)
+        {
+            adcMethod = null;
+            foreach (var member in type.GetMembers(methodSymbolName))
+            {
+                if (member is IMethodSymbol ifaceMethod)
+                {
+                    //var impl = containingType.FindImplementationForInterfaceMember(ifaceMethod) as IMethodSymbol;
+                    //if (SymbolEqualityComparer.Default.Equals(impl, invokedMethod))
+                    {
+                        var context = ifaceMethod.GetMethodContext();
+                        if (TryFindConfiguredMethod(adcType, context, out adcMethod))
+                        {
+                            if (expressionKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
+                            {
+                                return false;
+                            }
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryFindConfiguredMethod(AdcType adcType, MethodContext candidate, out AdcMethod adcMethod)
+        {
+            adcMethod = null;
+            if (adcType.GetMethods.Length == 0)
+            {
+                return true;
+            }
+
+            foreach (var method in adcType.GetMethods)
             {
                 if (method == null ||
                     (string.IsNullOrWhiteSpace(method.MethodName) && string.IsNullOrWhiteSpace(method.MethodIdentifier)))
@@ -373,37 +446,10 @@ namespace RoslynScribe.Domain.Services
             return false;
         }
 
-        private static ScribeNode ProcessCommentTrivia(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SyntaxTriviaList syntaxTrivias, SemanticModel semanticModel, Trackers trackers)
-        {
-            var line = -1;
-            var comments = new List<string>();
-            foreach (var trivia in syntaxTrivias)
-            {
-                var tmp = trivia.ToString();
-                if ((trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia)) && Starts.Any(x => tmp.StartsWith(x)))
-                {
-                    comments.Add(tmp);
-                    if (line == -1)
-                    {
-                        line = trivia.GetLocation().GetLineSpan().Span.Start.Line;
-                    }
-                }
-            }
-
-            if (comments.Count != 0)
-            {
-                var array = comments.ToArray();
-                var guides = ScribeCommnetParser.Parse(array);
-                return AddChildNode(syntaxNode, syntaxKind, parentNode, array, guides, semanticModel, line, trackers);
-            }
-
-            return null;
-        }
-
-        private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodInfo info)
+        private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodContext info)
         {
             var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
-            var level = adcMethod != null ? adcMethod.Level : 1;
+            var level = adcMethod?.SetDefaultLevel ?? 1;
 
             var guideText = $"{info.ContainingType}.{info.MethodIdentifier}";
             var value = new string[] {
@@ -415,7 +461,7 @@ namespace RoslynScribe.Domain.Services
                 Level = level,
                 Text = guideText,
             };
-            guides = GuidesOverridesParser.Apply(adcMethod.GuidesOverrides, guides, info);
+            guides = GuidesOverridesParser.Apply(adcMethod?.SetGuidesOverrides, guides, info);
 
             var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
             return configuredNode;
@@ -461,7 +507,7 @@ namespace RoslynScribe.Domain.Services
                     MetaInfo = metaInfo,
                     Kind = syntaxKind.ToString(),
                     Value = value,
-                    Guides = guides,                    
+                    Guides = guides,
                 };
             }
             else

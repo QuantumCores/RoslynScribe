@@ -503,9 +503,9 @@ namespace RoslynScribe.Domain.Tests
                         new AdcType
                         {
                             // TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
-                            Methods = new AdcMethod[1]
+                            GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", Level = 2, IncludeMethodDeclaration = true }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
                             }
                         }
                     }
@@ -582,9 +582,9 @@ namespace RoslynScribe.Domain.Tests
                         new AdcType
                         {
                             // TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
-                            Methods = new AdcMethod[1]
+                            GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", Level = 2, IncludeMethodDeclaration = false }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodDeclaration = false }
                             }
                         }
                     }
@@ -643,9 +643,9 @@ namespace RoslynScribe.Domain.Tests
                         new AdcType
                         {
                             // TypeFullName = "RoslynScribe.OtherTestProject.IExpandedHandler",
-                            Methods = new AdcMethod[1]
+                            GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "HandleWithResult", Level = 2, IncludeMethodDeclaration = false }
+                                new AdcMethod { MethodName = "HandleWithResult", SetDefaultLevel = 2, IncludeMethodDeclaration = false }
                             }
                         }
                     }
@@ -704,9 +704,9 @@ namespace RoslynScribe.Domain.Tests
                         new AdcType
                         {
                             // TypeFullName = "RoslynScribe.OtherTestProject.IGenericHandler<T123>",
-                            Methods = new AdcMethod[1]
+                            GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", Level = 2, IncludeMethodDeclaration = false }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodDeclaration = false }
                             }
                         }
                     }
@@ -765,9 +765,9 @@ namespace RoslynScribe.Domain.Tests
                         new AdcType
                         {
                             // TypeFullName = "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>",
-                            Methods = new AdcMethod[1]
+                            GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", Level = 3, IncludeMethodDeclaration = true }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 3, IncludeMethodDeclaration = true }
                             }
                         }
                     }
@@ -796,6 +796,52 @@ namespace RoslynScribe.Domain.Tests
 
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S016_Adc_NugetInterface.cs", adcConfig);
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
+        }
+
+        [Test]
+        public async Task S017_returns_valid_tree()
+        {
+            // Arrange
+            var adcConfig = new AdcConfig
+            {
+                Types =
+                {
+                    {
+                        "Microsoft.AspNetCore.Mvc.ControllerBase",
+                        new AdcType
+                        {
+                            GetMethods = new AdcMethod[]
+                            {
+                                new AdcMethod { MethodName = "LoadSomething", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
+                            },
+                        }
+                    }
+                }
+            };
+
+            var expected = new ScribeNode
+            {
+                Value = null,
+                ChildNodes = new List<ScribeNode>()
+                {
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S017_Adc_NugetBaseClass.LoadSomething(int, int)`,L:`2`]" },
+                    },
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S017_Adc_NugetBaseClass.LoadSomething(int)`,L:`2`]" },
+                    },
+                },
+            };
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S017_Adc_NugetBaseClass.cs", adcConfig);
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
