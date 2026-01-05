@@ -8,18 +8,297 @@ namespace RoslynScribe.Domain.Services
     {
         public static ScribeResult Merge(ScribeResult[] results)
         {
-            
+            if (results == null)
+            {
+                throw new ArgumentNullException(nameof(results));
+            }
+
+            if (results.Length == 0)
+            {
+                return new ScribeResult
+                {
+                    Trees = new List<ScribeTreeNode>(),
+                    Nodes = new Dictionary<Guid, ScribeNodeData>()
+                };
+            }
+
+            var mergedTrees = new List<ScribeTreeNode>();
+            var mergedNodes = new Dictionary<Guid, ScribeNodeData>();
+            var resultEntries = new List<MergeEntry>(results.Length);
+
+            foreach (var result in results)
+            {
+                if (result == null)
+                {
+                    continue;
+                }
+
+                var nodes = result.Nodes ?? new Dictionary<Guid, ScribeNodeData>();
+                resultEntries.Add(new MergeEntry(result, new HashSet<Guid>(nodes.Keys)));
+
+                foreach (var pair in nodes)
+                {
+                    if (!mergedNodes.ContainsKey(pair.Key))
+                    {
+                        mergedNodes.Add(pair.Key, CloneNodeData(pair.Value));
+                    }
+                }
+
+                if (result.Trees != null)
+                {
+                    foreach (var tree in result.Trees)
+                    {
+                        mergedTrees.Add(CloneTree(tree));
+                    }
+                }
+            }
+
+            var treeNodesById = new Dictionary<Guid, List<ScribeTreeNode>>();
+            foreach (var tree in mergedTrees)
+            {
+                IndexTreeNodes(tree, treeNodesById);
+            }
+
+            var userDefinedIds = new Dictionary<string, Guid>(StringComparer.Ordinal);
+            foreach (var pair in mergedNodes)
+            {
+                var userId = pair.Value.Guides?.UserDefinedId;
+                if (!string.IsNullOrWhiteSpace(userId) && !userDefinedIds.ContainsKey(userId))
+                {
+                    userDefinedIds.Add(userId, pair.Key);
+                }
+            }
+
+            foreach (var entry in resultEntries)
+            {
+                var result = entry.Result;
+                if (result.Nodes == null)
+                {
+                    continue;
+                }
+
+                foreach (var pair in result.Nodes)
+                {
+                    var nodeId = pair.Key;
+                    var nodeData = mergedNodes[nodeId];
+                    var externalChildIds = new List<Guid>();
+
+                    if (nodeData.ChildNodeIds == null)
+                    {
+                        nodeData.ChildNodeIds = new List<Guid>();
+                    }
+
+                    var seenChildIds = new HashSet<Guid>(nodeData.ChildNodeIds);
+
+                    if (pair.Value.ChildNodeIds != null)
+                    {
+                        foreach (var childId in pair.Value.ChildNodeIds)
+                        {
+                            if (entry.NodeIds.Contains(childId))
+                            {
+                                continue;
+                            }
+
+                            if (!mergedNodes.ContainsKey(childId))
+                            {
+                                continue;
+                            }
+
+                            if (seenChildIds.Add(childId))
+                            {
+                                nodeData.ChildNodeIds.Add(childId);
+                                externalChildIds.Add(childId);
+                            }
+                        }
+                    }
+
+                    var destinationUserIds = pair.Value.Guides?.DestinationUserIds ?? new string[0];
+                    foreach (var destinationUserId in destinationUserIds)
+                    {
+                        if (string.IsNullOrWhiteSpace(destinationUserId))
+                        {
+                            continue;
+                        }
+
+                        Guid targetId;
+                        if (!userDefinedIds.TryGetValue(destinationUserId, out targetId))
+                        {
+                            continue;
+                        }
+
+                        if (entry.NodeIds.Contains(targetId))
+                        {
+                            continue;
+                        }
+
+                        if (seenChildIds.Add(targetId))
+                        {
+                            nodeData.ChildNodeIds.Add(targetId);
+                            externalChildIds.Add(targetId);
+                        }
+                    }
+
+                    if (externalChildIds.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    List<ScribeTreeNode> treeNodes;
+                    if (!treeNodesById.TryGetValue(nodeId, out treeNodes))
+                    {
+                        continue;
+                    }
+
+                    foreach (var treeNode in treeNodes)
+                    {
+                        foreach (var childId in externalChildIds)
+                        {
+                            if (!HasChild(treeNode, childId))
+                            {
+                                treeNode.ChildNodes.Add(new ScribeTreeNode { Id = childId });
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new ScribeResult { Trees = mergedTrees, Nodes = mergedNodes };
+        }
+
+        public static ScribeResult MyMerge(ScribeResult[] results)
+        {
+            if (results == null)
+            {
+                throw new ArgumentNullException(nameof(results));
+            }
+
+            if (results.Length == 0)
+            {
+                return new ScribeResult
+                {
+                    Trees = new List<ScribeTreeNode>(),
+                    Nodes = new Dictionary<Guid, ScribeNodeData>()
+                };
+            }
+
+            var mergedDataNodes = new Dictionary<Guid, ScribeNodeData>();
+            var mergedUserIds = new Dictionary<string, ScribeNodeData>();
+            var nodesWithDest = new Dictionary<Guid, ScribeNodeData>();            
+
+            // merge all nodes and collect user-defined IDs and nodes with destination IDs
+            for (int i = 0; i < results.Length; i++)
+            {
+                var result = results[i];
+                foreach (var pair in result.Nodes)
+                {
+                    var nodeId = pair.Key;
+                    var nodeData = pair.Value;
+                    if (!mergedDataNodes.ContainsKey(nodeId))
+                    {
+                        mergedDataNodes.Add(nodeId, nodeData);
+
+                        var userId = nodeData.Guides?.UserDefinedId;
+                        if (!string.IsNullOrWhiteSpace(userId) && !mergedUserIds.ContainsKey(userId))
+                        {
+                            if (!mergedUserIds.ContainsKey(userId))
+                            {
+                                mergedUserIds.Add(userId, nodeData);
+                            }
+                            else
+                            {
+                                ScribeConsole.Console.WriteLine($"Warning: Duplicate user-defined ID '{userId}' found on node {nodeId}. Skipping duplicate.", ConsoleColor.Yellow);
+                            }
+                        }
+
+                        if (nodeData.Guides?.DestinationUserIds != null && nodeData.Guides?.DestinationUserIds.Length != 0)
+                        {
+                            nodesWithDest.Add(nodeId, nodeData);
+                        }
+                    }
+                    else
+                    {
+                        ScribeConsole.Console.WriteLine($"Warning: Duplicate node ID {nodeId} found during merge. Skipping duplicate.", ConsoleColor.Yellow);
+                    }
+                }
+            }
+
+            // complement child relationships based on user-defined destination IDs
+            foreach (var pair in nodesWithDest)
+            {
+                var nodeData = pair.Value;
+                foreach (var userDestId in nodeData.Guides.DestinationUserIds)
+                {
+                    if (mergedUserIds.ContainsKey(userDestId))
+                    {
+                        var destNode = mergedUserIds[userDestId];
+                        if (!nodeData.ChildNodeIds.Contains(destNode.Id))
+                        {
+                            nodeData.ChildNodeIds.Add(destNode.Id);
+                        }
+                    }
+                }
+            }
+
+            var mergedTrees = new List<ScribeTreeNode>();
+            // traverese all trees to rebuild tree structures
+            for (int i = 0; i < results.Length; i++)
+            {
+                var result = results[i];
+
+                foreach (var tree in result.Trees)
+                {
+                    mergedTrees.Add(tree);
+                    var stack = new Stack<ScribeTreeNode>(new[] { tree });
+                    
+                    // ensure all child relationships in tree are updated
+                    while (stack.Count != 0)
+                    {
+                        var root = stack.Pop();
+                        var id = root.Id;
+                        
+                        if (nodesWithDest.ContainsKey(id))
+                        {
+                            var nodeWithDest = nodesWithDest[id];
+                            foreach (var userDestId in nodeWithDest.Guides.DestinationUserIds)
+                            {
+                                if (mergedUserIds.ContainsKey(userDestId))
+                                {
+                                    var destNode = mergedUserIds[userDestId];
+                                    if (!HasChild(root, destNode.Id))
+                                    {
+                                        root.ChildNodes.Add(new ScribeTreeNode { Id = destNode.Id });
+                                    }
+                                }
+                            }
+                        }
+
+                        foreach (var child in root.ChildNodes)
+                        {
+                            stack.Push(child);
+                        }
+                    }
+                }
+            }
+
+            var merged = new ScribeResult
+            {
+                Nodes = mergedDataNodes,
+                Trees = mergedTrees
+            };
+
+            return merged;
         }
 
         public static ScribeResult Rebuild(List<ScribeNode> nodes)
         {
+            // node data map has to be built first to also capture userDefined relations
+            var nodeData = BuildNodeDataMap(nodes);
+
             var trees = new List<ScribeTreeNode>(nodes.Count);
             foreach (var node in nodes)
             {
                 trees.Add(BuildTree(node));
             }
-
-            var nodeData = BuildNodeDataMap(nodes);
 
             return new ScribeResult { Trees = trees, Nodes = nodeData };
         }
@@ -83,9 +362,17 @@ namespace RoslynScribe.Domain.Services
 
                 // collect data about userDefined IDs
                 var userId = root.Guides?.UserDefinedId;
-                if (!string.IsNullOrWhiteSpace(userId) && !userIds.ContainsKey(userId))
+                if (!string.IsNullOrWhiteSpace(userId))
                 {
-                    userIds.Add(root.Guides.UserDefinedId, root);
+                    if (!userIds.ContainsKey(userId))
+                    {
+                        userIds.Add(root.Guides.UserDefinedId, root);
+                    }
+                    else
+                    {
+                        ScribeConsole.Console.WriteLine($"Warning: Duplicate user-defined ID '{userId}' found on node {id}. Skipping duplicate.", ConsoleColor.Yellow);
+                    }
+
                 }
 
                 foreach (var child in root.ChildNodes)
@@ -123,6 +410,7 @@ namespace RoslynScribe.Domain.Services
                             if (seenChildIds.Add(childNode.Id))
                             {
                                 childNodeIds.Add(childNode.Id);
+                                node.ChildNodes.Add(childNode);
                             }
                         }
                     }
@@ -139,6 +427,72 @@ namespace RoslynScribe.Domain.Services
             }
 
             return result;
+        }
+
+        private static ScribeTreeNode CloneTree(ScribeTreeNode node)
+        {
+            var clone = new ScribeTreeNode { Id = node.Id };
+            foreach (var child in node.ChildNodes)
+            {
+                clone.ChildNodes.Add(CloneTree(child));
+            }
+
+            return clone;
+        }
+
+        private static void IndexTreeNodes(ScribeTreeNode node, Dictionary<Guid, List<ScribeTreeNode>> index)
+        {
+            List<ScribeTreeNode> list;
+            if (!index.TryGetValue(node.Id, out list))
+            {
+                list = new List<ScribeTreeNode>();
+                index.Add(node.Id, list);
+            }
+
+            list.Add(node);
+
+            foreach (var child in node.ChildNodes)
+            {
+                IndexTreeNodes(child, index);
+            }
+        }
+
+        private static bool HasChild(ScribeTreeNode node, Guid childId)
+        {
+            for (var i = 0; i < node.ChildNodes.Count; i++)
+            {
+                if (node.ChildNodes[i].Id == childId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static ScribeNodeData CloneNodeData(ScribeNodeData node)
+        {
+            var clone = new ScribeNodeData(node.Id, node.Guides)
+            {
+                Kind = node.Kind,
+                MetaInfo = node.MetaInfo,
+                ChildNodeIds = node.ChildNodeIds == null ? new List<Guid>() : new List<Guid>(node.ChildNodeIds)
+            };
+
+            return clone;
+        }
+
+        private sealed class MergeEntry
+        {
+            public MergeEntry(ScribeResult result, HashSet<Guid> nodeIds)
+            {
+                Result = result;
+                NodeIds = nodeIds;
+            }
+
+            public ScribeResult Result { get; }
+
+            public HashSet<Guid> NodeIds { get; }
         }
     }
 }

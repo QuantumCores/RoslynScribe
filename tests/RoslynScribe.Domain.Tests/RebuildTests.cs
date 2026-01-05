@@ -112,6 +112,9 @@ namespace RoslynScribe.Domain.Tests
             // Assert
             Assert.That(rebuilt.Nodes.Count, Is.EqualTo(3));
             Assert.That(rebuilt.Nodes[child2Guid].ChildNodeIds[0] == child1Guid);
+            Assert.That(rebuilt.Trees[0].ChildNodes.Select(x => x.Id), Is.EquivalentTo(new Guid[] { child1Guid, child2Guid }));
+            // verify that tree is updated and child2 has child1 as its child node
+            Assert.That(rebuilt.Trees[0].ChildNodes[1].ChildNodes[0].Id, Is.EqualTo(child1Guid));
         }
 
         private static List<Guid> GetTreeIds(List<ScribeTreeNode> trees)
