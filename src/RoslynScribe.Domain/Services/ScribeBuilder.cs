@@ -7,165 +7,6 @@ namespace RoslynScribe.Domain.Services
 {
     public class ScribeBuilder
     {
-        public static ScribeResult Merge(ScribeResult[] results)
-        {
-            if (results == null)
-            {
-                throw new ArgumentNullException(nameof(results));
-            }
-
-            if (results.Length == 0)
-            {
-                return new ScribeResult
-                {
-                    Trees = new List<ScribeTreeNode>(),
-                    Nodes = new Dictionary<Guid, ScribeNodeData>()
-                };
-            }
-
-            var mergedTrees = new List<ScribeTreeNode>();
-            var mergedNodes = new Dictionary<Guid, ScribeNodeData>();
-            var resultEntries = new List<MergeEntry>(results.Length);
-
-            foreach (var result in results)
-            {
-                if (result == null)
-                {
-                    continue;
-                }
-
-                var nodes = result.Nodes ?? new Dictionary<Guid, ScribeNodeData>();
-                resultEntries.Add(new MergeEntry(result, new HashSet<Guid>(nodes.Keys)));
-
-                foreach (var pair in nodes)
-                {
-                    if (!mergedNodes.ContainsKey(pair.Key))
-                    {
-                        mergedNodes.Add(pair.Key, CloneNodeData(pair.Value));
-                    }
-                }
-
-                if (result.Trees != null)
-                {
-                    foreach (var tree in result.Trees)
-                    {
-                        mergedTrees.Add(CloneTree(tree));
-                    }
-                }
-            }
-
-            var treeNodesById = new Dictionary<Guid, List<ScribeTreeNode>>();
-            foreach (var tree in mergedTrees)
-            {
-                IndexTreeNodes(tree, treeNodesById);
-            }
-
-            var userDefinedIds = new Dictionary<string, Guid>(StringComparer.Ordinal);
-            foreach (var pair in mergedNodes)
-            {
-                var userId = pair.Value.Guides?.UserDefinedId;
-                if (!string.IsNullOrWhiteSpace(userId) && !userDefinedIds.ContainsKey(userId))
-                {
-                    userDefinedIds.Add(userId, pair.Key);
-                }
-            }
-
-            foreach (var entry in resultEntries)
-            {
-                var result = entry.Result;
-                if (result.Nodes == null)
-                {
-                    continue;
-                }
-
-                foreach (var pair in result.Nodes)
-                {
-                    var nodeId = pair.Key;
-                    var nodeData = mergedNodes[nodeId];
-                    var externalChildIds = new List<Guid>();
-
-                    if (nodeData.ChildNodeIds == null)
-                    {
-                        nodeData.ChildNodeIds = new List<Guid>();
-                    }
-
-                    var seenChildIds = new HashSet<Guid>(nodeData.ChildNodeIds);
-
-                    if (pair.Value.ChildNodeIds != null)
-                    {
-                        foreach (var childId in pair.Value.ChildNodeIds)
-                        {
-                            if (entry.NodeIds.Contains(childId))
-                            {
-                                continue;
-                            }
-
-                            if (!mergedNodes.ContainsKey(childId))
-                            {
-                                continue;
-                            }
-
-                            if (seenChildIds.Add(childId))
-                            {
-                                nodeData.ChildNodeIds.Add(childId);
-                                externalChildIds.Add(childId);
-                            }
-                        }
-                    }
-
-                    var destinationUserIds = pair.Value.Guides?.DestinationUserIds ?? new string[0];
-                    foreach (var destinationUserId in destinationUserIds)
-                    {
-                        if (string.IsNullOrWhiteSpace(destinationUserId))
-                        {
-                            continue;
-                        }
-
-                        Guid targetId;
-                        if (!userDefinedIds.TryGetValue(destinationUserId, out targetId))
-                        {
-                            continue;
-                        }
-
-                        if (entry.NodeIds.Contains(targetId))
-                        {
-                            continue;
-                        }
-
-                        if (seenChildIds.Add(targetId))
-                        {
-                            nodeData.ChildNodeIds.Add(targetId);
-                            externalChildIds.Add(targetId);
-                        }
-                    }
-
-                    if (externalChildIds.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    List<ScribeTreeNode> treeNodes;
-                    if (!treeNodesById.TryGetValue(nodeId, out treeNodes))
-                    {
-                        continue;
-                    }
-
-                    foreach (var treeNode in treeNodes)
-                    {
-                        foreach (var childId in externalChildIds)
-                        {
-                            if (!HasChild(treeNode, childId))
-                            {
-                                treeNode.ChildNodes.Add(new ScribeTreeNode { Id = childId });
-                            }
-                        }
-                    }
-                }
-            }
-
-            return new ScribeResult { Trees = mergedTrees, Nodes = mergedNodes };
-        }
-
         public static ScribeResult MyMerge(ScribeResult[] results)
         {
             if (results == null)
@@ -232,7 +73,7 @@ namespace RoslynScribe.Domain.Services
                     if (mergedUserIds.ContainsKey(userDestId))
                     {
                         var destNode = mergedUserIds[userDestId];
-                        if (!nodeData.ChildNodeIds.Contains(destNode.Id))
+                        if (!HasChild(nodeData, destNode.Id))
                         {
                             nodeData.ChildNodeIds.Add(destNode.Id);
                         }
@@ -269,6 +110,11 @@ namespace RoslynScribe.Domain.Services
                             var nodeWithDest = nodesWithDest[id];
                             foreach (var userDestId in nodeWithDest.Guides.DestinationUserIds)
                             {
+                                if (string.IsNullOrWhiteSpace(userDestId))
+                                {
+                                    continue;
+                                }
+
                                 if (mergedUserIds.ContainsKey(userDestId))
                                 {
                                     var destNode = mergedUserIds[userDestId];
@@ -304,13 +150,7 @@ namespace RoslynScribe.Domain.Services
                 }
             }
 
-            var merged = new ScribeResult
-            {
-                Nodes = mergedDataNodes,
-                Trees = mergedTrees
-            };
-
-            return merged;
+            return new ScribeResult { Nodes = mergedDataNodes, Trees = mergedTrees };
         }
 
         public static ScribeResult Rebuild(List<ScribeNode> nodes)
@@ -505,31 +345,6 @@ namespace RoslynScribe.Domain.Services
             }
 
             return false;
-        }
-
-        private static ScribeNodeData CloneNodeData(ScribeNodeData node)
-        {
-            var clone = new ScribeNodeData(node.Id, node.Guides)
-            {
-                Kind = node.Kind,
-                MetaInfo = node.MetaInfo,
-                ChildNodeIds = node.ChildNodeIds == null ? new List<Guid>() : new List<Guid>(node.ChildNodeIds)
-            };
-
-            return clone;
-        }
-
-        private sealed class MergeEntry
-        {
-            public MergeEntry(ScribeResult result, HashSet<Guid> nodeIds)
-            {
-                Result = result;
-                NodeIds = nodeIds;
-            }
-
-            public ScribeResult Result { get; }
-
-            public HashSet<Guid> NodeIds { get; }
         }
     }
 }
