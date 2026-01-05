@@ -183,12 +183,12 @@ namespace RoslynScribe.Domain.Extensions
                 return;
             }
 
-            if (key.Equals(ScribeGuidesTokens.OriginUserIds, StringComparison.OrdinalIgnoreCase) ||
-                key.Equals(nameof(ScribeGuidesTokens.OriginUserIds), StringComparison.OrdinalIgnoreCase))
-            {
-                guide.OriginUserIds = Parse(value, info).Split(';');
-                return;
-            }
+            //if (key.Equals(ScribeGuidesTokens.OriginUserIds, StringComparison.OrdinalIgnoreCase) ||
+            //    key.Equals(nameof(ScribeGuidesTokens.OriginUserIds), StringComparison.OrdinalIgnoreCase))
+            //{
+            //    guide.OriginUserIds = Parse(value, info).Split(';');
+            //    return;
+            //}
 
             if (key.Equals(ScribeGuidesTokens.DestinationUserIds, StringComparison.OrdinalIgnoreCase) ||
                 key.Equals(nameof(ScribeGuidesTokens.DestinationUserIds), StringComparison.OrdinalIgnoreCase))

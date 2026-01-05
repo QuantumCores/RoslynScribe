@@ -212,12 +212,12 @@ namespace RoslynScribe.Domain.Extensions
                 return;
             }
 
-            if (key.Equals(ScribeGuidesTokens.Id, StringComparison.OrdinalIgnoreCase) ||
-                key.Equals(nameof(ScribeGuidesTokens.Id), StringComparison.OrdinalIgnoreCase))
-            {
-                guide.Id = value;
-                return;
-            }
+            //if (key.Equals(ScribeGuidesTokens.Id, StringComparison.OrdinalIgnoreCase) ||
+            //    key.Equals(nameof(ScribeGuidesTokens.Id), StringComparison.OrdinalIgnoreCase))
+            //{
+            //    guide.Id = value;
+            //    return;
+            //}
 
             if (key.Equals(ScribeGuidesTokens.UserDefinedId, StringComparison.OrdinalIgnoreCase) ||
                 key.Equals(nameof(ScribeGuidesTokens.UserDefinedId), StringComparison.OrdinalIgnoreCase))
@@ -243,12 +243,12 @@ namespace RoslynScribe.Domain.Extensions
                 return;
             }
 
-            if (key.Equals(ScribeGuidesTokens.OriginUserIds, StringComparison.OrdinalIgnoreCase) ||
-                key.Equals(nameof(ScribeGuidesTokens.OriginUserIds), StringComparison.OrdinalIgnoreCase))
-            {
-                guide.OriginUserIds = MergeStringList(guide.OriginUserIds, SplitList(value));
-                return;
-            }
+            //if (key.Equals(ScribeGuidesTokens.OriginUserIds, StringComparison.OrdinalIgnoreCase) ||
+            //    key.Equals(nameof(ScribeGuidesTokens.OriginUserIds), StringComparison.OrdinalIgnoreCase))
+            //{
+            //    guide.OriginUserIds = MergeStringList(guide.OriginUserIds, SplitList(value));
+            //    return;
+            //}
 
             if (key.Equals(ScribeGuidesTokens.DestinationUserIds, StringComparison.OrdinalIgnoreCase) ||
                 key.Equals(nameof(ScribeGuidesTokens.DestinationUserIds), StringComparison.OrdinalIgnoreCase))

@@ -7,8 +7,8 @@ namespace RoslynScribe.Domain.Models
         /// <summary>
         /// Unique node identifier
         /// </summary>
-        [JsonPropertyName(ScribeGuidesTokens.Id)]
-        public string Id { get; set; }
+        //[JsonPropertyName(ScribeGuidesTokens.Id)]
+        //public string Id { get; set; }
 
         /// <summary>
         /// Unique user defined node identifier
@@ -44,8 +44,8 @@ namespace RoslynScribe.Domain.Models
         /// <summary>
         /// This property contains node ids that should be pointing this node
         /// </summary>
-        [JsonPropertyName(ScribeGuidesTokens.OriginUserIds)]
-        public string[] OriginUserIds { get; set; } = new string[0];
+        //[JsonPropertyName(ScribeGuidesTokens.OriginUserIds)]
+        //public string[] OriginUserIds { get; set; } = new string[0];
 
         /// <summary>
         /// This property contains node ids which this node should be pointing

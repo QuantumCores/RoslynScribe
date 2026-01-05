@@ -6,6 +6,11 @@ namespace RoslynScribe.Domain.Services
 {
     public class ScribeBuilder
     {
+        public static ScribeResult Merge(ScribeResult[] results)
+        {
+            
+        }
+
         public static ScribeResult Rebuild(List<ScribeNode> nodes)
         {
             var trees = new List<ScribeTreeNode>(nodes.Count);
