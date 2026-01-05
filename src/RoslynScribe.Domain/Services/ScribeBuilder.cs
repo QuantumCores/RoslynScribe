@@ -1,6 +1,7 @@
 ﻿using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RoslynScribe.Domain.Services
 {
@@ -183,7 +184,7 @@ namespace RoslynScribe.Domain.Services
 
             var mergedDataNodes = new Dictionary<Guid, ScribeNodeData>();
             var mergedUserIds = new Dictionary<string, ScribeNodeData>();
-            var nodesWithDest = new Dictionary<Guid, ScribeNodeData>();            
+            var nodesWithDest = new Dictionary<Guid, ScribeNodeData>();
 
             // merge all nodes and collect user-defined IDs and nodes with destination IDs
             for (int i = 0; i < results.Length; i++)
@@ -249,13 +250,20 @@ namespace RoslynScribe.Domain.Services
                 {
                     mergedTrees.Add(tree);
                     var stack = new Stack<ScribeTreeNode>(new[] { tree });
-                    
+
                     // ensure all child relationships in tree are updated
                     while (stack.Count != 0)
                     {
                         var root = stack.Pop();
                         var id = root.Id;
-                        
+
+                        // we add child nodes in the beginning to avoid double processing of newly added nodes
+                        foreach (var child in root.ChildNodes)
+                        {
+                            stack.Push(child);
+                        }
+
+                        // add any missing child nodes based on destination user IDs
                         if (nodesWithDest.ContainsKey(id))
                         {
                             var nodeWithDest = nodesWithDest[id];
@@ -268,13 +276,29 @@ namespace RoslynScribe.Domain.Services
                                     {
                                         root.ChildNodes.Add(new ScribeTreeNode { Id = destNode.Id });
                                     }
+
+                                    if (!HasChild(nodeWithDest, destNode.Id))
+                                    {
+                                        nodeWithDest.ChildNodeIds.Add(destNode.Id);
+                                    }
                                 }
                             }
                         }
 
-                        foreach (var child in root.ChildNodes)
+                        // add missing child nodes to treeNode based on node child ids
+                        if (mergedDataNodes.ContainsKey(id))
                         {
-                            stack.Push(child);
+                            var nodeData = mergedDataNodes[id];
+                            var idsCopy = nodeData.ChildNodeIds.ToList();
+                            foreach (var childId in root.ChildNodes)
+                            {
+                                idsCopy.Remove(childId.Id);
+                            }
+
+                            foreach (var leftId in idsCopy)
+                            {
+                                root.ChildNodes.Add(new ScribeTreeNode { Id = leftId });
+                            }
                         }
                     }
                 }
@@ -462,6 +486,19 @@ namespace RoslynScribe.Domain.Services
             for (var i = 0; i < node.ChildNodes.Count; i++)
             {
                 if (node.ChildNodes[i].Id == childId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasChild(ScribeNodeData node, Guid childId)
+        {
+            for (var i = 0; i < node.ChildNodeIds.Count; i++)
+            {
+                if (node.ChildNodeIds[i] == childId)
                 {
                     return true;
                 }
