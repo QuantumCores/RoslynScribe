@@ -58,6 +58,7 @@ namespace RoslynScribe.Domain.Services
             var byIdDict = new Dictionary<Guid, ScribeNode>();
             var visited = new HashSet<Guid>();
             var stack = new Stack<ScribeNode>(documentRoots);
+            var userIds = new Dictionary<string, ScribeNode>();
 
             // Depth-first traversal to collect all nodes into byIdDict
             // suboptimal but simple
@@ -73,6 +74,13 @@ namespace RoslynScribe.Domain.Services
                 if (!byIdDict.ContainsKey(id))
                 {
                     byIdDict.Add(id, root);
+                }
+
+                // collect data about userDefined IDs
+                var userId = root.Guides?.UserDefinedId;
+                if (!string.IsNullOrWhiteSpace(userId) && !userIds.ContainsKey(userId))
+                {
+                    userIds.Add(root.Guides.UserDefinedId, root);
                 }
 
                 foreach (var child in root.ChildNodes)
@@ -99,12 +107,30 @@ namespace RoslynScribe.Domain.Services
                     }
                 }
 
-                result[pair.Key] = new ScribeNodeData(node.Id, node.Guides)
+                // Also add any user-defined ID references
+                if (node.Guides != null)
+                {
+                    foreach (var userChildId in node.Guides.DestinationUserIds)
+                    {
+                        if (userIds.ContainsKey(userChildId))
+                        {
+                            var childNode = userIds[userChildId];
+                            if (seenChildIds.Add(childNode.Id))
+                            {
+                                childNodeIds.Add(childNode.Id);
+                            }
+                        }
+                    }
+                }
+
+                var nodeData = new ScribeNodeData(node.Id, node.Guides)
                 {
                     Kind = node.Kind,
                     MetaInfo = node.MetaInfo,
                     ChildNodeIds = childNodeIds
                 };
+
+                result[pair.Key] = nodeData;
             }
 
             return result;

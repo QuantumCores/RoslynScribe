@@ -45,19 +45,19 @@ namespace RoslynScribe.Domain.Models
         /// This property contains node ids that should be pointing this node
         /// </summary>
         [JsonPropertyName(ScribeGuidesTokens.OriginUserIds)]
-        public string[] OriginUserIds { get; set; }
+        public string[] OriginUserIds { get; set; } = new string[0];
 
         /// <summary>
         /// This property contains node ids which this node should be pointing
         /// </summary>
         [JsonPropertyName(ScribeGuidesTokens.DestinationUserIds)]
-        public string[] DestinationUserIds { get; set; }
+        public string[] DestinationUserIds { get; set; } = new string[0];
 
         /// <summary>
         /// Tags for given node
         /// </summary>
         [JsonPropertyName(ScribeGuidesTokens.Tags)]
-        public string[] Tags { get; set; }
+        public string[] Tags { get; set; } = new string[0];
 
         public static ScribeGuides Default()
         {

@@ -11,8 +11,6 @@ namespace RoslynScribe.Domain.Tests
 {
     public class RebuildTests
     {
-        private string _expectedDirectory;
-
         [OneTimeSetUp]
         public async Task Setup()
         {
@@ -69,6 +67,51 @@ namespace RoslynScribe.Domain.Tests
 
             // Assert
             Assert.That(rebuilt.Nodes.Count, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public async Task Rebuild_includes_user_defined_childs()
+        {
+            // Arrange
+            var userDefinedId = "user-defined-child";
+            var child1Guid = Guid.NewGuid();
+            var child2Guid = Guid.NewGuid();
+            var tree = new ScribeNode
+            {
+                Id = Guid.NewGuid(),
+                Kind = "Root",
+                ChildNodes = new List<ScribeNode>
+                {
+                    new ScribeNode
+                    {
+                        Id = child1Guid,
+                        Kind = "Child1",
+                        ChildNodes = new List<ScribeNode>(),
+                        Guides = new ScribeGuides
+                        {
+                            UserDefinedId = userDefinedId,
+                        }
+
+                    },
+                    new ScribeNode
+                    {
+                        Id = child2Guid,
+                        Kind = "Child2",
+                        ChildNodes = new List<ScribeNode>(),
+                        Guides = new ScribeGuides
+                        {
+                            DestinationUserIds = new[] { userDefinedId }
+                        }
+                    }
+                }
+            };
+
+            // Act
+            var rebuilt = ScribeBuilder.Rebuild(new List<ScribeNode> { tree });
+
+            // Assert
+            Assert.That(rebuilt.Nodes.Count, Is.EqualTo(3));
+            Assert.That(rebuilt.Nodes[child2Guid].ChildNodeIds[0] == child1Guid);
         }
 
         private static List<Guid> GetTreeIds(List<ScribeTreeNode> trees)
