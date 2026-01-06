@@ -1,30 +1,38 @@
 {
-  "Id": "38806d1d-1a4d-fc41-1aee-48f2f72d4d0c",
-  "TargetNodeId": null,
+  "Id": "rCsjrMA3",
   "Value": null,
+  "Guides": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S004_CommentFromOtherClassMethod.cs",
-    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
+    "DocumentPath": "src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S004_TestClass",
     "MemberName": null,
-    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
+    "Identifier": "src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": "6ddff3b7-c279-2d25-63e1-93b21c2789d1",
-      "TargetNodeId": null,
+      "Id": "2VdZPi2Z",
       "Value": [
-        "// [ADC][T:`S004 return addition`]"
+        "// [ADC][T:\u0060S004 return addition\u0060]"
       ],
+      "Guides": {
+        "Uid": null,
+        "L": 1,
+        "T": "S004 return addition",
+        "D": null,
+        "P": null,
+        "DUI": [],
+        "Tags": []
+      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S004_CommentFromOtherClassMethod.cs",
-        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
+        "DocumentPath": "src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S004_TestClass",
         "MemberName": "S004_SecondMethod",
@@ -33,16 +41,24 @@
       },
       "ChildNodes": [
         {
-          "Id": "5b107038-7969-d1df-2127-7c65ac6c5c41",
-          "TargetNodeId": null,
+          "Id": "YvicELCd",
           "Value": [
-            "// [ADC][T:`S004 Nodes shared comment get logic data`]"
+            "// [ADC][T:\u0060S004 Nodes shared comment get logic data\u0060]"
           ],
+          "Guides": {
+            "Uid": null,
+            "L": 1,
+            "T": "S004 Nodes shared comment get logic data",
+            "D": null,
+            "P": null,
+            "DUI": [],
+            "Tags": []
+          },
           "Kind": "LocalDeclarationStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "S004_CommentFromOtherClassMethod.cs",
-            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
+            "DocumentPath": "src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S004_TestClass",
             "MemberName": "S004_SecondMethod",
@@ -52,16 +68,24 @@
           "ChildNodes": []
         },
         {
-          "Id": "66000eb4-b4bc-a587-fbdc-3c6de6bf13b1",
-          "TargetNodeId": null,
+          "Id": "AvXavq06",
           "Value": [
-            "// [ADC][T:`Logic Add two numbers`,L:`2`]"
+            "// [ADC][T:\u0060Logic Add two numbers\u0060,L:\u00602\u0060]"
           ],
+          "Guides": {
+            "Uid": null,
+            "L": 2,
+            "T": "Logic Add two numbers",
+            "D": null,
+            "P": null,
+            "DUI": [],
+            "Tags": []
+          },
           "Kind": "MethodDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "Logic.cs",
-            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\Logic.cs",
+            "DocumentPath": "src\\RoslynScribe.TestProject\\Logic.cs",
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "Logic",
             "MemberName": "Add",
@@ -70,16 +94,24 @@
           },
           "ChildNodes": [
             {
-              "Id": "963e1dbd-4669-d278-6260-69f22b22b703",
-              "TargetNodeId": null,
+              "Id": "7romtLtN",
               "Value": [
-                "// [ADC][T:`Logic This is add result`]"
+                "// [ADC][T:\u0060Logic This is add result\u0060]"
               ],
+              "Guides": {
+                "Uid": null,
+                "L": 1,
+                "T": "Logic This is add result",
+                "D": null,
+                "P": null,
+                "DUI": [],
+                "Tags": []
+              },
               "Kind": "ReturnStatement",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
                 "DocumentName": "Logic.cs",
-                "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\Logic.cs",
+                "DocumentPath": "src\\RoslynScribe.TestProject\\Logic.cs",
                 "NameSpace": "RoslynScribe.TestProject",
                 "TypeName": "Logic",
                 "MemberName": "Add",

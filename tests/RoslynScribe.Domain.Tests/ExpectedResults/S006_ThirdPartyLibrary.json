@@ -1,30 +1,38 @@
 {
-  "Id": "9ce59090-f26a-287a-20a3-d3616028e0d5",
-  "TargetNodeId": null,
+  "Id": "T4k5eYnJ",
   "Value": null,
+  "Guides": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S006_ThirdPartyLibrary.cs",
-    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
+    "DocumentPath": "src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S006_ThirdPartyLibrary",
     "MemberName": null,
-    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
+    "Identifier": "src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": "006ba9ab-f9f8-c3aa-70da-b964a9cc67a3",
-      "TargetNodeId": null,
+      "Id": "sHQAVHis",
       "Value": [
-        "// [ADC][T:`S006 call external method to add days`]"
+        "// [ADC][T:\u0060S006 call external method to add days\u0060]"
       ],
+      "Guides": {
+        "Uid": null,
+        "L": 1,
+        "T": "S006 call external method to add days",
+        "D": null,
+        "P": null,
+        "DUI": [],
+        "Tags": []
+      },
       "Kind": "ExpressionStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S006_ThirdPartyLibrary.cs",
-        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
+        "DocumentPath": "src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S006_ThirdPartyLibrary",
         "MemberName": null,

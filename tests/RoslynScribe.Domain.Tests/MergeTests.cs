@@ -9,7 +9,7 @@ namespace RoslynScribe.Domain.Tests
     public class MergeTests
     {
         [Test]
-        public void MyMerge_connects_external_child_nodes_in_tree()
+        public void Merge_connects_external_child_nodes_in_tree()
         {
             var parentId = Guid.NewGuid().ToString();
             var externalId = Guid.NewGuid().ToString();
@@ -53,7 +53,7 @@ namespace RoslynScribe.Domain.Tests
         }
 
         [Test]
-        public void MyMerge_connects_external_destination_user_ids_in_tree()
+        public void Merge_connects_external_destination_user_ids_in_tree()
         {
             var parentId = Guid.NewGuid().ToString();
             var targetId = Guid.NewGuid().ToString();
@@ -104,7 +104,7 @@ namespace RoslynScribe.Domain.Tests
         }
 
         [Test]
-        public void MyMerge_ignores_unknown_destination_user_ids()
+        public void Merge_ignores_unknown_destination_user_ids()
         {
             var parentId = Guid.NewGuid().ToString();
 
@@ -135,7 +135,7 @@ namespace RoslynScribe.Domain.Tests
         }
 
         [Test]
-        public void MyMerge_returns_empty_result_for_empty_input()
+        public void Merge_returns_empty_result_for_empty_input()
         {
             var merged = ScribeBuilder.Merge(new ScribeResult[0]);
 

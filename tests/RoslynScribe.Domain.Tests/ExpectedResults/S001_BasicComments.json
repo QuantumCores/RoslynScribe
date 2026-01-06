@@ -1,30 +1,38 @@
 {
-  "Id": "121f4626-5b2c-dd8b-435c-edcf681a7dfb",
-  "TargetNodeId": null,
+  "Id": "FBR4kHgM",
   "Value": null,
+  "Guides": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S001_BasicComments.cs",
-    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+    "DocumentPath": "src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": null,
     "MemberName": null,
-    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+    "Identifier": "src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": "46657d7d-373d-c0da-cf60-02f6ac8a8eb0",
-      "TargetNodeId": null,
+      "Id": "bBuRaQdn",
       "Value": [
-        "// [ADC][T:`S001 namespace comment`]"
+        "// [ADC][T:\u0060S001 namespace comment\u0060]"
       ],
+      "Guides": {
+        "Uid": null,
+        "L": 1,
+        "T": "S001 namespace comment",
+        "D": null,
+        "P": null,
+        "DUI": [],
+        "Tags": []
+      },
       "Kind": "NamespaceDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S001_BasicComments.cs",
-        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+        "DocumentPath": "src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S001_BasicComments",
         "MemberName": null,
@@ -33,16 +41,24 @@
       },
       "ChildNodes": [
         {
-          "Id": "1d39ead3-feb7-3a11-507b-f70ecbea66fd",
-          "TargetNodeId": null,
+          "Id": "fvhJqu8y",
           "Value": [
-            "// [ADC][T:`S001 BasicTestClass`]"
+            "// [ADC][T:\u0060S001 BasicTestClass\u0060]"
           ],
+          "Guides": {
+            "Uid": null,
+            "L": 1,
+            "T": "S001 BasicTestClass",
+            "D": null,
+            "P": null,
+            "DUI": [],
+            "Tags": []
+          },
           "Kind": "ClassDeclaration",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "S001_BasicComments.cs",
-            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+            "DocumentPath": "src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S001_BasicComments",
             "MemberName": null,
@@ -51,16 +67,24 @@
           },
           "ChildNodes": [
             {
-              "Id": "71cd404a-9712-b025-f6ab-30c1bb5a580b",
-              "TargetNodeId": null,
+              "Id": "aQjdhHUT",
               "Value": [
-                "// [ADC][T:`S001 BasicMethod`]"
+                "// [ADC][T:\u0060S001 BasicMethod\u0060]"
               ],
+              "Guides": {
+                "Uid": null,
+                "L": 1,
+                "T": "S001 BasicMethod",
+                "D": null,
+                "P": null,
+                "DUI": [],
+                "Tags": []
+              },
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
                 "DocumentName": "S001_BasicComments.cs",
-                "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+                "DocumentPath": "src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
                 "NameSpace": "RoslynScribe.TestProject",
                 "TypeName": "S001_BasicComments",
                 "MemberName": "S001_BasicMethod",
@@ -69,16 +93,24 @@
               },
               "ChildNodes": [
                 {
-                  "Id": "b672798b-906f-cae0-9dda-1de073d9e58f",
-                  "TargetNodeId": null,
+                  "Id": "X99tWySj",
                   "Value": [
-                    "// [ADC][T:`S001 result`]"
+                    "// [ADC][T:\u0060S001 result\u0060]"
                   ],
+                  "Guides": {
+                    "Uid": null,
+                    "L": 1,
+                    "T": "S001 result",
+                    "D": null,
+                    "P": null,
+                    "DUI": [],
+                    "Tags": []
+                  },
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",
                     "DocumentName": "S001_BasicComments.cs",
-                    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
+                    "DocumentPath": "src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
                     "NameSpace": "RoslynScribe.TestProject",
                     "TypeName": "S001_BasicComments",
                     "MemberName": "S001_BasicMethod",

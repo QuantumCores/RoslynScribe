@@ -1,30 +1,38 @@
 {
-  "Id": "98d4ed30-6730-a223-cec9-d14d6b95e64f",
-  "TargetNodeId": null,
+  "Id": "xNfDegV1",
   "Value": null,
+  "Guides": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S007_CallLambda.cs",
-    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
+    "DocumentPath": "src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S007_CallLambda",
     "MemberName": null,
-    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
+    "Identifier": "src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": "9031e2ea-ac9e-d8ff-7138-27eb4be61bde",
-      "TargetNodeId": null,
+      "Id": "pb7fDS1D",
       "Value": [
-        "// [ADC][T:`S007 prepare lambda`]"
+        "// [ADC][T:\u0060S007 prepare lambda\u0060]"
       ],
+      "Guides": {
+        "Uid": null,
+        "L": 1,
+        "T": "S007 prepare lambda",
+        "D": null,
+        "P": null,
+        "DUI": [],
+        "Tags": []
+      },
       "Kind": "LocalDeclarationStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S007_CallLambda.cs",
-        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
+        "DocumentPath": "src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S007_CallLambda",
         "MemberName": null,
@@ -34,16 +42,24 @@
       "ChildNodes": []
     },
     {
-      "Id": "4d595483-8279-7255-9186-b0049d094059",
-      "TargetNodeId": null,
+      "Id": "vScxEeL0",
       "Value": [
-        "// [ADC][T:`S007 add one in lambda expression`]"
+        "// [ADC][T:\u0060S007 add one in lambda expression\u0060]"
       ],
+      "Guides": {
+        "Uid": null,
+        "L": 1,
+        "T": "S007 add one in lambda expression",
+        "D": null,
+        "P": null,
+        "DUI": [],
+        "Tags": []
+      },
       "Kind": "LocalDeclarationStatement",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S007_CallLambda.cs",
-        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
+        "DocumentPath": "src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S007_CallLambda",
         "MemberName": null,

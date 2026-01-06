@@ -12,13 +12,14 @@ namespace RoslynScribe.Domain.Tests
     public class MetaInfoTests
     {
         private string _expectedDirectory;
-        private static bool overrideResults = true;
+        private static bool overrideResults = false;
 
         private static void OverrideResults(string path, ScribeNode result)
         {
             if (overrideResults)
             {         
-                File.WriteAllText(path, JsonSerializer.Serialize(result, new JsonSerializerOptions() { WriteIndented = true }));
+                var file = Path.GetFileName(path);
+                File.WriteAllText($"D:\\Source\\RoslynScribe\\src\\RoslynScribe.Visualizer\\{file}", JsonSerializer.Serialize(result, new JsonSerializerOptions() { WriteIndented = true }));
             }
         }
 

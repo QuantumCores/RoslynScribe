@@ -1,30 +1,38 @@
 {
-  "Id": "52e94e25-12d2-3780-2efd-40b081ba4225",
-  "TargetNodeId": null,
+  "Id": "nLAgciNJ",
   "Value": null,
+  "Guides": null,
   "Kind": "Document",
   "MetaInfo": {
     "ProjectName": "RoslynScribe.TestProject",
     "DocumentName": "S003_CommentFromLocalMethod.cs",
-    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+    "DocumentPath": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
     "NameSpace": "RoslynScribe.TestProject",
     "TypeName": "S003_TestClass",
     "MemberName": null,
-    "Identifier": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+    "Identifier": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
     "Line": 0
   },
   "ChildNodes": [
     {
-      "Id": "26e8c0c1-7b4a-8e4b-9d72-d78693a61125",
-      "TargetNodeId": null,
+      "Id": "sEB5E87J",
       "Value": [
-        "// [ADC][T:`S003 basicMethod`]"
+        "// [ADC][T:\u0060S003 basicMethod\u0060]"
       ],
+      "Guides": {
+        "Uid": null,
+        "L": 1,
+        "T": "S003 basicMethod",
+        "D": null,
+        "P": null,
+        "DUI": [],
+        "Tags": []
+      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S003_CommentFromLocalMethod.cs",
-        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+        "DocumentPath": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S003_TestClass",
         "MemberName": "S003_BasicMethod",
@@ -33,16 +41,24 @@
       },
       "ChildNodes": [
         {
-          "Id": "c2fc9872-0179-edc7-aa15-fb82ba9559f5",
-          "TargetNodeId": null,
+          "Id": "EjAPzTU1",
           "Value": [
-            "// [ADC][T:`S003 basic result`]"
+            "// [ADC][T:\u0060S003 basic result\u0060]"
           ],
+          "Guides": {
+            "Uid": null,
+            "L": 1,
+            "T": "S003 basic result",
+            "D": null,
+            "P": null,
+            "DUI": [],
+            "Tags": []
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "S003_CommentFromLocalMethod.cs",
-            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+            "DocumentPath": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S003_TestClass",
             "MemberName": "S003_BasicMethod",
@@ -54,16 +70,24 @@
       ]
     },
     {
-      "Id": "964f3576-b21d-dac9-1a03-42a4aa82554a",
-      "TargetNodeId": null,
+      "Id": "zALCCOcV",
       "Value": [
-        "// [ADC][T:`S003 second method`]"
+        "// [ADC][T:\u0060S003 second method\u0060]"
       ],
+      "Guides": {
+        "Uid": null,
+        "L": 1,
+        "T": "S003 second method",
+        "D": null,
+        "P": null,
+        "DUI": [],
+        "Tags": []
+      },
       "Kind": "MethodDeclaration",
       "MetaInfo": {
         "ProjectName": "RoslynScribe.TestProject",
         "DocumentName": "S003_CommentFromLocalMethod.cs",
-        "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+        "DocumentPath": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
         "NameSpace": "RoslynScribe.TestProject",
         "TypeName": "S003_TestClass",
         "MemberName": "S003_SecondMethod",
@@ -72,16 +96,24 @@
       },
       "ChildNodes": [
         {
-          "Id": "6ad38714-66fc-5f0e-fa35-a58b6823732b",
-          "TargetNodeId": null,
+          "Id": "cFjuGZyD",
           "Value": [
-            "// [ADC][T:`S003 call basicMethod`]"
+            "// [ADC][T:\u0060S003 call basicMethod\u0060]"
           ],
+          "Guides": {
+            "Uid": null,
+            "L": 1,
+            "T": "S003 call basicMethod",
+            "D": null,
+            "P": null,
+            "DUI": [],
+            "Tags": []
+          },
           "Kind": "ReturnStatement",
           "MetaInfo": {
             "ProjectName": "RoslynScribe.TestProject",
             "DocumentName": "S003_CommentFromLocalMethod.cs",
-            "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+            "DocumentPath": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
             "NameSpace": "RoslynScribe.TestProject",
             "TypeName": "S003_TestClass",
             "MemberName": "S003_SecondMethod",
@@ -90,16 +122,24 @@
           },
           "ChildNodes": [
             {
-              "Id": "26e8c0c1-7b4a-8e4b-9d72-d78693a61125",
-              "TargetNodeId": null,
+              "Id": "sEB5E87J",
               "Value": [
-                "// [ADC][T:`S003 basicMethod`]"
+                "// [ADC][T:\u0060S003 basicMethod\u0060]"
               ],
+              "Guides": {
+                "Uid": null,
+                "L": 1,
+                "T": "S003 basicMethod",
+                "D": null,
+                "P": null,
+                "DUI": [],
+                "Tags": []
+              },
               "Kind": "MethodDeclaration",
               "MetaInfo": {
                 "ProjectName": "RoslynScribe.TestProject",
                 "DocumentName": "S003_CommentFromLocalMethod.cs",
-                "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+                "DocumentPath": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
                 "NameSpace": "RoslynScribe.TestProject",
                 "TypeName": "S003_TestClass",
                 "MemberName": "S003_BasicMethod",
@@ -108,16 +148,24 @@
               },
               "ChildNodes": [
                 {
-                  "Id": "c2fc9872-0179-edc7-aa15-fb82ba9559f5",
-                  "TargetNodeId": null,
+                  "Id": "EjAPzTU1",
                   "Value": [
-                    "// [ADC][T:`S003 basic result`]"
+                    "// [ADC][T:\u0060S003 basic result\u0060]"
                   ],
+                  "Guides": {
+                    "Uid": null,
+                    "L": 1,
+                    "T": "S003 basic result",
+                    "D": null,
+                    "P": null,
+                    "DUI": [],
+                    "Tags": []
+                  },
                   "Kind": "ReturnStatement",
                   "MetaInfo": {
                     "ProjectName": "RoslynScribe.TestProject",
                     "DocumentName": "S003_CommentFromLocalMethod.cs",
-                    "DocumentPath": "D:\\Source\\RoslynScribe\\src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
+                    "DocumentPath": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
                     "NameSpace": "RoslynScribe.TestProject",
                     "TypeName": "S003_TestClass",
                     "MemberName": "S003_BasicMethod",
