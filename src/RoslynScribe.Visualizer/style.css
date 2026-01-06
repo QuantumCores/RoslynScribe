@@ -377,10 +377,11 @@ input[type="text"] {
     display: flex;
     gap: 6px;
     margin-top: 4px;
+    min-height: 24px;
     z-index: 10;
 }
 
-.node-icon-btn {
+button.node-icon-btn {
     cursor: pointer;
     background: #fff;
     border: 1px solid #ccc;
@@ -395,18 +396,51 @@ input[type="text"] {
     transition: all 0.2s;
 }
 
-.node-icon-btn:hover {
+button.node-icon-btn:hover {
     background-color: #f0f0f0;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
-.node-icon-btn svg {
+button.node-icon-btn svg {
     width: 14px;
     height: 14px;
     fill: none;
     stroke: #555;
     pointer-events: none; /* Ensure click passes to button */
+}
+
+/* SVG Decorations */
+.node-decorations .node-icon-btn {
+    cursor: pointer;
+    color: #555;
+}
+
+.node-decorations .node-icon-bg {
+    fill: #fff;
+    stroke: #ccc;
+    stroke-width: 1px;
+}
+
+.node-decorations .node-icon-btn:hover .node-icon-bg {
+    fill: #f0f0f0;
+}
+
+.node-decorations .node-icon {
+    pointer-events: none;
+}
+
+.node-decorations .node-badge-circle {
+    fill: #1565c0 !important;
+    stroke: #fff;
+    stroke-width: 1px;
+}
+
+.node-decorations .node-badge-text {
+    fill: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    pointer-events: none;
 }
 
 /* Tree Selector */

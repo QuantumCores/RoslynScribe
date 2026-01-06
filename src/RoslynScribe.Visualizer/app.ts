@@ -3,15 +3,17 @@
 declare var mermaid: any;
 declare var svgPanZoom: any;
 
-// SVG Icons
-const ICONS = {
-    EXPAND: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    COLLAPSE: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    DETAILS: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
-    SEARCH: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`
-};
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 type SubgraphMode = 'project' | 'folder' | 'none';
+type IconType = 'expand' | 'collapse' | 'details';
+type NodeDecoration = {
+    id: string;
+    className: string;
+    hiddenCount: number;
+    canExpand: boolean;
+    canCollapse: boolean;
+};
 
 class ScribeApp {
     private data: ScribeResult | null = null;
@@ -38,11 +40,11 @@ class ScribeApp {
         // Initialize Mermaid
         mermaid.initialize({ 
             startOnLoad: false,
-            securityLevel: 'loose', // Required for htmlLabels interactions
-            htmlLabels: true,
+            securityLevel: 'loose',
+            htmlLabels: false,
             flowchart: { 
                 useMaxWidth: false, 
-                htmlLabels: true,
+                htmlLabels: false,
                 curve: 'basis'
             }
         });
@@ -110,30 +112,30 @@ class ScribeApp {
 
         // Global Event Delegation for Dynamic Mermaid Elements
         // This is robust against parsing errors and scope issues
-        document.getElementById('mermaid-output')?.addEventListener('click', (e: Event) => {
-            let target = e.target as HTMLElement;
-            // Traverse up to find button or relevant container
-            while (target && target.id !== 'mermaid-output') {
-                if (target.tagName === 'BUTTON' && target.dataset.action) {
-                    const action = target.dataset.action;
-                    const id = target.dataset.id;
-                    if (action === 'expand' && id) {
+        const mermaidOutput = document.getElementById('mermaid-output');
+        mermaidOutput?.addEventListener('click', (e: Event) => {
+            let target = e.target as Element | null;
+            while (target && target !== mermaidOutput) {
+                const action = target.getAttribute('data-action');
+                const id = target.getAttribute('data-id');
+                if (action && id) {
+                    if (action === 'expand') {
                         this.expandNode(id);
                         e.stopPropagation();
                         return;
                     }
-                    if (action === 'details' && id) {
+                    if (action === 'details') {
                         this.showNodeDetails(id);
                         e.stopPropagation();
                         return;
                     }
-                    if (action === 'collapse' && id) {
+                    if (action === 'collapse') {
                         this.retractNode(id);
                         e.stopPropagation();
                         return;
                     }
                 }
-                target = target.parentElement as HTMLElement;
+                target = target.parentElement;
             }
         });
     }
@@ -568,6 +570,184 @@ class ScribeApp {
         return edges;
     }
 
+    private sanitizeMermaidLabel(value: string): string {
+        return value.replace(/[\r\n]+/g, ' ').replace(/"/g, '\\"');
+    }
+
+    private sanitizeClassName(value: string): string {
+        return value.replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+
+    private getNodeKeyClass(id: string): string {
+        return `node-key-${this.sanitizeClassName(id)}`;
+    }
+
+    private createSvgElement<T extends keyof SVGElementTagNameMap>(tag: T): SVGElementTagNameMap[T] {
+        return document.createElementNS(SVG_NS, tag);
+    }
+
+    private buildIcon(icon: IconType): SVGGElement {
+        const iconGroup = this.createSvgElement('g');
+        iconGroup.setAttribute('class', 'node-icon');
+        iconGroup.setAttribute('fill', 'none');
+        iconGroup.setAttribute('stroke', 'currentColor');
+        iconGroup.setAttribute('stroke-width', '2');
+        iconGroup.setAttribute('stroke-linecap', 'round');
+        iconGroup.setAttribute('stroke-linejoin', 'round');
+
+        if (icon === 'expand') {
+            const vLine = this.createSvgElement('line');
+            vLine.setAttribute('x1', '12');
+            vLine.setAttribute('y1', '5');
+            vLine.setAttribute('x2', '12');
+            vLine.setAttribute('y2', '19');
+            iconGroup.appendChild(vLine);
+
+            const hLine = this.createSvgElement('line');
+            hLine.setAttribute('x1', '5');
+            hLine.setAttribute('y1', '12');
+            hLine.setAttribute('x2', '19');
+            hLine.setAttribute('y2', '12');
+            iconGroup.appendChild(hLine);
+        } else if (icon === 'collapse') {
+            const hLine = this.createSvgElement('line');
+            hLine.setAttribute('x1', '5');
+            hLine.setAttribute('y1', '12');
+            hLine.setAttribute('x2', '19');
+            hLine.setAttribute('y2', '12');
+            iconGroup.appendChild(hLine);
+        } else {
+            const circle = this.createSvgElement('circle');
+            circle.setAttribute('cx', '12');
+            circle.setAttribute('cy', '12');
+            circle.setAttribute('r', '10');
+            iconGroup.appendChild(circle);
+
+            const vLine = this.createSvgElement('line');
+            vLine.setAttribute('x1', '12');
+            vLine.setAttribute('y1', '16');
+            vLine.setAttribute('x2', '12');
+            vLine.setAttribute('y2', '12');
+            iconGroup.appendChild(vLine);
+
+            const dot = this.createSvgElement('line');
+            dot.setAttribute('x1', '12');
+            dot.setAttribute('y1', '8');
+            dot.setAttribute('x2', '12.01');
+            dot.setAttribute('y2', '8');
+            iconGroup.appendChild(dot);
+        }
+
+        return iconGroup;
+    }
+
+    private appendIconButton(parent: SVGGElement, x: number, y: number, size: number, icon: IconType, action: string, nodeId: string, title: string) {
+        const buttonGroup = this.createSvgElement('g');
+        buttonGroup.setAttribute('class', 'node-icon-btn');
+        buttonGroup.setAttribute('data-action', action);
+        buttonGroup.setAttribute('data-id', nodeId);
+        buttonGroup.setAttribute('transform', `translate(${x}, ${y})`);
+        buttonGroup.setAttribute('role', 'button');
+        buttonGroup.setAttribute('aria-label', title);
+
+        const bg = this.createSvgElement('rect');
+        bg.setAttribute('class', 'node-icon-bg');
+        bg.setAttribute('x', '0');
+        bg.setAttribute('y', '0');
+        bg.setAttribute('width', `${size}`);
+        bg.setAttribute('height', `${size}`);
+        bg.setAttribute('rx', '4');
+        bg.setAttribute('ry', '4');
+        buttonGroup.appendChild(bg);
+
+        const iconGroup = this.buildIcon(icon);
+        const iconSize = size - 8;
+        const scale = iconSize / 24;
+        const offset = (size - iconSize) / 2;
+        iconGroup.setAttribute('transform', `translate(${offset}, ${offset}) scale(${scale})`);
+        buttonGroup.appendChild(iconGroup);
+
+        const titleEl = this.createSvgElement('title');
+        titleEl.textContent = title;
+        buttonGroup.appendChild(titleEl);
+
+        parent.appendChild(buttonGroup);
+    }
+
+    private appendBadge(parent: SVGGElement, x: number, y: number, count: number) {
+        const badgeGroup = this.createSvgElement('g');
+        badgeGroup.setAttribute('class', 'node-badge');
+        badgeGroup.setAttribute('transform', `translate(${x}, ${y})`);
+
+        const circle = this.createSvgElement('circle');
+        circle.setAttribute('class', 'node-badge-circle');
+        circle.setAttribute('cx', '0');
+        circle.setAttribute('cy', '0');
+        circle.setAttribute('r', '9');
+        circle.setAttribute('fill', '#1565c0');
+        circle.setAttribute('stroke', '#fff');
+        circle.setAttribute('stroke-width', '1');
+        circle.setAttribute('style', 'fill: #1565c0 !important; stroke: #fff !important; stroke-width: 1px !important;');
+        badgeGroup.appendChild(circle);
+
+        const text = this.createSvgElement('text');
+        text.setAttribute('class', 'node-badge-text');
+        text.setAttribute('x', '0');
+        text.setAttribute('y', '0');
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.textContent = `+${count}`;
+        badgeGroup.appendChild(text);
+
+        parent.appendChild(badgeGroup);
+    }
+
+    private hydrateNodeDecorations(container: HTMLElement, nodeDecorations: Map<string, NodeDecoration>) {
+        const svg = container.querySelector('svg');
+        if (!svg) return;
+
+        nodeDecorations.forEach(decoration => {
+            const nodeEl = svg.querySelector(`g.node.${decoration.className}`) as SVGGElement | null;
+            if (!nodeEl) return;
+
+            const bbox = nodeEl.getBBox();
+            const rect = nodeEl.querySelector('rect.label-container') as SVGRectElement | null;
+            const rectBox = rect ? rect.getBBox() : bbox;
+            const decorationGroup = this.createSvgElement('g');
+            decorationGroup.setAttribute('class', 'node-decorations');
+            decorationGroup.setAttribute('data-node-id', decoration.id);
+
+            const badgePadding = 2;
+            if (decoration.hiddenCount > 0) {
+                const badgeX = rectBox.x + rectBox.width - 9 - badgePadding;
+                const badgeY = rectBox.y + 9 + badgePadding;
+                this.appendBadge(decorationGroup, badgeX, badgeY, decoration.hiddenCount);
+            }
+
+            const buttons: Array<{ action: string; icon: IconType; title: string }> = [];
+            if (decoration.canExpand) {
+                buttons.push({ action: 'expand', icon: 'expand', title: 'Expand' });
+            }
+            if (decoration.canCollapse) {
+                buttons.push({ action: 'collapse', icon: 'collapse', title: 'Retract' });
+            }
+            buttons.push({ action: 'details', icon: 'details', title: 'Details' });
+
+            const buttonSize = 20;
+            const buttonGap = 6;
+            const totalWidth = (buttonSize * buttons.length) + (buttonGap * (buttons.length - 1));
+            const startX = rectBox.x + (rectBox.width - totalWidth) / 2;
+            const y = rectBox.y + rectBox.height + 6;
+
+            buttons.forEach((button, index) => {
+                const x = startX + (index * (buttonSize + buttonGap));
+                this.appendIconButton(decorationGroup, x, y, buttonSize, button.icon, button.action, decoration.id, button.title);
+            });
+
+            nodeEl.appendChild(decorationGroup);
+        });
+    }
+
     private async renderGraph() {
         await this.showLoading(true);
         const container = document.getElementById('mermaid-output');
@@ -595,6 +775,7 @@ class ScribeApp {
         
         // We need to track processed nodes to handle DAG/Deduplication visually
         const processedNodes = new Set<string>();
+        const nodeDecorations = new Map<string, NodeDecoration>();
         
         // Helper to generate node string
         const generateNodeDefinition = (treeNode: ScribeTreeNode) => {
@@ -606,9 +787,9 @@ class ScribeApp {
             const hasDirectHigherHidden = directHigherChildren.some(child => !nodesToRender.has(child.Id));
             const hasDirectHigherVisible = directHigherChildren.some(child => nodesToRender.has(child.Id));
             
-            // Build Node Content
-            const labelText = (guide?.T || data.MetaInfo?.MemberName || "Unknown").replace(/"/g, "'");
-            const cleanLabelText = labelText.replace(/[\n\r]+/g, ' ').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            // Build Node Label (classic Mermaid text)
+            const labelText = guide?.T || data.MetaInfo?.MemberName || "Unknown";
+            const cleanLabelText = this.sanitizeMermaidLabel(labelText);
             
             // Badges (Hidden Children Count)
             // We need to check if children are NOT visible
@@ -622,36 +803,11 @@ class ScribeApp {
                 }
             }
 
-            const badgesHtml = hiddenCount > 0 
-                ? `<div class='badge'>+${hiddenCount}</div>` 
-                : '';
-                
             // Use data attributes for event delegation
             const canExpand = hasDirectHigherHidden;
-            const expandBtnHtml = canExpand
-                ? `<button class='node-icon-btn' data-action='expand' data-id='${id}' title='Expand'>${ICONS.EXPAND.replace(/"/g, "'")}</button>`
-                : '';
 
             const canRetract = hasDirectHigherVisible;
-            const collapseBtnHtml = canRetract
-                ? `<button class='node-icon-btn' data-action='collapse' data-id='${id}' title='Retract'>${ICONS.COLLAPSE.replace(/"/g, "'")}</button>`
-                : '';
 
-            const detailsBtnHtml = `<button class='node-icon-btn' data-action='details' data-id='${id}' title='Details'>${ICONS.DETAILS.replace(/"/g, "'")}</button>`;
-
-
-            const htmlLabel = `
-                <div class='node-content'>
-                    <div class='node-badges'>${badgesHtml}</div>
-                    <div class='node-title'>${cleanLabelText}</div>
-                    <div class='node-controls'>
-                        ${expandBtnHtml}
-                        ${collapseBtnHtml}
-                        ${detailsBtnHtml}
-                    </div>
-                </div>
-            `.replace(/[\n\r]+/g, '').replace(/\s+/g, ' ');
-            
             // Style Classes
             const styles: string[] = [];
             // Semantic colors
@@ -669,14 +825,19 @@ class ScribeApp {
 
             // Emit Node Definition
             // id["label"]
-            graphDef += `    ${id}["${htmlLabel}"]\n`;
+            graphDef += `    ${id}["${cleanLabelText}"]\n`;
+
+            const nodeKeyClass = this.getNodeKeyClass(id);
+            nodeDecorations.set(id, {
+                id,
+                className: nodeKeyClass,
+                hiddenCount,
+                canExpand,
+                canCollapse: canRetract
+            });
             
-            if (styles.length > 0) {
-                // Mermaid classDef is global usually, or we use `class id className`
-                // We define classes at the end or use style?
-                // `class ID classname`
-                graphDef += `    class ${id} ${styles.join(',')}\n`;
-            }
+            const nodeClasses = [nodeKeyClass, ...styles];
+            graphDef += `    class ${id} ${nodeClasses.join(',')}\n`;
             
             // Traverse Children
         };
@@ -739,6 +900,8 @@ class ScribeApp {
                 svgEl.style.width = '100%';
                 svgEl.style.height = '100%';
             }
+
+            this.hydrateNodeDecorations(container, nodeDecorations);
 
             // Initialize PanZoom
             this.panZoomInstance = svgPanZoom(container.querySelector('svg'), {
@@ -896,7 +1059,9 @@ class ScribeApp {
     private focusNode(id: string) {
         // Use svg-pan-zoom to center
         // Needs finding the SVG element for the node
-        const el = document.getElementById(id); // Mermaid uses ID as ID
+        const container = document.getElementById('mermaid-output');
+        const nodeClass = this.getNodeKeyClass(id);
+        const el = container?.querySelector(`svg g.node.${nodeClass}`) as SVGGElement | null;
         if (el && this.panZoomInstance) {
             // Calculate center
             // This is tricky with svg-pan-zoom API directly on element, 
@@ -910,7 +1075,6 @@ class ScribeApp {
             
             // Pan to center of bbox
             // Current pan
-            const pan = this.panZoomInstance.getPan();
             const zoom = this.panZoomInstance.getZoom();
             
             // Target center in SVG coords

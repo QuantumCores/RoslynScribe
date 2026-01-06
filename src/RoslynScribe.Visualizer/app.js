@@ -1,10 +1,5 @@
 "use strict";
-const ICONS = {
-    EXPAND: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    COLLAPSE: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    DETAILS: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
-    SEARCH: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`
-};
+const SVG_NS = 'http://www.w3.org/2000/svg';
 class ScribeApp {
     constructor() {
         this.data = null;
@@ -26,10 +21,10 @@ class ScribeApp {
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'loose',
-            htmlLabels: true,
+            htmlLabels: false,
             flowchart: {
                 useMaxWidth: false,
-                htmlLabels: true,
+                htmlLabels: false,
                 curve: 'basis'
             }
         });
@@ -87,23 +82,24 @@ class ScribeApp {
         document.getElementById('btn-close-details')?.addEventListener('click', () => {
             this.hideNodeDetails();
         });
-        document.getElementById('mermaid-output')?.addEventListener('click', (e) => {
+        const mermaidOutput = document.getElementById('mermaid-output');
+        mermaidOutput?.addEventListener('click', (e) => {
             let target = e.target;
-            while (target && target.id !== 'mermaid-output') {
-                if (target.tagName === 'BUTTON' && target.dataset.action) {
-                    const action = target.dataset.action;
-                    const id = target.dataset.id;
-                    if (action === 'expand' && id) {
+            while (target && target !== mermaidOutput) {
+                const action = target.getAttribute('data-action');
+                const id = target.getAttribute('data-id');
+                if (action && id) {
+                    if (action === 'expand') {
                         this.expandNode(id);
                         e.stopPropagation();
                         return;
                     }
-                    if (action === 'details' && id) {
+                    if (action === 'details') {
                         this.showNodeDetails(id);
                         e.stopPropagation();
                         return;
                     }
-                    if (action === 'collapse' && id) {
+                    if (action === 'collapse') {
                         this.retractNode(id);
                         e.stopPropagation();
                         return;
@@ -502,6 +498,161 @@ class ScribeApp {
         trees.forEach(tree => traverse(tree, null, false));
         return edges;
     }
+    sanitizeMermaidLabel(value) {
+        return value.replace(/[\r\n]+/g, ' ').replace(/"/g, '\\"');
+    }
+    sanitizeClassName(value) {
+        return value.replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+    getNodeKeyClass(id) {
+        return `node-key-${this.sanitizeClassName(id)}`;
+    }
+    createSvgElement(tag) {
+        return document.createElementNS(SVG_NS, tag);
+    }
+    buildIcon(icon) {
+        const iconGroup = this.createSvgElement('g');
+        iconGroup.setAttribute('class', 'node-icon');
+        iconGroup.setAttribute('fill', 'none');
+        iconGroup.setAttribute('stroke', 'currentColor');
+        iconGroup.setAttribute('stroke-width', '2');
+        iconGroup.setAttribute('stroke-linecap', 'round');
+        iconGroup.setAttribute('stroke-linejoin', 'round');
+        if (icon === 'expand') {
+            const vLine = this.createSvgElement('line');
+            vLine.setAttribute('x1', '12');
+            vLine.setAttribute('y1', '5');
+            vLine.setAttribute('x2', '12');
+            vLine.setAttribute('y2', '19');
+            iconGroup.appendChild(vLine);
+            const hLine = this.createSvgElement('line');
+            hLine.setAttribute('x1', '5');
+            hLine.setAttribute('y1', '12');
+            hLine.setAttribute('x2', '19');
+            hLine.setAttribute('y2', '12');
+            iconGroup.appendChild(hLine);
+        }
+        else if (icon === 'collapse') {
+            const hLine = this.createSvgElement('line');
+            hLine.setAttribute('x1', '5');
+            hLine.setAttribute('y1', '12');
+            hLine.setAttribute('x2', '19');
+            hLine.setAttribute('y2', '12');
+            iconGroup.appendChild(hLine);
+        }
+        else {
+            const circle = this.createSvgElement('circle');
+            circle.setAttribute('cx', '12');
+            circle.setAttribute('cy', '12');
+            circle.setAttribute('r', '10');
+            iconGroup.appendChild(circle);
+            const vLine = this.createSvgElement('line');
+            vLine.setAttribute('x1', '12');
+            vLine.setAttribute('y1', '16');
+            vLine.setAttribute('x2', '12');
+            vLine.setAttribute('y2', '12');
+            iconGroup.appendChild(vLine);
+            const dot = this.createSvgElement('line');
+            dot.setAttribute('x1', '12');
+            dot.setAttribute('y1', '8');
+            dot.setAttribute('x2', '12.01');
+            dot.setAttribute('y2', '8');
+            iconGroup.appendChild(dot);
+        }
+        return iconGroup;
+    }
+    appendIconButton(parent, x, y, size, icon, action, nodeId, title) {
+        const buttonGroup = this.createSvgElement('g');
+        buttonGroup.setAttribute('class', 'node-icon-btn');
+        buttonGroup.setAttribute('data-action', action);
+        buttonGroup.setAttribute('data-id', nodeId);
+        buttonGroup.setAttribute('transform', `translate(${x}, ${y})`);
+        buttonGroup.setAttribute('role', 'button');
+        buttonGroup.setAttribute('aria-label', title);
+        const bg = this.createSvgElement('rect');
+        bg.setAttribute('class', 'node-icon-bg');
+        bg.setAttribute('x', '0');
+        bg.setAttribute('y', '0');
+        bg.setAttribute('width', `${size}`);
+        bg.setAttribute('height', `${size}`);
+        bg.setAttribute('rx', '4');
+        bg.setAttribute('ry', '4');
+        buttonGroup.appendChild(bg);
+        const iconGroup = this.buildIcon(icon);
+        const iconSize = size - 8;
+        const scale = iconSize / 24;
+        const offset = (size - iconSize) / 2;
+        iconGroup.setAttribute('transform', `translate(${offset}, ${offset}) scale(${scale})`);
+        buttonGroup.appendChild(iconGroup);
+        const titleEl = this.createSvgElement('title');
+        titleEl.textContent = title;
+        buttonGroup.appendChild(titleEl);
+        parent.appendChild(buttonGroup);
+    }
+    appendBadge(parent, x, y, count) {
+        const badgeGroup = this.createSvgElement('g');
+        badgeGroup.setAttribute('class', 'node-badge');
+        badgeGroup.setAttribute('transform', `translate(${x}, ${y})`);
+        const circle = this.createSvgElement('circle');
+        circle.setAttribute('class', 'node-badge-circle');
+        circle.setAttribute('cx', '0');
+        circle.setAttribute('cy', '0');
+        circle.setAttribute('r', '9');
+        circle.setAttribute('fill', '#1565c0');
+        circle.setAttribute('stroke', '#fff');
+        circle.setAttribute('stroke-width', '1');
+        circle.setAttribute('style', 'fill: #1565c0 !important; stroke: #fff !important; stroke-width: 1px !important;');
+        badgeGroup.appendChild(circle);
+        const text = this.createSvgElement('text');
+        text.setAttribute('class', 'node-badge-text');
+        text.setAttribute('x', '0');
+        text.setAttribute('y', '0');
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.textContent = `+${count}`;
+        badgeGroup.appendChild(text);
+        parent.appendChild(badgeGroup);
+    }
+    hydrateNodeDecorations(container, nodeDecorations) {
+        const svg = container.querySelector('svg');
+        if (!svg)
+            return;
+        nodeDecorations.forEach(decoration => {
+            const nodeEl = svg.querySelector(`g.node.${decoration.className}`);
+            if (!nodeEl)
+                return;
+            const bbox = nodeEl.getBBox();
+            const rect = nodeEl.querySelector('rect.label-container');
+            const rectBox = rect ? rect.getBBox() : bbox;
+            const decorationGroup = this.createSvgElement('g');
+            decorationGroup.setAttribute('class', 'node-decorations');
+            decorationGroup.setAttribute('data-node-id', decoration.id);
+            const badgePadding = 2;
+            if (decoration.hiddenCount > 0) {
+                const badgeX = rectBox.x + rectBox.width - 9 - badgePadding;
+                const badgeY = rectBox.y + 9 + badgePadding;
+                this.appendBadge(decorationGroup, badgeX, badgeY, decoration.hiddenCount);
+            }
+            const buttons = [];
+            if (decoration.canExpand) {
+                buttons.push({ action: 'expand', icon: 'expand', title: 'Expand' });
+            }
+            if (decoration.canCollapse) {
+                buttons.push({ action: 'collapse', icon: 'collapse', title: 'Retract' });
+            }
+            buttons.push({ action: 'details', icon: 'details', title: 'Details' });
+            const buttonSize = 20;
+            const buttonGap = 6;
+            const totalWidth = (buttonSize * buttons.length) + (buttonGap * (buttons.length - 1));
+            const startX = rectBox.x + (rectBox.width - totalWidth) / 2;
+            const y = rectBox.y + rectBox.height + 6;
+            buttons.forEach((button, index) => {
+                const x = startX + (index * (buttonSize + buttonGap));
+                this.appendIconButton(decorationGroup, x, y, buttonSize, button.icon, button.action, decoration.id, button.title);
+            });
+            nodeEl.appendChild(decorationGroup);
+        });
+    }
     async renderGraph() {
         await this.showLoading(true);
         const container = document.getElementById('mermaid-output');
@@ -520,6 +671,7 @@ class ScribeApp {
         const edges = this.computeEdges(treesToRender, nodesToRender);
         let graphDef = "graph TD\n";
         const processedNodes = new Set();
+        const nodeDecorations = new Map();
         const generateNodeDefinition = (treeNode) => {
             const id = treeNode.Id;
             const data = this.data.Nodes[id];
@@ -528,8 +680,8 @@ class ScribeApp {
             const directHigherChildren = treeNode.ChildNodes.filter(child => this.getNodeLevel(child.Id) > nodeLevel);
             const hasDirectHigherHidden = directHigherChildren.some(child => !nodesToRender.has(child.Id));
             const hasDirectHigherVisible = directHigherChildren.some(child => nodesToRender.has(child.Id));
-            const labelText = (guide?.T || data.MetaInfo?.MemberName || "Unknown").replace(/"/g, "'");
-            const cleanLabelText = labelText.replace(/[\n\r]+/g, ' ').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const labelText = guide?.T || data.MetaInfo?.MemberName || "Unknown";
+            const cleanLabelText = this.sanitizeMermaidLabel(labelText);
             let hiddenCount = 0;
             if (treeNode.ChildNodes) {
                 for (const child of treeNode.ChildNodes) {
@@ -538,29 +690,8 @@ class ScribeApp {
                     }
                 }
             }
-            const badgesHtml = hiddenCount > 0
-                ? `<div class='badge'>+${hiddenCount}</div>`
-                : '';
             const canExpand = hasDirectHigherHidden;
-            const expandBtnHtml = canExpand
-                ? `<button class='node-icon-btn' data-action='expand' data-id='${id}' title='Expand'>${ICONS.EXPAND.replace(/"/g, "'")}</button>`
-                : '';
             const canRetract = hasDirectHigherVisible;
-            const collapseBtnHtml = canRetract
-                ? `<button class='node-icon-btn' data-action='collapse' data-id='${id}' title='Retract'>${ICONS.COLLAPSE.replace(/"/g, "'")}</button>`
-                : '';
-            const detailsBtnHtml = `<button class='node-icon-btn' data-action='details' data-id='${id}' title='Details'>${ICONS.DETAILS.replace(/"/g, "'")}</button>`;
-            const htmlLabel = `
-                <div class='node-content'>
-                    <div class='node-badges'>${badgesHtml}</div>
-                    <div class='node-title'>${cleanLabelText}</div>
-                    <div class='node-controls'>
-                        ${expandBtnHtml}
-                        ${collapseBtnHtml}
-                        ${detailsBtnHtml}
-                    </div>
-                </div>
-            `.replace(/[\n\r]+/g, '').replace(/\s+/g, ' ');
             const styles = [];
             if (data.Kind === "Document")
                 styles.push("node-document");
@@ -573,10 +704,17 @@ class ScribeApp {
             if (this.searchResults.includes(id)) {
                 styles.push("highlighted");
             }
-            graphDef += `    ${id}["${htmlLabel}"]\n`;
-            if (styles.length > 0) {
-                graphDef += `    class ${id} ${styles.join(',')}\n`;
-            }
+            graphDef += `    ${id}["${cleanLabelText}"]\n`;
+            const nodeKeyClass = this.getNodeKeyClass(id);
+            nodeDecorations.set(id, {
+                id,
+                className: nodeKeyClass,
+                hiddenCount,
+                canExpand,
+                canCollapse: canRetract
+            });
+            const nodeClasses = [nodeKeyClass, ...styles];
+            graphDef += `    class ${id} ${nodeClasses.join(',')}\n`;
         };
         const traverseNodes = (treeNode) => {
             if (nodesToRender.has(treeNode.Id) && !processedNodes.has(treeNode.Id)) {
@@ -624,6 +762,7 @@ class ScribeApp {
                 svgEl.style.width = '100%';
                 svgEl.style.height = '100%';
             }
+            this.hydrateNodeDecorations(container, nodeDecorations);
             this.panZoomInstance = svgPanZoom(container.querySelector('svg'), {
                 zoomEnabled: true,
                 controlIconsEnabled: true,
@@ -667,7 +806,7 @@ class ScribeApp {
         const meta = data.MetaInfo;
         const guide = data.Guides;
         const tags = guide?.Tags?.length ? guide.Tags.join(', ') : '';
-        const originIds = guide?.O?.length ? guide.O.join(', ') : '';
+        const originIds = guide?.OUI?.length ? guide.OUI.join(', ') : '';
         const destinationUserIds = guide?.DUI?.length ? guide.DUI.join(', ') : '';
         const childNodeIds = data.ChildNodeIds?.length ? data.ChildNodeIds.join(', ') : '';
         const sections = [
@@ -759,11 +898,12 @@ class ScribeApp {
         this.focusNode(this.searchResults[this.currentSearchIndex]);
     }
     focusNode(id) {
-        const el = document.getElementById(id);
+        const container = document.getElementById('mermaid-output');
+        const nodeClass = this.getNodeKeyClass(id);
+        const el = container?.querySelector(`svg g.node.${nodeClass}`);
         if (el && this.panZoomInstance) {
             const bbox = el.getBBox();
             const sizes = this.panZoomInstance.getSizes();
-            const pan = this.panZoomInstance.getPan();
             const zoom = this.panZoomInstance.getZoom();
             const cx = bbox.x + bbox.width / 2;
             const cy = bbox.y + bbox.height / 2;
