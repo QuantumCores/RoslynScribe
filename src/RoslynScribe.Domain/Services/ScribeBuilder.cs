@@ -81,6 +81,31 @@ namespace RoslynScribe.Domain.Services
                 }
             }
 
+            // index all tree nodes by ID for easy lookup
+            var treeNodesDict = new Dictionary<Guid, ScribeTreeNode>();
+            for (int i = 0; i < results.Length; i++)
+            {
+                var result = results[i];
+
+                foreach (var tree in result.Trees)
+                {
+                    var stack = new Stack<ScribeTreeNode>(new[] { tree });
+                    while (stack.Count != 0)
+                    {
+                        var root = stack.Pop();
+                        if (!treeNodesDict.ContainsKey(root.Id))
+                        {
+                            treeNodesDict.Add(root.Id, root);
+                        }
+
+                        foreach (var child in root.ChildNodes)
+                        {
+                            stack.Push(child);
+                        }
+                    }
+                }
+            }
+
             var mergedTrees = new List<ScribeTreeNode>();
             // traverese all trees to rebuild tree structures
             for (int i = 0; i < results.Length; i++)
@@ -120,6 +145,7 @@ namespace RoslynScribe.Domain.Services
                                     var destNode = mergedUserIds[userDestId];
                                     if (!HasChild(root, destNode.Id))
                                     {
+                                        // TODO this creates new node without children, is that ok?
                                         root.ChildNodes.Add(new ScribeTreeNode { Id = destNode.Id });
                                     }
 
@@ -159,9 +185,10 @@ namespace RoslynScribe.Domain.Services
             var nodeData = BuildNodeDataMap(nodes);
 
             var trees = new List<ScribeTreeNode>(nodes.Count);
+            var treeNodesDict = new Dictionary<Guid, ScribeTreeNode>();
             foreach (var node in nodes)
             {
-                trees.Add(BuildTree(node));
+                trees.Add(BuildTree(node, treeNodesDict));
             }
 
             return new ScribeResult { Trees = trees, Nodes = nodeData };
@@ -174,15 +201,22 @@ namespace RoslynScribe.Domain.Services
         /// <returns>
         /// A ScribeTreeNode representing the root of the constructed tree, including all child node IDs.
         /// </returns>
-        private static ScribeTreeNode BuildTree(ScribeNode node)
+        private static ScribeTreeNode BuildTree(ScribeNode node, Dictionary<Guid, ScribeTreeNode> treeNodesDict)
         {
             var id = node.Id;
-            var treeNode = new ScribeTreeNode { Id = id };
 
+            if (treeNodesDict.ContainsKey(id))
+            {
+                return treeNodesDict[id];
+            }
+
+            var treeNode = new ScribeTreeNode { Id = id };
             foreach (var child in node.ChildNodes)
             {
-                treeNode.ChildNodes.Add(BuildTree(child));
+                treeNode.ChildNodes.Add(BuildTree(child, treeNodesDict));
             }
+
+            // treeNodesDict.Add(id, treeNode); TODO: make sure this wont affect cycles and references
 
             return treeNode;
         }
