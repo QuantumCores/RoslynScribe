@@ -74,11 +74,11 @@ namespace RoslynScribe.Domain.Tests
         {
             // Arrange
             var userDefinedId = "user-defined-child";
-            var child1Guid = Guid.NewGuid();
-            var child2Guid = Guid.NewGuid();
+            var child1Guid = Guid.NewGuid().ToString();
+            var child2Guid = Guid.NewGuid().ToString();
             var tree = new ScribeNode
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 Kind = "Root",
                 ChildNodes = new List<ScribeNode>
                 {
@@ -112,14 +112,14 @@ namespace RoslynScribe.Domain.Tests
             // Assert
             Assert.That(rebuilt.Nodes.Count, Is.EqualTo(3));
             Assert.That(rebuilt.Nodes[child2Guid].ChildNodeIds[0] == child1Guid);
-            Assert.That(rebuilt.Trees[0].ChildNodes.Select(x => x.Id), Is.EquivalentTo(new Guid[] { child1Guid, child2Guid }));
+            Assert.That(rebuilt.Trees[0].ChildNodes.Select(x => x.Id), Is.EquivalentTo(new string[] { child1Guid, child2Guid }));
             // verify that tree is updated and child2 has child1 as its child node
             Assert.That(rebuilt.Trees[0].ChildNodes[1].ChildNodes[0].Id, Is.EqualTo(child1Guid));
         }
 
-        private static List<Guid> GetTreeIds(List<ScribeTreeNode> trees)
+        private static List<string> GetTreeIds(List<ScribeTreeNode> trees)
         {
-            var ids = new List<Guid>();
+            var ids = new List<string>();
             void Traverse(ScribeTreeNode node)
             {
                 ids.Add(node.Id);

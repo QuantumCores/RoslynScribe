@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace RoslynScribe.Domain.Models
 {
     public class ScribeNode : IScribeNode
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         // This is id of node which this node represents
-        // public Guid? TargetNodeId { get; set; }
+        // public string TargetNodeId { get; set; }
 
         // commens in their original form
         public string[] Value { get; set; }
@@ -27,3 +27,4 @@ namespace RoslynScribe.Domain.Models
         }
     }
 }
+

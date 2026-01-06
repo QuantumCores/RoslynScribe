@@ -28,6 +28,7 @@ namespace RoslynScribe.Domain.Services
                 .ToDictionary(x => x.FilePath, StringComparer.OrdinalIgnoreCase);
             var result = new List<ScribeNode>();
             var trackers = new Trackers();
+            trackers.SolutionDirectory = GetSolutionDirectory(solution);
 
             foreach (var project in solution.Projects)
             {
@@ -60,7 +61,11 @@ namespace RoslynScribe.Domain.Services
             var project = solution.Projects.Single(x => x.Name == projectName);
             var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
             var document = project.Documents.Single(x => x.Name == documentName);
-            return Analyze(project, documents, document, new Trackers(), adcConfig);
+            var trackers = new Trackers
+            {
+                SolutionDirectory = GetSolutionDirectory(solution)
+            };
+            return Analyze(project, documents, document, trackers, adcConfig);
         }
 
         private static async Task<ScribeNode> Analyze(
@@ -86,8 +91,8 @@ namespace RoslynScribe.Domain.Services
             {
                 ProjectName = project.Name,
                 DocumentName = document.Name,
-                DocumentPath = document.FilePath,
-                Identifier = document.FilePath
+                DocumentPath = NormalizeDocumentPath(document.FilePath, trackers.SolutionDirectory),
+                Identifier = NormalizeDocumentPath(document.FilePath, trackers.SolutionDirectory)
             };
 
             var scribeNode = new ScribeNode()
@@ -500,7 +505,7 @@ namespace RoslynScribe.Domain.Services
         /// </returns>
         private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, ScribeGuides guides, SemanticModel semanticModel, int line, Trackers trackers)
         {
-            var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line);
+            var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line, trackers.SolutionDirectory);
             var id = metaInfo.GetDeterministicId();
 
             if (parentNode.ChildNodes.Any(x => x.Id == id) || parentNode.Id == id)
@@ -580,7 +585,7 @@ namespace RoslynScribe.Domain.Services
             return model;
         }
 
-        private static MetaInfo GetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, int line)
+        private static MetaInfo GetMetaInfo(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, int line, string solutionDirectory)
         {
             var metaInfo = new MetaInfo();
             metaInfo.Line = line;
@@ -613,7 +618,7 @@ namespace RoslynScribe.Domain.Services
 
                     // methods can be called from other project thus copying data from parent won't work
                     var symbolInfo = semanticModel.GetDeclaredSymbol(methodSyntax);
-                    return GetMetaInfo(symbolInfo, line);
+                    return GetMetaInfo(symbolInfo, line, solutionDirectory);
                 default:
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
@@ -627,14 +632,14 @@ namespace RoslynScribe.Domain.Services
             return metaInfo;
         }
 
-        private static MetaInfo GetMetaInfo(IMethodSymbol symbolInfo, int line)
+        private static MetaInfo GetMetaInfo(IMethodSymbol symbolInfo, int line, string solutionDirectory)
         {
             var metaInfo = new MetaInfo();
             metaInfo.ProjectName = symbolInfo.ContainingAssembly.Name;
 
             var location = symbolInfo.Locations[0].GetLineSpan().Path;
             metaInfo.DocumentName = Path.GetFileName(location);
-            metaInfo.DocumentPath = location;
+            metaInfo.DocumentPath = NormalizeDocumentPath(location, solutionDirectory);
             metaInfo.NameSpace = symbolInfo.ContainingNamespace.ToString();
             metaInfo.TypeName = symbolInfo.ContainingType.Name;
             metaInfo.MemberName = symbolInfo.Name;
@@ -654,6 +659,56 @@ namespace RoslynScribe.Domain.Services
                 kind == SyntaxKind.CompilationUnit ||
                 kind == SyntaxKind.PredefinedType ||
                 kind == SyntaxKind.ParameterList; // TODO verify if method invocation inside parameter list is processed
+        }
+
+        private static string GetSolutionDirectory(Solution solution)
+        {
+            if (string.IsNullOrWhiteSpace(solution?.FilePath))
+            {
+                return null;
+            }
+
+            return Path.GetDirectoryName(solution.FilePath);
+        }
+
+        private static string NormalizeDocumentPath(string documentPath, string solutionDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(documentPath) || string.IsNullOrWhiteSpace(solutionDirectory))
+            {
+                return documentPath;
+            }
+
+            if (!Path.IsPathRooted(documentPath))
+            {
+                return documentPath;
+            }
+
+            var fullDocumentPath = Path.GetFullPath(documentPath);
+            var fullSolutionDirectory = Path.GetFullPath(solutionDirectory);
+            fullSolutionDirectory = AppendDirectorySeparatorChar(fullSolutionDirectory);
+
+            if (fullDocumentPath.StartsWith(fullSolutionDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                return fullDocumentPath.Substring(fullSolutionDirectory.Length);
+            }
+
+            return documentPath;
+        }
+
+        private static string AppendDirectorySeparatorChar(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            var lastChar = path[path.Length - 1];
+            if (lastChar == Path.DirectorySeparatorChar || lastChar == Path.AltDirectorySeparatorChar)
+            {
+                return path;
+            }
+
+            return path + Path.DirectorySeparatorChar;
         }
     }
 }

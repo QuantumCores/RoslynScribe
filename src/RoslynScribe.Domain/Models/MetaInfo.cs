@@ -1,11 +1,12 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Text;
+using System;
 
 namespace RoslynScribe.Domain.Models
 {
     public struct MetaInfo
     {
+        private const int DefaultDeterministicIdLength = 8;
+        private const string Base62Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
         public string ProjectName { get; set; }
 
         public string DocumentName { get; set; }
@@ -20,16 +21,22 @@ namespace RoslynScribe.Domain.Models
 
         public string Identifier { get; set; }
 
-        public int Line {  get; set; }
+        public int Line { get; set; }
 
-        public Guid GetDeterministicId()
+        public string GetDeterministicId()
         {
-            using (var md5 = MD5.Create())
+            return GetDeterministicId(DefaultDeterministicIdLength);
+        }
+
+        public string GetDeterministicId(int length)
+        {
+            if (length <= 0)
             {
-                var bytes = Encoding.UTF8.GetBytes(GetIdentityKey());
-                var hash = md5.ComputeHash(bytes);
-                return new Guid(hash);
+                throw new ArgumentOutOfRangeException(nameof(length), "Length must be positive.");
             }
+
+            var hash = ComputeFnv1a64(GetIdentityKey());
+            return ToBase62(hash, length);
         }
 
         public string GetIdentityKey()
@@ -45,28 +52,37 @@ namespace RoslynScribe.Domain.Models
                 Line.ToString());
         }
 
-        //public override int GetHashCode()
-        //{
-        //    return ComputeStableHash(GetIdentityKey());
-        //}
-
         private static string Normalize(string value) => value ?? string.Empty;
 
-        // Deterministic, platform-independent hash (FNV-1a 32-bit)
-        //private static int ComputeStableHash(string value)
-        //{
-        //    unchecked
-        //    {
-        //        const int offset = unchecked((int)2166136261);
-        //        const int prime = 16777619;
-        //        var hash = offset;
-        //        foreach (var c in value)
-        //        {
-        //            hash ^= c;
-        //            hash *= prime;
-        //        }
-        //        return hash;
-        //    }
-        //}
+        // Deterministic, platform-independent hash (FNV-1a 64-bit)
+        private static ulong ComputeFnv1a64(string value)
+        {
+            unchecked
+            {
+                const ulong offset = 14695981039346656037;
+                const ulong prime = 1099511628211;
+                var hash = offset;
+                for (int i = 0; i < value.Length; i++)
+                {
+                    hash ^= value[i];
+                    hash *= prime;
+                }
+                return hash;
+            }
+        }
+
+        private static string ToBase62(ulong value, int length)
+        {
+            var buffer = new char[length];
+            for (int i = length - 1; i >= 0; i--)
+            {
+                var index = (int)(value % 62);
+                buffer[i] = Base62Alphabet[index];
+                value /= 62;
+            }
+
+            return new string(buffer);
+        }
     }
 }
+

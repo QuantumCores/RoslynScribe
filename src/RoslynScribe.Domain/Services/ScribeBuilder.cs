@@ -1,4 +1,4 @@
-﻿using RoslynScribe.Domain.Models;
+using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +19,13 @@ namespace RoslynScribe.Domain.Services
                 return new ScribeResult
                 {
                     Trees = new List<ScribeTreeNode>(),
-                    Nodes = new Dictionary<Guid, ScribeNodeData>()
+                    Nodes = new Dictionary<string, ScribeNodeData>()
                 };
             }
 
-            var mergedDataNodes = new Dictionary<Guid, ScribeNodeData>();
+            var mergedDataNodes = new Dictionary<string, ScribeNodeData>();
             var mergedUserIds = new Dictionary<string, ScribeNodeData>();
-            var nodesWithDest = new Dictionary<Guid, ScribeNodeData>();
+            var nodesWithDest = new Dictionary<string, ScribeNodeData>();
 
             // merge all nodes and collect user-defined IDs and nodes with destination IDs
             for (int i = 0; i < results.Length; i++)
@@ -82,7 +82,7 @@ namespace RoslynScribe.Domain.Services
             }
 
             // index all tree nodes by ID for easy lookup
-            var treeNodesDict = new Dictionary<Guid, ScribeTreeNode>();
+            var treeNodesDict = new Dictionary<string, ScribeTreeNode>();
             for (int i = 0; i < results.Length; i++)
             {
                 var result = results[i];
@@ -185,7 +185,7 @@ namespace RoslynScribe.Domain.Services
             var nodeData = BuildNodeDataMap(nodes);
 
             var trees = new List<ScribeTreeNode>(nodes.Count);
-            var treeNodesDict = new Dictionary<Guid, ScribeTreeNode>();
+            var treeNodesDict = new Dictionary<string, ScribeTreeNode>();
             foreach (var node in nodes)
             {
                 trees.Add(BuildTree(node, treeNodesDict));
@@ -201,7 +201,7 @@ namespace RoslynScribe.Domain.Services
         /// <returns>
         /// A ScribeTreeNode representing the root of the constructed tree, including all child node IDs.
         /// </returns>
-        private static ScribeTreeNode BuildTree(ScribeNode node, Dictionary<Guid, ScribeTreeNode> treeNodesDict)
+        private static ScribeTreeNode BuildTree(ScribeNode node, Dictionary<string, ScribeTreeNode> treeNodesDict)
         {
             var id = node.Id;
 
@@ -235,10 +235,10 @@ namespace RoslynScribe.Domain.Services
         /// A dictionary mapping each node's identifier to its associated node data, including all nodes reachable from
         /// the provided roots.
         /// </returns>
-        private static Dictionary<Guid, ScribeNodeData> BuildNodeDataMap(List<ScribeNode> documentRoots)
+        private static Dictionary<string, ScribeNodeData> BuildNodeDataMap(List<ScribeNode> documentRoots)
         {
-            var byIdDict = new Dictionary<Guid, ScribeNode>();
-            var visited = new HashSet<Guid>();
+            var byIdDict = new Dictionary<string, ScribeNode>();
+            var visited = new HashSet<string>();
             var stack = new Stack<ScribeNode>(documentRoots);
             var userIds = new Dictionary<string, ScribeNode>();
 
@@ -280,12 +280,12 @@ namespace RoslynScribe.Domain.Services
             }
 
             // Rebuilds byIdDict into ScribeNodeData dict with deduplicated child IDs
-            var result = new Dictionary<Guid, ScribeNodeData>(byIdDict.Count);
+            var result = new Dictionary<string, ScribeNodeData>(byIdDict.Count);
             foreach (var pair in byIdDict)
             {
                 var node = pair.Value;
-                var childNodeIds = new List<Guid>(node.ChildNodes.Count);
-                var seenChildIds = new HashSet<Guid>();
+                var childNodeIds = new List<string>(node.ChildNodes.Count);
+                var seenChildIds = new HashSet<string>();
 
                 // Deduplicate child IDs
                 // this should be done earlier in analysis, probably not needed here
@@ -338,7 +338,7 @@ namespace RoslynScribe.Domain.Services
             return clone;
         }
 
-        private static void IndexTreeNodes(ScribeTreeNode node, Dictionary<Guid, List<ScribeTreeNode>> index)
+        private static void IndexTreeNodes(ScribeTreeNode node, Dictionary<string, List<ScribeTreeNode>> index)
         {
             List<ScribeTreeNode> list;
             if (!index.TryGetValue(node.Id, out list))
@@ -355,7 +355,7 @@ namespace RoslynScribe.Domain.Services
             }
         }
 
-        private static bool HasChild(ScribeTreeNode node, Guid childId)
+        private static bool HasChild(ScribeTreeNode node, string childId)
         {
             for (var i = 0; i < node.ChildNodes.Count; i++)
             {
@@ -368,7 +368,7 @@ namespace RoslynScribe.Domain.Services
             return false;
         }
 
-        private static bool HasChild(ScribeNodeData node, Guid childId)
+        private static bool HasChild(ScribeNodeData node, string childId)
         {
             for (var i = 0; i < node.ChildNodeIds.Count; i++)
             {
@@ -382,3 +382,4 @@ namespace RoslynScribe.Domain.Services
         }
     }
 }
+

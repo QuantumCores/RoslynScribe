@@ -6,13 +6,13 @@ namespace RoslynScribe.Domain.Models
 {
     public class ScribeNodeData : IScribeNode
     {
-        public ScribeNodeData(Guid id, ScribeGuides guides)
+        public ScribeNodeData(string id, ScribeGuides guides)
         {
             Id = id;
             Guides = guides;
         }
 
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         public ScribeGuides Guides { get; set; }
 
@@ -20,7 +20,6 @@ namespace RoslynScribe.Domain.Models
 
         public MetaInfo MetaInfo { get; set; }
 
-        public List<Guid> ChildNodeIds { get; set; } = new List<Guid>();
+        public List<string> ChildNodeIds { get; set; } = new List<string>();
     }
 }
-

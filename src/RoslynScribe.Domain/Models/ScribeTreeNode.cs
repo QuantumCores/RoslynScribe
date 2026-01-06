@@ -5,9 +5,8 @@ namespace RoslynScribe.Domain.Models
 {
     public class ScribeTreeNode : IScribeNode
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         public List<ScribeTreeNode> ChildNodes { get; set; } = new List<ScribeTreeNode>();
     }
 }
-

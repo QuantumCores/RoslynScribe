@@ -11,8 +11,8 @@ namespace RoslynScribe.Domain.Tests
         [Test]
         public void MyMerge_connects_external_child_nodes_in_tree()
         {
-            var parentId = Guid.NewGuid();
-            var externalId = Guid.NewGuid();
+            var parentId = Guid.NewGuid().ToString();
+            var externalId = Guid.NewGuid().ToString();
 
             var result1 = new ScribeResult
             {
@@ -20,13 +20,13 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeTreeNode { Id = parentId }
                 },
-                Nodes = new Dictionary<Guid, ScribeNodeData>
+                Nodes = new Dictionary<string, ScribeNodeData>
                 {
                     {
                         parentId,
                         new ScribeNodeData(parentId, new ScribeGuides())
                         {
-                            ChildNodeIds = new List<Guid> { externalId }
+                            ChildNodeIds = new List<string> { externalId }
                         }
                     }
                 }
@@ -38,7 +38,7 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeTreeNode { Id = externalId }
                 },
-                Nodes = new Dictionary<Guid, ScribeNodeData>
+                Nodes = new Dictionary<string, ScribeNodeData>
                 {
                     { externalId, new ScribeNodeData(externalId, new ScribeGuides()) }
                 }
@@ -55,8 +55,8 @@ namespace RoslynScribe.Domain.Tests
         [Test]
         public void MyMerge_connects_external_destination_user_ids_in_tree()
         {
-            var parentId = Guid.NewGuid();
-            var targetId = Guid.NewGuid();
+            var parentId = Guid.NewGuid().ToString();
+            var targetId = Guid.NewGuid().ToString();
             var targetUserId = "target-user-id";
 
             var result1 = new ScribeResult
@@ -65,7 +65,7 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeTreeNode { Id = parentId }
                 },
-                Nodes = new Dictionary<Guid, ScribeNodeData>
+                Nodes = new Dictionary<string, ScribeNodeData>
                 {
                     {
                         parentId,
@@ -83,7 +83,7 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeTreeNode { Id = targetId }
                 },
-                Nodes = new Dictionary<Guid, ScribeNodeData>
+                Nodes = new Dictionary<string, ScribeNodeData>
                 {
                     {
                         targetId,
@@ -106,7 +106,7 @@ namespace RoslynScribe.Domain.Tests
         [Test]
         public void MyMerge_ignores_unknown_destination_user_ids()
         {
-            var parentId = Guid.NewGuid();
+            var parentId = Guid.NewGuid().ToString();
 
             var result1 = new ScribeResult
             {
@@ -114,7 +114,7 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeTreeNode { Id = parentId }
                 },
-                Nodes = new Dictionary<Guid, ScribeNodeData>
+                Nodes = new Dictionary<string, ScribeNodeData>
                 {
                     {
                         parentId,
@@ -146,7 +146,7 @@ namespace RoslynScribe.Domain.Tests
             Assert.That(merged.Nodes.Count, Is.EqualTo(0));
         }
 
-        private static ScribeTreeNode FindNode(List<ScribeTreeNode> trees, Guid id)
+        private static ScribeTreeNode FindNode(List<ScribeTreeNode> trees, string id)
         {
             foreach (var tree in trees)
             {
@@ -160,7 +160,7 @@ namespace RoslynScribe.Domain.Tests
             return null;
         }
 
-        private static ScribeTreeNode FindNode(ScribeTreeNode node, Guid id)
+        private static ScribeTreeNode FindNode(ScribeTreeNode node, string id)
         {
             if (node.Id == id)
             {
@@ -179,7 +179,7 @@ namespace RoslynScribe.Domain.Tests
             return null;
         }
 
-        private static bool HasChild(ScribeTreeNode node, Guid childId)
+        private static bool HasChild(ScribeTreeNode node, string childId)
         {
             for (var i = 0; i < node.ChildNodes.Count; i++)
             {

@@ -1,4 +1,4 @@
-﻿using RoslynScribe.Domain.Models;
+using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,8 +30,8 @@ namespace RoslynScribe.Printer.Mermaid
             sb.AppendLine("flowchart LR");
 
             // transitions set to avoid duplicated connections between nodes
-            var transitions = new HashSet<(Guid, Guid)>();
-            var labeled = new HashSet<Guid>();
+            var transitions = new HashSet<(string, string)>();
+            var labeled = new HashSet<string>();
             foreach (var node in scribeResult.Trees)
             {
                 Traverse(sb, node, scribeResult.Nodes, transitions, labeled);
@@ -45,9 +45,9 @@ namespace RoslynScribe.Printer.Mermaid
         private static void Traverse(
             StringBuilder sb,
             ScribeTreeNode node,
-            Dictionary<Guid, ScribeNodeData> nodes,
-            HashSet<(Guid, Guid)> transitions,
-            HashSet<Guid> labeled)
+            Dictionary<string, ScribeNodeData> nodes,
+            HashSet<(string, string)> transitions,
+            HashSet<string> labeled)
         {
             var current = nodes[node.Id];
             var showCurrentValue = labeled.Add(node.Id);
@@ -73,7 +73,7 @@ namespace RoslynScribe.Printer.Mermaid
 
         private static string GetText(ScribeNodeData node, bool showValue)
         {
-            var result = node.Kind == "Document" ? node.MetaInfo.DocumentName : node.Id.ToString();
+            var result = node.Kind == "Document" ? node.MetaInfo.DocumentName : node.Id;
             
             if (node.Guides != null && showValue)
             {
@@ -96,3 +96,5 @@ namespace RoslynScribe.Printer.Mermaid
         }
     }
 }
+
+
