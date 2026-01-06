@@ -9,8 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 
 namespace RoslynScribe.Domain.Services
@@ -24,29 +22,34 @@ namespace RoslynScribe.Domain.Services
 
         public static async Task<List<ScribeNode>> Analyze(MSBuildWorkspace workspace, Solution solution, AdcConfig adcConfig)
         {
-            var documents = solution.Projects.SelectMany(x => x.Documents).ToDictionary(x => x.FilePath);
+            var documents = solution.Projects
+                .SelectMany(x => x.Documents)
+                .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
+                .ToDictionary(x => x.FilePath, StringComparer.OrdinalIgnoreCase);
             var result = new List<ScribeNode>();
             var trackers = new Trackers();
 
             foreach (var project in solution.Projects)
             {
-                if (project.Name == "RoslynScribe.TestProject")
+                foreach (var document in project.Documents)
                 {
-                    foreach (var document in project.Documents)
+                    if (string.IsNullOrWhiteSpace(document.FilePath))
                     {
-                        var node = await Analyze(project, documents, document, trackers, adcConfig);
-                        if (node != null)
-                        {
-                            result.Add(node);
-                        }
+                        continue;
+                    }
+
+                    var node = await Analyze(project, documents, document, trackers, adcConfig);
+                    if (node != null)
+                    {
+                        result.Add(node);
                     }
                 }
+            }
 
-                var diagnostics = workspace.Diagnostics;
-                foreach (var diagnostic in diagnostics)
-                {
-                    Console.WriteLine(diagnostic.Message);
-                }
+            var diagnostics = workspace.Diagnostics;
+            foreach (var diagnostic in diagnostics)
+            {
+                Console.WriteLine(diagnostic.Message);
             }
 
             return result;
@@ -94,7 +97,10 @@ namespace RoslynScribe.Domain.Services
                 MetaInfo = documentMeta
             };
 
-            trackers.SemanticModelCache.Add(document.FilePath, semanticModel);
+            if(!trackers.SemanticModelCache.ContainsKey(document.FilePath))
+            {
+                trackers.SemanticModelCache.Add(document.FilePath, semanticModel);
+            }
 
             Traverse(rootNode, scribeNode, semanticModel, documents, trackers, adcConfig);
 
@@ -229,6 +235,11 @@ namespace RoslynScribe.Domain.Services
             for (int i = 0; i < syntaxReferences.Length; i++)
             {
                 var location = invokedMethod.Locations[i].GetLineSpan().Path;
+                if (string.IsNullOrWhiteSpace(location) || !documents.ContainsKey(location))
+                {
+                    continue;
+                }
+
                 var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
                 var methodNode = syntaxReferences[i].GetSyntax();
                 ProcessNode(methodNode, methodNode.Kind(), currentParent, contextSemanticModel, documents, trackers, adcConfig);

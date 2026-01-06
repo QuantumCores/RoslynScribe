@@ -24,7 +24,7 @@ public void Validate(User user) { ... }
 Run the `RoslynScribe` tool against your solution to generate the analysis result.
 
 ```bash
-RoslynScribe.exe --solution "MySolution.sln" --output "result.json"
+RoslynScribe.exe analyze -s "MySolution.sln" -o "result.adc.json"
 ```
 
 ### 3. Visualize Results
@@ -52,6 +52,67 @@ To modify the visualizer:
     ```bash
     npx tsc -p src/RoslynScribe.Visualizer/tsconfig.json
     ```
+
+## Command Line Reference
+
+### Commands
+
+*   `analyze` - Analyze a solution and write a single `.adc.json` output.
+*   `merge` - Merge multiple `.adc.json` files into one.
+
+### analyze options
+
+*   `-s`, `--solution` (required): Path to the `.sln` file.
+*   `-p`, `--project` (repeatable): Project name(s) to include (exact match, case-insensitive).
+*   `-pe`, `--project-exclude` (repeatable): Project name(s) to exclude (exact match, case-insensitive).
+*   `-pec`, `--project-exclude-contains` (repeatable): Exclude projects containing this phrase (case-insensitive).
+*   `-d`, `--dir` (repeatable): Directory to analyze (combined with files when both are provided).
+*   `-f`, `--file` (repeatable): File path(s) to analyze (combined with directories when both are provided).
+*   `-o`, `--output`: Output file path. Defaults to `<solutionName>.adc.json` in the current directory.
+*   `-c`, `--config`: Optional ADC config JSON path. If omitted, an empty config is used.
+
+### merge options
+
+*   `-d`, `--dir`: Directory containing `.adc.json` files (top-level only).
+*   `-f`, `--file` (repeatable): File path(s) to merge (requires at least two files when `-d` is not used).
+*   `-o`, `--output`: Output file path. Defaults to `merge_<yyyy_MM_dd>.adc.json` in the current directory.
+
+Notes:
+
+*   For `merge`, `-d` and `-f` are mutually exclusive.
+*   For `analyze`, `-d` and `-f` are combined (union).
+
+### Example invocations
+
+Analyze a solution with project filters and output file:
+
+```bash
+RoslynScribe.exe analyze -s "D:\Source\MyApp\MyApp.sln" -p "MyApp.Api" -pe "MyApp.Tests" -o "MyApp.adc.json"
+```
+
+Analyze only specific folders and files:
+
+```bash
+RoslynScribe.exe analyze -s "D:\Source\MyApp\MyApp.sln" -d "D:\Source\MyApp\src" -f "D:\Source\MyApp\tools\Seed.cs"
+```
+
+Analyze with a custom config:
+
+```bash
+RoslynScribe.exe analyze -s "D:\Source\MyApp\MyApp.sln" -c "D:\configs\adc.config.json"
+```
+
+Merge all `.adc.json` files in a directory:
+
+```bash
+RoslynScribe.exe merge -d "D:\Source\MyApp\results" -o "merged.adc.json"
+```
+
+Merge a specific set of files:
+
+```bash
+RoslynScribe.exe merge -f "A.adc.json" -f "B.adc.json" -o "merged.adc.json"
+```
 
 ## Project Structure
 

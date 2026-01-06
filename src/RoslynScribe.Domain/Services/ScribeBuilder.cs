@@ -7,7 +7,7 @@ namespace RoslynScribe.Domain.Services
 {
     public class ScribeBuilder
     {
-        public static ScribeResult MyMerge(ScribeResult[] results)
+        public static ScribeResult Merge(ScribeResult[] results)
         {
             if (results == null)
             {

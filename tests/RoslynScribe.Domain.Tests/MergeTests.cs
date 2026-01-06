@@ -44,7 +44,7 @@ namespace RoslynScribe.Domain.Tests
                 }
             };
 
-            var merged = ScribeBuilder.MyMerge(new[] { result1, result2 });
+            var merged = ScribeBuilder.Merge(new[] { result1, result2 });
             var parentNode = FindNode(merged.Trees, parentId);
 
             Assert.That(parentNode, Is.Not.Null);
@@ -95,7 +95,7 @@ namespace RoslynScribe.Domain.Tests
                 }
             };
 
-            var merged = ScribeBuilder.MyMerge(new[] { result1, result2 });
+            var merged = ScribeBuilder.Merge(new[] { result1, result2 });
             var parentNode = FindNode(merged.Trees, parentId);
 
             Assert.That(parentNode, Is.Not.Null);
@@ -126,7 +126,7 @@ namespace RoslynScribe.Domain.Tests
                 }
             };
 
-            var merged = ScribeBuilder.MyMerge(new[] { result1 });
+            var merged = ScribeBuilder.Merge(new[] { result1 });
             var parentNode = FindNode(merged.Trees, parentId);
 
             Assert.That(parentNode, Is.Not.Null);
@@ -137,7 +137,7 @@ namespace RoslynScribe.Domain.Tests
         [Test]
         public void MyMerge_returns_empty_result_for_empty_input()
         {
-            var merged = ScribeBuilder.MyMerge(new ScribeResult[0]);
+            var merged = ScribeBuilder.Merge(new ScribeResult[0]);
 
             Assert.That(merged, Is.Not.Null);
             Assert.That(merged.Trees, Is.Not.Null);
