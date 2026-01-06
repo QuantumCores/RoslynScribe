@@ -1,27 +1,14 @@
 /// <reference path="types.ts" />
-
-declare var mermaid: any;
-declare var svgPanZoom: any;
-
-const SVG_NS = 'http://www.w3.org/2000/svg';
+/// <reference path="renderers.ts" />
 
 type SubgraphMode = 'project' | 'folder' | 'none';
-type IconType = 'expand' | 'collapse' | 'details';
-type NodeDecoration = {
-    id: string;
-    className: string;
-    hiddenCount: number;
-    canExpand: boolean;
-    canCollapse: boolean;
-};
-
 class ScribeApp {
     private data: ScribeResult | null = null;
     private childToParentMap: Map<string, string> = new Map();
     private expandedNodeMaxLevels: Map<string, number> = new Map();
     private collapsedNodeIds: Set<string> = new Set();
     private activeTreeId: string | null = null;
-    private panZoomInstance: any = null;
+    private renderer: GraphRenderer;
     private readonly baseVisibleLevel = 1;
     private subgraphMode: SubgraphMode = 'project';
     private subgraphColors: { project: Record<string, string>; folder: Record<string, string> } = {
@@ -35,19 +22,8 @@ class ScribeApp {
     private currentSearchIndex: number = -1;
 
     constructor() {
+        this.renderer = new MermaidRenderer();
         this.initializeEventListeners();
-        
-        // Initialize Mermaid
-        mermaid.initialize({ 
-            startOnLoad: false,
-            securityLevel: 'loose',
-            htmlLabels: false,
-            flowchart: { 
-                useMaxWidth: false, 
-                htmlLabels: false,
-                curve: 'basis'
-            }
-        });
 
         // Expose global methods for HTML onclick events
         (window as any).scribeApp = {
@@ -489,28 +465,31 @@ class ScribeApp {
         return groups;
     }
 
-    private buildSubgraphDefinitions(groups: Map<string, string[]>, mode: SubgraphMode): { blocks: string; styles: string; classDefs: string } {
-        let blocks = '';
-        let styles = '';
-        let classDefs = '';
+    private buildSubgraphModels(groups: Map<string, string[]>, mode: SubgraphMode): { subgraphs: GraphSubgraph[]; classDefs: GraphClassDef[] } {
+        const subgraphs: GraphSubgraph[] = [];
+        const classDefs: GraphClassDef[] = [];
         const entries = Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
         entries.forEach(([group, ids], index) => {
             const labelPrefix = mode === 'project' ? 'Project' : 'Folder';
-            const label = `${labelPrefix}: ${group}`.replace(/"/g, "'");
+            const label = `${labelPrefix}: ${group}`;
             const subgraphId = `${mode}_${this.hashString(group)}_${index}`;
             const className = `sg_${this.hashString(group)}_${index}`;
-            blocks += `    subgraph ${subgraphId}["${label}"]\n`;
-            blocks += `        direction TB\n`;
-            ids.forEach(id => {
-                blocks += `        ${id}\n`;
-            });
-            blocks += `    end\n`;
             const color = this.getSubgraphColor(mode, group);
-            styles += `    style ${subgraphId} fill:${color},stroke:#9e9e9e,stroke-width:1px\n`;
-            styles += `    class ${subgraphId} ${className}\n`;
-            classDefs += `    classDef ${className} fill:${color},stroke:#9e9e9e,stroke-width:1px;\n`;
+            const styles: Record<string, string> = {
+                fill: color,
+                stroke: '#9e9e9e',
+                'stroke-width': '1px'
+            };
+            subgraphs.push({
+                id: subgraphId,
+                label,
+                nodeIds: ids,
+                className,
+                styles
+            });
+            classDefs.push({ name: className, styles });
         });
-        return { blocks, styles, classDefs };
+        return { subgraphs, classDefs };
     }
 
     private computeVisibleSet(trees: ScribeTreeNode[]): Set<string> {
@@ -570,183 +549,6 @@ class ScribeApp {
         return edges;
     }
 
-    private sanitizeMermaidLabel(value: string): string {
-        return value.replace(/[\r\n]+/g, ' ').replace(/"/g, '\\"');
-    }
-
-    private sanitizeClassName(value: string): string {
-        return value.replace(/[^a-zA-Z0-9_-]/g, '_');
-    }
-
-    private getNodeKeyClass(id: string): string {
-        return `node-key-${this.sanitizeClassName(id)}`;
-    }
-
-    private createSvgElement<T extends keyof SVGElementTagNameMap>(tag: T): SVGElementTagNameMap[T] {
-        return document.createElementNS(SVG_NS, tag);
-    }
-
-    private buildIcon(icon: IconType): SVGGElement {
-        const iconGroup = this.createSvgElement('g');
-        iconGroup.setAttribute('class', 'node-icon');
-        iconGroup.setAttribute('fill', 'none');
-        iconGroup.setAttribute('stroke', 'currentColor');
-        iconGroup.setAttribute('stroke-width', '2');
-        iconGroup.setAttribute('stroke-linecap', 'round');
-        iconGroup.setAttribute('stroke-linejoin', 'round');
-
-        if (icon === 'expand') {
-            const vLine = this.createSvgElement('line');
-            vLine.setAttribute('x1', '12');
-            vLine.setAttribute('y1', '5');
-            vLine.setAttribute('x2', '12');
-            vLine.setAttribute('y2', '19');
-            iconGroup.appendChild(vLine);
-
-            const hLine = this.createSvgElement('line');
-            hLine.setAttribute('x1', '5');
-            hLine.setAttribute('y1', '12');
-            hLine.setAttribute('x2', '19');
-            hLine.setAttribute('y2', '12');
-            iconGroup.appendChild(hLine);
-        } else if (icon === 'collapse') {
-            const hLine = this.createSvgElement('line');
-            hLine.setAttribute('x1', '5');
-            hLine.setAttribute('y1', '12');
-            hLine.setAttribute('x2', '19');
-            hLine.setAttribute('y2', '12');
-            iconGroup.appendChild(hLine);
-        } else {
-            const circle = this.createSvgElement('circle');
-            circle.setAttribute('cx', '12');
-            circle.setAttribute('cy', '12');
-            circle.setAttribute('r', '10');
-            iconGroup.appendChild(circle);
-
-            const vLine = this.createSvgElement('line');
-            vLine.setAttribute('x1', '12');
-            vLine.setAttribute('y1', '16');
-            vLine.setAttribute('x2', '12');
-            vLine.setAttribute('y2', '12');
-            iconGroup.appendChild(vLine);
-
-            const dot = this.createSvgElement('line');
-            dot.setAttribute('x1', '12');
-            dot.setAttribute('y1', '8');
-            dot.setAttribute('x2', '12.01');
-            dot.setAttribute('y2', '8');
-            iconGroup.appendChild(dot);
-        }
-
-        return iconGroup;
-    }
-
-    private appendIconButton(parent: SVGGElement, x: number, y: number, size: number, icon: IconType, action: string, nodeId: string, title: string) {
-        const buttonGroup = this.createSvgElement('g');
-        buttonGroup.setAttribute('class', 'node-icon-btn');
-        buttonGroup.setAttribute('data-action', action);
-        buttonGroup.setAttribute('data-id', nodeId);
-        buttonGroup.setAttribute('transform', `translate(${x}, ${y})`);
-        buttonGroup.setAttribute('role', 'button');
-        buttonGroup.setAttribute('aria-label', title);
-
-        const bg = this.createSvgElement('rect');
-        bg.setAttribute('class', 'node-icon-bg');
-        bg.setAttribute('x', '0');
-        bg.setAttribute('y', '0');
-        bg.setAttribute('width', `${size}`);
-        bg.setAttribute('height', `${size}`);
-        bg.setAttribute('rx', '4');
-        bg.setAttribute('ry', '4');
-        buttonGroup.appendChild(bg);
-
-        const iconGroup = this.buildIcon(icon);
-        const iconSize = size - 8;
-        const scale = iconSize / 24;
-        const offset = (size - iconSize) / 2;
-        iconGroup.setAttribute('transform', `translate(${offset}, ${offset}) scale(${scale})`);
-        buttonGroup.appendChild(iconGroup);
-
-        const titleEl = this.createSvgElement('title');
-        titleEl.textContent = title;
-        buttonGroup.appendChild(titleEl);
-
-        parent.appendChild(buttonGroup);
-    }
-
-    private appendBadge(parent: SVGGElement, x: number, y: number, count: number) {
-        const badgeGroup = this.createSvgElement('g');
-        badgeGroup.setAttribute('class', 'node-badge');
-        badgeGroup.setAttribute('transform', `translate(${x}, ${y})`);
-
-        const circle = this.createSvgElement('circle');
-        circle.setAttribute('class', 'node-badge-circle');
-        circle.setAttribute('cx', '0');
-        circle.setAttribute('cy', '0');
-        circle.setAttribute('r', '9');
-        circle.setAttribute('fill', '#1565c0');
-        circle.setAttribute('stroke', '#fff');
-        circle.setAttribute('stroke-width', '1');
-        circle.setAttribute('style', 'fill: #1565c0 !important; stroke: #fff !important; stroke-width: 1px !important;');
-        badgeGroup.appendChild(circle);
-
-        const text = this.createSvgElement('text');
-        text.setAttribute('class', 'node-badge-text');
-        text.setAttribute('x', '0');
-        text.setAttribute('y', '0');
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('dominant-baseline', 'middle');
-        text.textContent = `+${count}`;
-        badgeGroup.appendChild(text);
-
-        parent.appendChild(badgeGroup);
-    }
-
-    private hydrateNodeDecorations(container: HTMLElement, nodeDecorations: Map<string, NodeDecoration>) {
-        const svg = container.querySelector('svg');
-        if (!svg) return;
-
-        nodeDecorations.forEach(decoration => {
-            const nodeEl = svg.querySelector(`g.node.${decoration.className}`) as SVGGElement | null;
-            if (!nodeEl) return;
-
-            const bbox = nodeEl.getBBox();
-            const rect = nodeEl.querySelector('rect.label-container') as SVGRectElement | null;
-            const rectBox = rect ? rect.getBBox() : bbox;
-            const decorationGroup = this.createSvgElement('g');
-            decorationGroup.setAttribute('class', 'node-decorations');
-            decorationGroup.setAttribute('data-node-id', decoration.id);
-
-            const badgePadding = 2;
-            if (decoration.hiddenCount > 0) {
-                const badgeX = rectBox.x + rectBox.width - 9 - badgePadding;
-                const badgeY = rectBox.y + 9 + badgePadding;
-                this.appendBadge(decorationGroup, badgeX, badgeY, decoration.hiddenCount);
-            }
-
-            const buttons: Array<{ action: string; icon: IconType; title: string }> = [];
-            if (decoration.canExpand) {
-                buttons.push({ action: 'expand', icon: 'expand', title: 'Expand' });
-            }
-            if (decoration.canCollapse) {
-                buttons.push({ action: 'collapse', icon: 'collapse', title: 'Retract' });
-            }
-            buttons.push({ action: 'details', icon: 'details', title: 'Details' });
-
-            const buttonSize = 20;
-            const buttonGap = 6;
-            const totalWidth = (buttonSize * buttons.length) + (buttonGap * (buttons.length - 1));
-            const startX = rectBox.x + (rectBox.width - totalWidth) / 2;
-            const y = rectBox.y + rectBox.height + 6;
-
-            buttons.forEach((button, index) => {
-                const x = startX + (index * (buttonSize + buttonGap));
-                this.appendIconButton(decorationGroup, x, y, buttonSize, button.icon, button.action, decoration.id, button.title);
-            });
-
-            nodeEl.appendChild(decorationGroup);
-        });
-    }
 
     private async renderGraph() {
         await this.showLoading(true);
@@ -771,13 +573,19 @@ class ScribeApp {
         const nodesToRender = this.computeVisibleSet(treesToRender);
         const edges = this.computeEdges(treesToRender, nodesToRender);
 
-        let graphDef = "graph TD\n";
-        
+        const model: GraphModel = {
+            direction: 'TD',
+            nodes: [],
+            edges: [],
+            subgraphs: [],
+            classDefs: []
+        };
+
         // We need to track processed nodes to handle DAG/Deduplication visually
         const processedNodes = new Set<string>();
         const nodeDecorations = new Map<string, NodeDecoration>();
-        
-        // Helper to generate node string
+
+        // Helper to generate node model
         const generateNodeDefinition = (treeNode: ScribeTreeNode) => {
             const id = treeNode.Id;
             const data = this.data!.Nodes[id];
@@ -787,9 +595,8 @@ class ScribeApp {
             const hasDirectHigherHidden = directHigherChildren.some(child => !nodesToRender.has(child.Id));
             const hasDirectHigherVisible = directHigherChildren.some(child => nodesToRender.has(child.Id));
             
-            // Build Node Label (classic Mermaid text)
+            // Build Node Label
             const labelText = guide?.T || data.MetaInfo?.MemberName || "Unknown";
-            const cleanLabelText = this.sanitizeMermaidLabel(labelText);
             
             // Badges (Hidden Children Count)
             // We need to check if children are NOT visible
@@ -822,12 +629,7 @@ class ScribeApp {
             if (this.searchResults.includes(id)) {
                 styles.push("highlighted");
             }
-
-            // Emit Node Definition
-            // id["label"]
-            graphDef += `    ${id}["${cleanLabelText}"]\n`;
-
-            const nodeKeyClass = this.getNodeKeyClass(id);
+            const nodeKeyClass = getNodeKeyClass(id);
             nodeDecorations.set(id, {
                 id,
                 className: nodeKeyClass,
@@ -835,9 +637,13 @@ class ScribeApp {
                 canExpand,
                 canCollapse: canRetract
             });
-            
+
             const nodeClasses = [nodeKeyClass, ...styles];
-            graphDef += `    class ${id} ${nodeClasses.join(',')}\n`;
+            model.nodes.push({
+                id,
+                label: labelText,
+                classes: nodeClasses
+            });
             
             // Traverse Children
         };
@@ -856,13 +662,11 @@ class ScribeApp {
             traverseNodes(tree);
         });
 
-        let subgraphClassDefs = '';
         if (this.subgraphMode !== 'none') {
             const subgraphGroups = this.buildSubgraphGroups(nodesToRender, this.subgraphMode);
-            const subgraphDefs = this.buildSubgraphDefinitions(subgraphGroups, this.subgraphMode);
-            graphDef += subgraphDefs.blocks;
-            graphDef += subgraphDefs.styles;
-            subgraphClassDefs = subgraphDefs.classDefs;
+            const subgraphModels = this.buildSubgraphModels(subgraphGroups, this.subgraphMode);
+            model.subgraphs = subgraphModels.subgraphs;
+            model.classDefs.push(...subgraphModels.classDefs);
         }
 
         const edgeSet = new Set<string>();
@@ -870,49 +674,35 @@ class ScribeApp {
             const key = `${edge.from}-->${edge.to}`;
             if (!edgeSet.has(key)) {
                 edgeSet.add(key);
-                graphDef += `    ${edge.from} --> ${edge.to}\n`;
+                model.edges.push(edge);
             }
         }
 
         // Add Style Definitions (Dynamic)
-        graphDef += `\n    classDef default fill:#e3f2fd,stroke:#333,stroke-width:1px;\n`;
-        graphDef += `    classDef highlighted stroke:#ff9800,stroke-width:3px;\n`;
-        graphDef += `    classDef tagwarning fill:#fff3e0,stroke:#ffb74d;\n`;
-        graphDef += `    classDef tagerror fill:#ffebee,stroke:#ef5350;\n`;
-        graphDef += subgraphClassDefs;
+        model.classDefs.push(
+            {
+                name: 'default',
+                styles: { fill: '#e3f2fd', stroke: '#333', 'stroke-width': '1px' }
+            },
+            {
+                name: 'highlighted',
+                styles: { stroke: '#ff9800', 'stroke-width': '3px' }
+            },
+            {
+                name: 'tagwarning',
+                styles: { fill: '#fff3e0', stroke: '#ffb74d' }
+            },
+            {
+                name: 'tagerror',
+                styles: { fill: '#ffebee', stroke: '#ef5350' }
+            }
+        );
 
         // Render
         try {
-            // Check if graph is valid
-            // console.log(graphDef);
-            const isValid = await mermaid.parse(graphDef);
-            if (!isValid) throw new Error("Graph parsing failed");
-            
-            // We use mermaid.render (async in v10)
-            const { svg } = await mermaid.render('graphDiv', graphDef);
-            container.innerHTML = svg;
-            
-            // Fix svg size to take full container
-            const svgEl = container.querySelector('svg');
-            if(svgEl) {
-                svgEl.setAttribute('width', '100%');
-                svgEl.setAttribute('height', '100%');
-                svgEl.style.width = '100%';
-                svgEl.style.height = '100%';
-            }
-
-            this.hydrateNodeDecorations(container, nodeDecorations);
-
-            // Initialize PanZoom
-            this.panZoomInstance = svgPanZoom(container.querySelector('svg'), {
-                zoomEnabled: true,
-                controlIconsEnabled: true,
-                fit: true,
-                center: true
-            });
-
+            await this.renderer.render(container, model, nodeDecorations);
         } catch (e) {
-            console.error("Mermaid Render Error", e);
+            console.error("Graph Render Error", e);
             container.innerText = "Error rendering graph.";
         } finally {
             this.showLoading(false);
@@ -1057,40 +847,7 @@ class ScribeApp {
     }
 
     private focusNode(id: string) {
-        // Use svg-pan-zoom to center
-        // Needs finding the SVG element for the node
-        const container = document.getElementById('mermaid-output');
-        const nodeClass = this.getNodeKeyClass(id);
-        const el = container?.querySelector(`svg g.node.${nodeClass}`) as SVGGElement | null;
-        if (el && this.panZoomInstance) {
-            // Calculate center
-            // This is tricky with svg-pan-zoom API directly on element, 
-            // usually we need bbox.
-            // Simplified:
-            // this.panZoomInstance.zoomAtPoint(2, {x: ..., y: ...});
-            // Let's just highlight for now. CSS handles highlight.
-            // To actually pan:
-            const bbox = (el as any).getBBox();
-            const sizes = this.panZoomInstance.getSizes();
-            
-            // Pan to center of bbox
-            // Current pan
-            const zoom = this.panZoomInstance.getZoom();
-            
-            // Target center in SVG coords
-            const cx = bbox.x + bbox.width / 2;
-            const cy = bbox.y + bbox.height / 2;
-            
-            // Target center in Screen coords
-            // screenX = (svgX * zoom) + panX
-            // We want screenX = sizes.width / 2
-            
-            const newPanX = (sizes.width / 2) - (cx * zoom);
-            const newPanY = (sizes.height / 2) - (cy * zoom);
-            
-            this.panZoomInstance.pan({x: newPanX, y: newPanY});
-            this.panZoomInstance.setZoom(1.2); // slight zoom in
-        }
+        this.renderer.focusNode(id);
     }
 
     private saveConfig() {
