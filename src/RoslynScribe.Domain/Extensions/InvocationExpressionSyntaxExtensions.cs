@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RoslynScribe.Domain.Models;
 using System;
 
 namespace RoslynScribe.Domain.Extensions

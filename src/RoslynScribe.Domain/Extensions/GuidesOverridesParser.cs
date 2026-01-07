@@ -1,4 +1,5 @@
-﻿using RoslynScribe.Domain.Models;
+﻿using Newtonsoft.Json.Linq;
+using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,6 +134,11 @@ namespace RoslynScribe.Domain.Extensions
 
         private static string GetArrayValue(string[] array, string token)
         {
+            if(array == null)
+            {
+                return null;
+            }
+
             var key = GetCollectionKey(token);
             if (key == null)
             {
@@ -151,6 +157,11 @@ namespace RoslynScribe.Domain.Extensions
 
         private static string GetDictionaryValue(Dictionary<string, string> dict, string token)
         {
+            if (dict == null)
+            {
+                return null;
+            }
+
             var key = GetCollectionKey(token);
             if (key == null)
             {

@@ -145,13 +145,21 @@ namespace RoslynScribe.Domain.ScribeConsole
                     .ToList();
                 if (missingExcludes.Count > 0)
                 {
-                    Console.WriteLine($"Warning: Excluded project(s) not found: {string.Join(", ", missingExcludes)}", ConsoleColor.Yellow);
+                    Console.WriteLine("Warning: Excluded project(s) not found:", ConsoleColor.Yellow);
+                    foreach (var proj in missingExcludes)
+                    {
+                        Console.WriteLine($" - {proj}", ConsoleColor.Yellow);
+                    }
                 }
             }
 
             if (excluded.Count > 0)
             {
-                Console.WriteLine($"Warning: Excluded projects: {string.Join(", ", excluded)}", ConsoleColor.Yellow);
+                Console.WriteLine("Warning: Excluded projects:", ConsoleColor.Yellow);
+                foreach (var proj in excluded)
+                {
+                    Console.WriteLine($" - {proj}", ConsoleColor.Yellow);
+                }
             }
 
             if (finalProjects.Count == 0)

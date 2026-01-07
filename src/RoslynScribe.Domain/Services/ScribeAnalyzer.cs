@@ -234,30 +234,7 @@ namespace RoslynScribe.Domain.Services
             var configuredNode = GetNodeFromConfiguration(invocation, parentNode, invokedMethod, adcConfig, semanticModel, trackers);
             var currentParent = configuredNode ?? parentNode;
 
-            // Avoid infinite recursion
-            var methodKey = invokedMethod.GetMethodKey();
-            if (!trackers.RecursionStack.Add(methodKey))
-            {
-                return;
-            }
-
-            // Expand into the invoked method so comments inside it become part of the tree under the configured node.
-            var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
-            for (int i = 0; i < syntaxReferences.Length; i++)
-            {
-                var location = invokedMethod.Locations[i].GetLineSpan().Path;
-                if (string.IsNullOrWhiteSpace(location) || !documents.ContainsKey(location))
-                {
-                    continue;
-                }
-
-                var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
-                var methodNode = syntaxReferences[i].GetSyntax();
-                ProcessNode(methodNode, methodNode.Kind(), currentParent, contextSemanticModel, documents, trackers, adcConfig);
-            }
-
-            trackers.RecursionStack.Remove(methodKey);
-            return;
+            ExpandIntoMethod(semanticModel, documents, trackers, adcConfig, invokedMethod, currentParent);
         }
 
         private static void ProcessDeclaration(
@@ -275,6 +252,37 @@ namespace RoslynScribe.Domain.Services
             }
 
             var configuredNode = GetNodeFromConfiguration(declaration, parentNode, declaredMethod, adcConfig, semanticModel, trackers);
+            var currentParent = configuredNode ?? parentNode;
+
+            ExpandIntoMethod(semanticModel, documents, trackers, adcConfig, declaredMethod, currentParent);
+
+        }
+
+        private static void ExpandIntoMethod(SemanticModel semanticModel, Dictionary<string, Document> documents, Trackers trackers, AdcConfig adcConfig, IMethodSymbol invokedMethod, ScribeNode currentParent)
+        {
+            // Avoid infinite recursion
+            var methodKey = invokedMethod.GetMethodKey();
+            if (!trackers.RecursionStack.Add(methodKey))
+            {
+                return;
+            }
+
+            // Expand into the method so comments inside it become part of the tree under the configured node.
+            var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
+            for (int i = 0; i < syntaxReferences.Length; i++)
+            {
+                var location = invokedMethod.Locations[i].GetLineSpan().Path;
+                if (string.IsNullOrWhiteSpace(location) || !documents.ContainsKey(location))
+                {
+                    continue;
+                }
+
+                var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
+                var methodNode = syntaxReferences[i].GetSyntax();
+                ProcessNode(methodNode, methodNode.Kind(), currentParent, contextSemanticModel, documents, trackers, adcConfig);
+            }
+
+            trackers.RecursionStack.Remove(methodKey);
         }
 
         /// <summary>
