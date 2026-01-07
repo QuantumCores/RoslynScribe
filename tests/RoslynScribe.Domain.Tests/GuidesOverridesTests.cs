@@ -168,10 +168,6 @@ namespace RoslynScribe.Domain.Tests
                         "RoslynScribe.NugetTestProject.Senders.INugetSender",
                         new AdcType
                         {
-                            GetMethods = new AdcMethod[]
-                            {
-                                new AdcMethod { MethodName = "Send", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
-                            },
                             SetGuidesOverrides = new Dictionary<string, string>
                             {
                                 { ScribeGuidesTokens.UserDefinedId, $"{{{nameof(MethodContext.MethodArgumentsTypes)}[0]}}_handler" },

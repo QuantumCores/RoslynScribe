@@ -19,7 +19,8 @@ namespace RoslynScribe.Domain.Extensions
         internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, CSharpSyntaxNode expression, SemanticModel semanticModel, AdcType adcType, AdcMethod adcMethod)
         {
             // enrich only if there are overrides to set
-            if (adcMethod != null && adcMethod.SetGuidesOverrides != null && adcMethod.SetGuidesOverrides.Count != 0)
+            if (adcMethod != null && adcMethod.SetGuidesOverrides != null && adcMethod.SetGuidesOverrides.Count != 0 ||
+                adcType.SetGuidesOverrides != null && adcType.SetGuidesOverrides.Count != 0)
             {
                 methodContext.ContainingTypeGenericParameters = GetGenericTypeParameters(symbol);
                 methodContext.MethodParametersTypes = GetParameterTypes(symbol);
@@ -35,7 +36,7 @@ namespace RoslynScribe.Domain.Extensions
                     methodContext.ContainingTypeAttributes = GetAttributes(symbol.ContainingType, adcType.GetAttributes);
                 }
 
-                if (adcMethod.GetAttributes != null)
+                if (adcMethod?.GetAttributes != null)
                 {
                     methodContext.MethodAttributes = GetAttributes(symbol, adcMethod.GetAttributes);
                 }

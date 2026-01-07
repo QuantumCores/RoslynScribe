@@ -38,7 +38,6 @@ namespace RoslynScribe.Domain.Configuration
                                 combinedOverrides[fromMethod.Key] = fromMethod.Value;
                             }
                         }
-                        method.SetGuidesOverrides = combinedOverrides;
                     }
                 }
             }
@@ -54,6 +53,8 @@ namespace RoslynScribe.Domain.Configuration
         public HashSet<string> GetAttributes { get; set; }
 
         public Dictionary<string, string> SetGuidesOverrides { get; set; }
+
+        public int SetDefaultLevel { get; set; } = 1;
     }
 
     public class AdcMethod

@@ -432,7 +432,7 @@ namespace RoslynScribe.Domain.Services
         private static bool TryFindConfiguredMethod(AdcType adcType, MethodContext candidate, out AdcMethod adcMethod)
         {
             adcMethod = null;
-            if (adcType.GetMethods.Length == 0)
+            if (adcType.GetMethods == null || adcType.GetMethods.Length == 0)
             {
                 return true;
             }
@@ -478,7 +478,7 @@ namespace RoslynScribe.Domain.Services
             methodSymbol.EnrichMethodContext(context, expression, semanticModel, adcType, adcMethod);
 
             var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
-            var level = adcMethod?.SetDefaultLevel ?? 1;
+            var level = adcMethod?.SetDefaultLevel ?? adcType.SetDefaultLevel;
 
             var guideText = $"{context.ContainingType}.{context.MethodIdentifier}";
             var value = new string[] {

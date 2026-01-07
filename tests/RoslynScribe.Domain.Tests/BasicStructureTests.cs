@@ -861,10 +861,7 @@ namespace RoslynScribe.Domain.Tests
                         "RoslynScribe.NugetTestProject.Senders.INugetSender",
                         new AdcType
                         {
-                            GetMethods = new AdcMethod[]
-                            {
-                                new AdcMethod { MethodIdentifier = "Send(object)", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
-                            },
+                            SetDefaultLevel = 2,
                         }
                     }
                 }
