@@ -44,6 +44,7 @@ namespace RoslynScribe.Domain.Extensions
             var methodInfo = new MethodContext
             {
                 ContainingType = MethodContext.NormalizeTypeFullName(symbol.ContainingType?.ToDisplayString()),
+                ContainingTypeName = symbol.ContainingType?.Name,
                 MethodName = symbol.Name,
                 MethodIdentifier = symbol.GetMethodIdentifier(),
             };
@@ -156,6 +157,8 @@ namespace RoslynScribe.Domain.Extensions
     internal class MethodContext
     {
         internal string ContainingType { get; set; }
+
+        internal string ContainingTypeName { get; set; }
 
         internal Dictionary<string, string> ContainingTypeAttributes { get; set; }
 

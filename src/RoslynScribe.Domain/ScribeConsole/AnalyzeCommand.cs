@@ -445,12 +445,50 @@ namespace RoslynScribe.Domain.ScribeConsole
                     return new AdcConfig();
                 }
 
+                FlattenMethodOverrides(config);
+
                 return config;
             }
             catch
             {
                 Console.WriteLine($"Warning: Failed to read config file '{configPath}'. Using empty config.", ConsoleColor.Yellow);
                 return new AdcConfig();
+            }
+        }
+
+        private static void FlattenMethodOverrides(AdcConfig config)
+        {
+            foreach (var type in config.Types.Values)
+            {
+                if (type.GetMethods == null)
+                {
+                    continue;
+                }
+
+                foreach (var method in type.GetMethods)
+                {
+                    if (method.SetGuidesOverrides == null && type.SetGuidesOverrides != null)
+                    {
+                        method.SetGuidesOverrides = type.SetGuidesOverrides;
+                    }
+                    else if (method.SetGuidesOverrides != null && type.SetGuidesOverrides != null)
+                    {
+                        // flatten overrides, method-level takes precedence
+                        var combinedOverrides = new Dictionary<string, string>(type.SetGuidesOverrides);
+                        foreach (var fromMethod in method.SetGuidesOverrides)
+                        {
+                            if (!type.SetGuidesOverrides.ContainsKey(fromMethod.Key))
+                            {
+                                combinedOverrides.Add(fromMethod.Key, fromMethod.Value);
+                            }
+                            else
+                            {
+                                combinedOverrides[fromMethod.Key] = fromMethod.Value;
+                            }
+                        }
+                        method.SetGuidesOverrides = combinedOverrides;
+                    }
+                }
             }
         }
 

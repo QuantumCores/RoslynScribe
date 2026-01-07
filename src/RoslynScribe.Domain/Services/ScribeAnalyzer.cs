@@ -42,7 +42,18 @@ namespace RoslynScribe.Domain.Services
                     var node = await Analyze(project, documents, document, trackers, adcConfig);
                     if (node != null)
                     {
-                        result.Add(node);
+                        // skip artificial document nodes without any child nodes
+                        if (node.ChildNodes.Count == 0)
+                        {
+                            continue;
+                        }
+
+                        // take only nodes that have relevant child nodes, otherwise we have detached single leaf
+                        var relevantNodes = node.ChildNodes
+                            .Where(x => x.ChildNodes.Count != 0)
+                            .ToList();
+
+                        result.AddRange(relevantNodes);
                     }
                 }
             }
@@ -102,7 +113,7 @@ namespace RoslynScribe.Domain.Services
                 MetaInfo = documentMeta
             };
 
-            if(!trackers.SemanticModelCache.ContainsKey(document.FilePath))
+            if (!trackers.SemanticModelCache.ContainsKey(document.FilePath))
             {
                 trackers.SemanticModelCache.Add(document.FilePath, semanticModel);
             }
@@ -376,7 +387,7 @@ namespace RoslynScribe.Domain.Services
             // if type has no methods this means we add all methods from containing type
             if (adcType.GetMethods == null || adcType.GetMethods.Length == 0)
             {
-                return true;                
+                return true;
             }
 
             // now that we know that containing type implements the configured type check if configured method is part of the containing type
@@ -477,7 +488,8 @@ namespace RoslynScribe.Domain.Services
                 Level = level,
                 Text = guideText,
             };
-            guides = GuidesOverridesParser.Apply(adcMethod?.SetGuidesOverrides, guides, info);
+            var overrides = adcMethod?.SetGuidesOverrides ?? adcType.SetGuidesOverrides;
+            guides = GuidesOverridesParser.Apply(overrides, guides, info);
 
             var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
             return configuredNode;

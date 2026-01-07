@@ -82,6 +82,11 @@ namespace RoslynScribe.Domain.Extensions
                 replacement = context.ContainingType;
             }
 
+            if (token == nameof(MethodContext.ContainingTypeName))
+            {
+                replacement = context.ContainingTypeName;
+            }
+
             if (token.StartsWith(nameof(MethodContext.ContainingTypeAttributes)))
             {
                 var key = GetCollectionKey(token);

@@ -16,6 +16,8 @@ namespace RoslynScribe.Domain.Configuration
         public AdcMethod[] GetMethods { get; set; }
 
         public HashSet<string> GetAttributes { get; set; }
+
+        public Dictionary<string, string> SetGuidesOverrides { get; set; }
     }
 
     public class AdcMethod

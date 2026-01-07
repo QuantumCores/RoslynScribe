@@ -848,5 +848,51 @@ namespace RoslynScribe.Domain.Tests
             var isEquivalent = result.IsEquivalent(expected);
             Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
         }
+
+        [Test]
+        public async Task S018_returns_valid_tree()
+        {
+            // Arrange
+            var adcConfig = new AdcConfig
+            {
+                Types =
+                {
+                    {
+                        "RoslynScribe.NugetTestProject.Senders.INugetSender",
+                        new AdcType
+                        {
+                            GetMethods = new AdcMethod[]
+                            {
+                                new AdcMethod { MethodName = "Send", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
+                            },
+                        }
+                    }
+                }
+            };
+
+            var expected = new ScribeNode
+            {
+                Value = null,
+                ChildNodes = new List<ScribeNode>()
+                {
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S018_Adc_NugetMethodWithObjectParam.LoadSomething(int, int)`,L:`2`]" },
+                    },
+                    new ScribeNode
+                    {
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S018_Adc_NugetMethodWithObjectParam.LoadSomething(int)`,L:`2`]" },
+                    },
+                },
+            };
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S018_Adc_NugetMethodWithObjectParam.cs", adcConfig);
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            var isEquivalent = result.IsEquivalent(expected);
+            Assert.IsTrue(isEquivalent.Result, isEquivalent.Text);
+        }
     }
 }
