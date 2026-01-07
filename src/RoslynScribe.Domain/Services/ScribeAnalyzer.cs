@@ -48,12 +48,7 @@ namespace RoslynScribe.Domain.Services
                             continue;
                         }
 
-                        // take only nodes that have relevant child nodes, otherwise we have detached single leaf
-                        var relevantNodes = node.ChildNodes
-                            .Where(x => x.ChildNodes.Count != 0)
-                            .ToList();
-
-                        result.AddRange(relevantNodes);
+                        result.AddRange(node.ChildNodes);
                     }
                 }
             }
