@@ -323,11 +323,7 @@ namespace RoslynScribe.Domain.Services
             {
                 if (TryFindConfiguredMethod(adcType, originalContext, out adcMethod))
                 {
-                    if (expressionKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
-                    {
-                        return null;
-                    }
-                    return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
+                    return AddConfiguredNode(expression, expressionKind, parentNode, methodSymbol, semanticModel, trackers, adcType, adcMethod, originalContext);
                 }
             }
 
@@ -339,8 +335,7 @@ namespace RoslynScribe.Domain.Services
                 {
                     if (TryFindConfiguredTypeAndMethod(bType, containingType, adcConfig, originalContext, methodSymbol, expressionKind, out adcType, out adcMethod))
                     {
-                        methodSymbol.EnrichMethodContext(originalContext, adcType, adcMethod);
-                        return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
+                        return AddConfiguredNode(expression, expressionKind, parentNode, methodSymbol, semanticModel, trackers, adcType, adcMethod, originalContext);
                     }
                 }
 
@@ -348,8 +343,7 @@ namespace RoslynScribe.Domain.Services
                 {
                     if (TryFindConfiguredTypeAndMethod(iface, containingType, adcConfig, originalContext, methodSymbol, expressionKind, out adcType, out adcMethod))
                     {
-                        methodSymbol.EnrichMethodContext(originalContext, adcType, adcMethod);
-                        return AddConfiguredNode(expression, expressionKind, parentNode, semanticModel, trackers, adcType, adcMethod, originalContext);
+                        return AddConfiguredNode(expression, expressionKind, parentNode, methodSymbol, semanticModel, trackers, adcType, adcMethod, originalContext);
                     }
                 }
             }
@@ -473,12 +467,20 @@ namespace RoslynScribe.Domain.Services
             return false;
         }
 
-        private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodContext info)
+        private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, IMethodSymbol methodSymbol, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodContext context)
         {
+            // if method declarations are not configured skip them
+            if (syntaxKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
+            {
+                return null;
+            }
+
+            methodSymbol.EnrichMethodContext(context, expression, semanticModel, adcType, adcMethod);
+
             var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
             var level = adcMethod?.SetDefaultLevel ?? 1;
 
-            var guideText = $"{info.ContainingType}.{info.MethodIdentifier}";
+            var guideText = $"{context.ContainingType}.{context.MethodIdentifier}";
             var value = new string[] {
                 $"// {CommentLabel}[{ScribeGuidesTokens.Text}:`{guideText}`,{ScribeGuidesTokens.Level}:`{level}`]",
                 // $"// {CommentLabel}[{ScribeGuidesTokens.Tags}:`{info.TypeFullName}.{info.MethodIdentifier}`]"
@@ -489,7 +491,7 @@ namespace RoslynScribe.Domain.Services
                 Text = guideText,
             };
             var overrides = adcMethod?.SetGuidesOverrides ?? adcType.SetGuidesOverrides;
-            guides = GuidesOverridesParser.Apply(overrides, guides, info);
+            guides = GuidesOverridesParser.Apply(overrides, guides, context);
 
             var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
             return configuredNode;

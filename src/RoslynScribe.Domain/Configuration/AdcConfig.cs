@@ -7,6 +7,42 @@ namespace RoslynScribe.Domain.Configuration
         public bool DiscardDocumentRootNode { get; set; } = false;
 
         public Dictionary<string, AdcType> Types { get; set; } = new Dictionary<string, AdcType>();
+
+        internal void FlattenMethodOverrides()
+        {
+            foreach (var type in Types.Values)
+            {
+                if (type.GetMethods == null)
+                {
+                    continue;
+                }
+
+                foreach (var method in type.GetMethods)
+                {
+                    if (method.SetGuidesOverrides == null && type.SetGuidesOverrides != null)
+                    {
+                        method.SetGuidesOverrides = type.SetGuidesOverrides;
+                    }
+                    else if (method.SetGuidesOverrides != null && type.SetGuidesOverrides != null)
+                    {
+                        // flatten overrides, method-level takes precedence
+                        var combinedOverrides = new Dictionary<string, string>(type.SetGuidesOverrides);
+                        foreach (var fromMethod in method.SetGuidesOverrides)
+                        {
+                            if (!type.SetGuidesOverrides.ContainsKey(fromMethod.Key))
+                            {
+                                combinedOverrides.Add(fromMethod.Key, fromMethod.Value);
+                            }
+                            else
+                            {
+                                combinedOverrides[fromMethod.Key] = fromMethod.Value;
+                            }
+                        }
+                        method.SetGuidesOverrides = combinedOverrides;
+                    }
+                }
+            }
+        }
     }
 
     public class AdcType

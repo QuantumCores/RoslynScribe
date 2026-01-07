@@ -1,6 +1,7 @@
 ﻿using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace RoslynScribe.Domain.Extensions
@@ -89,20 +90,12 @@ namespace RoslynScribe.Domain.Extensions
 
             if (token.StartsWith(nameof(MethodContext.ContainingTypeAttributes)))
             {
-                var key = GetCollectionKey(token);
-                if (context.ContainingTypeAttributes.TryGetValue(key, out var value))
-                { 
-                    replacement = value;
-                }
-                else
-                {
-                    ScribeConsole.Console.WriteLine($"Guides overrides could not find value in {nameof(MethodContext.ContainingTypeAttributes)} for {key}", ConsoleColor.Yellow);
-                }
+                replacement = GetDictionaryValue(context.ContainingTypeAttributes, token);
             }
 
-            if (token == nameof(MethodContext.ContainingTypeGenericParameters))
+            if (token.StartsWith(nameof(MethodContext.ContainingTypeGenericParameters)))
             {
-                replacement = string.Join("|", context.ContainingTypeGenericParameters ?? Array.Empty<string>());
+                replacement = GetArrayValue(context.ContainingTypeGenericParameters, token);
             }
 
             if (token == nameof(MethodContext.MethodName))
@@ -115,25 +108,58 @@ namespace RoslynScribe.Domain.Extensions
                 replacement = context.MethodIdentifier;
             }
 
-            if (token == nameof(MethodContext.MethodParametersTypes))
+            if (token.StartsWith(nameof(MethodContext.MethodParametersTypes)))
             {
-                replacement = string.Join("|", context.MethodParametersTypes ?? Array.Empty<string>());
+                replacement = GetArrayValue(context.MethodParametersTypes, token);
+            }
+
+            if (token.StartsWith(nameof(MethodContext.MethodArgumentsTypes)))
+            {
+                replacement = GetArrayValue(context.MethodArgumentsTypes, token);
             }
 
             if (token.StartsWith(nameof(MethodContext.MethodAttributes)))
             {
-                var key = GetCollectionKey(token);
-                if (context.MethodAttributes.TryGetValue(key, out var value))
-                {
-                    replacement = value;
-                }
-                else
-                {
-                    ScribeConsole.Console.WriteLine($"Guides overrides could not find value in {nameof(MethodContext.MethodAttributes)} for {key}", ConsoleColor.Yellow);
-                }
+                replacement = GetDictionaryValue(context.MethodAttributes, token);
             }           
 
             return replacement;
+        }
+
+        private static string GetArrayValue(string[] array, string token)
+        {
+            var key = GetCollectionKey(token);
+            if (key == null)
+            {
+                return string.Join("|", array ?? Array.Empty<string>());
+            }
+
+            if (int.TryParse(key, out var idx))
+            {
+                return array[idx];
+            }
+            
+            ScribeConsole.Console.WriteLine($"Guides overrides could not find value in {nameof(MethodContext.MethodAttributes)} for {key}", ConsoleColor.Yellow);
+
+            return null;
+        }
+
+        private static string GetDictionaryValue(Dictionary<string, string> dict, string token)
+        {
+            var key = GetCollectionKey(token);
+            if (key == null)
+            {
+                return string.Join("|", dict.Values.ToArray() ?? Array.Empty<string>());
+            }
+
+            if (dict.TryGetValue(key, out var value))
+            {
+                return value;
+            }            
+
+            ScribeConsole.Console.WriteLine($"Guides overrides could not find value in {nameof(MethodContext.MethodAttributes)} for {key}", ConsoleColor.Yellow);            
+
+            return null;
         }
 
 
@@ -145,8 +171,6 @@ namespace RoslynScribe.Domain.Extensions
             {
                 return text.Substring(startIndex + 1, endIndex - startIndex - 1);
             }
-
-            ScribeConsole.Console.WriteLine($"Guides overrides could not parse collection key from text: {text}", ConsoleColor.Yellow);
 
             return null;
         }

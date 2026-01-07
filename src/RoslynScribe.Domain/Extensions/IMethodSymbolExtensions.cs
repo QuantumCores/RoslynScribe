@@ -1,4 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynScribe.Domain.Configuration;
 using System;
 using System.Collections.Generic;
@@ -14,13 +16,19 @@ namespace RoslynScribe.Domain.Extensions
             return symbol.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
         }
 
-        internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, AdcType adcType, AdcMethod adcMethod)
+        internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, CSharpSyntaxNode expression, SemanticModel semanticModel, AdcType adcType, AdcMethod adcMethod)
         {
             // enrich only if there are overrides to set
             if (adcMethod != null && adcMethod.SetGuidesOverrides != null && adcMethod.SetGuidesOverrides.Count != 0)
             {
                 methodContext.ContainingTypeGenericParameters = GetGenericTypeParameters(symbol);
                 methodContext.MethodParametersTypes = GetParameterTypes(symbol);
+
+                if (expression.Kind() == SyntaxKind.InvocationExpression)
+                {
+                    var invocation = expression as InvocationExpressionSyntax;
+                    methodContext.MethodArgumentsTypes = invocation.GetArgumentTypes(semanticModel);
+                }
 
                 if (adcType.GetAttributes != null)
                 {
@@ -165,6 +173,8 @@ namespace RoslynScribe.Domain.Extensions
         internal string[] ContainingTypeGenericParameters { get; set; }
 
         internal string[] MethodParametersTypes { get; set; }
+
+        internal string[] MethodArgumentsTypes { get; set; }
 
         internal string MethodName { get; set; }
 

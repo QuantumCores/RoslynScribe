@@ -156,5 +156,39 @@ namespace RoslynScribe.Domain.Tests
             Assert.AreEqual("api/v1/[controller]/test/Load2", result.ChildNodes[1].Guides.UserDefinedId);
         }
 
+        [Test]
+        public async Task GuideOverride_applies_adc_config_method_argument_replacements_to_UserDefinedId()
+        {
+            // Arrange
+            var adcConfig = new AdcConfig
+            {
+                Types =
+                {
+                    {
+                        "RoslynScribe.NugetTestProject.Senders.INugetSender",
+                        new AdcType
+                        {
+                            GetMethods = new AdcMethod[]
+                            {
+                                new AdcMethod { MethodName = "Send", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
+                            },
+                            SetGuidesOverrides = new Dictionary<string, string>
+                            {
+                                { ScribeGuidesTokens.UserDefinedId, $"{{{nameof(MethodContext.MethodArgumentsTypes)}[0]}}_handler" },
+                            }
+                        }
+                    }
+                }
+            };
+            adcConfig.FlattenMethodOverrides();
+
+            // Act
+            var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S018_Adc_NugetMethodWithObjectParam.cs", adcConfig);
+
+            // var json = JsonSerializer.Serialize(result);
+            // Assert
+            Assert.AreEqual("RoslynScribe.TestProject.NugetMessage_handler", result.ChildNodes[0].Guides.UserDefinedId);
+        }
+
     }
 }

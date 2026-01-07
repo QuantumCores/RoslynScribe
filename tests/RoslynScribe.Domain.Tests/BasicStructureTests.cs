@@ -863,7 +863,7 @@ namespace RoslynScribe.Domain.Tests
                         {
                             GetMethods = new AdcMethod[]
                             {
-                                new AdcMethod { MethodName = "Send", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
+                                new AdcMethod { MethodIdentifier = "Send(object)", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
                             },
                         }
                     }
@@ -877,11 +877,7 @@ namespace RoslynScribe.Domain.Tests
                 {
                     new ScribeNode
                     {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S018_Adc_NugetMethodWithObjectParam.LoadSomething(int, int)`,L:`2`]" },
-                    },
-                    new ScribeNode
-                    {
-                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S018_Adc_NugetMethodWithObjectParam.LoadSomething(int)`,L:`2`]" },
+                        Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.NugetTestProject.Senders.INugetSender.Send(object)`,L:`2`]" },
                     },
                 },
             };
