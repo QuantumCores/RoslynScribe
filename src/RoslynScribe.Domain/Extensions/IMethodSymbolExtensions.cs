@@ -24,8 +24,10 @@ namespace RoslynScribe.Domain.Extensions
             {
                 methodContext.ContainingTypeGenericParameters = GetGenericTypeParameters(symbol);
                 methodContext.MethodParametersTypes = GetParameterTypes(symbol);
+                var kind = expression.Kind();
+                methodContext.ExpressionKind = kind.ToString().Replace("Expression", "");
 
-                if (expression.Kind() == SyntaxKind.InvocationExpression)
+                if (kind == SyntaxKind.InvocationExpression)
                 {
                     var invocation = expression as InvocationExpressionSyntax;
                     methodContext.MethodArgumentsTypes = invocation.GetArgumentTypes(semanticModel);
@@ -180,6 +182,7 @@ namespace RoslynScribe.Domain.Extensions
         internal string MethodName { get; set; }
 
         internal string MethodIdentifier { get; set; }
+        public string ExpressionKind { get; internal set; }
 
         internal Dictionary<string, string> MethodAttributes { get; set; }
 

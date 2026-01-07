@@ -108,6 +108,11 @@ namespace RoslynScribe.Domain.Extensions
                 replacement = context.MethodIdentifier;
             }
 
+            if(token == nameof(MethodContext.ExpressionKind))
+            {
+                replacement = context.ExpressionKind;
+            }
+
             if (token.StartsWith(nameof(MethodContext.MethodParametersTypes)))
             {
                 replacement = GetArrayValue(context.MethodParametersTypes, token);

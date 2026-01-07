@@ -282,7 +282,7 @@ namespace RoslynScribe.Domain.Services
                     }
                     else
                     {
-                        ScribeConsole.Console.WriteLine($"Warning: Duplicate user-defined ID '{userId}' found on node {id}. Skipping duplicate.", ConsoleColor.Yellow);
+                        ScribeConsole.Console.WriteLine($"Warning: Duplicate user-defined ID '{userId}' found on node {id} in {root.MetaInfo.DocumentPath}. Skipping duplicate.", ConsoleColor.Yellow);
                     }
 
                 }
