@@ -1,5 +1,3 @@
-using RoslynScribe.Domain.Extensions;
-using System;
 using System.Collections.Generic;
 
 namespace RoslynScribe.Domain.Models

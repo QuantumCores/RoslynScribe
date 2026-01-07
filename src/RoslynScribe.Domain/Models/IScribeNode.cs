@@ -1,5 +1,3 @@
-using System;
-
 namespace RoslynScribe.Domain.Models
 {
     public interface IScribeNode

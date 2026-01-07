@@ -29,6 +29,7 @@ interface ScribeGuides {
 }
 
 interface MetaInfo {
+    SolutionName: string;
     ProjectName: string;
     DocumentName: string;
     DocumentPath: string;
