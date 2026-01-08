@@ -63,5 +63,15 @@ namespace RoslynScribe.Domain.Models
         {
             return new ScribeGuides();
         }
+
+        public void Complement(ScribeGuides other)
+        {
+            UserDefinedId = UserDefinedId ?? other.UserDefinedId;
+            Text = Text ?? other.Text;
+            Description = Description ?? other.Description;
+            Path = Path ?? other.Path;
+            DestinationUserIds = DestinationUserIds.Length > 0 ? DestinationUserIds : other.DestinationUserIds;
+            Tags = Tags.Length > 0 ? Tags : other.Tags;
+        }
     }
 }

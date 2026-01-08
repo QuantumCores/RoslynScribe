@@ -8,6 +8,8 @@ namespace RoslynScribe.Domain.Configuration
 
         public Dictionary<string, AdcType> Types { get; set; } = new Dictionary<string, AdcType>();
 
+        public string[] ExcludedTypes { get; set; } = new string[0];
+
         internal void FlattenMethodOverrides()
         {
             foreach (var type in Types.Values)

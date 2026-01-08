@@ -12,7 +12,7 @@ namespace RoslynScribe.Domain.Models
         // commens in their original form
         public string[] Value { get; set; }
 
-        public ScribeGuides Guides { get; set; }
+        public ScribeGuides Guides { get; set; } = new ScribeGuides();
 
         public string Kind { get; set; }
 

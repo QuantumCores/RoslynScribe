@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace RoslynScribe.Domain.Services
 {
@@ -162,36 +163,47 @@ namespace RoslynScribe.Domain.Services
             SetMetaInfo(syntaxNode, syntaxKind, parentNode);
             var lTrivias = syntaxNode.GetLeadingTrivia();
 
-            ScribeNode childNode = null;
+            ScribeNode commentChildNode = null;
             if (lTrivias.Count != 0)
             {
-                childNode = ProcessCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel, trackers);
-
-                if (childNode != null)
-                {
-                    // if trackers contains node with that id it means that this path was already processed
-                    if (trackers.Nodes.ContainsKey(childNode.Id))
-                    {
-                        return;
-                    }
-
-                    trackers.Nodes.Add(childNode.Id, childNode);
-                }
+                commentChildNode = ProcessCommentTrivia(syntaxNode, syntaxKind, parentNode, lTrivias, semanticModel, trackers);
             }
 
-            var currentParent = childNode ?? parentNode;
-
+            ScribeNode childNode = null;
             if (syntaxKind == SyntaxKind.InvocationExpression)
             {
                 var invocation = syntaxNode as InvocationExpressionSyntax;
-                ProcessInvocation(invocation, currentParent, semanticModel, documents, trackers, adcConfig);
+                childNode = ProcessInvocation(invocation, syntaxKind, parentNode, semanticModel, documents, trackers, adcConfig);
             }
-
-            if (syntaxKind == SyntaxKind.MethodDeclaration)
+            else if (syntaxKind == SyntaxKind.MethodDeclaration)
             {
                 var declaration = syntaxNode as MethodDeclarationSyntax;
-                ProcessDeclaration(declaration, parentNode, semanticModel, documents, trackers, adcConfig);
+                childNode = ProcessDeclaration(declaration, syntaxKind, parentNode, semanticModel, documents, trackers, adcConfig);
             }
+
+            if (commentChildNode != null)
+            {
+                // comment nodes take precedence over other nodes
+                if (childNode != null)
+                {
+                    commentChildNode.Guides.Complement(childNode.Guides);
+                }
+
+                childNode = commentChildNode;
+            }
+
+            if (childNode != null)
+            {
+                // if trackers contains node with that id it means that this path was already processed
+                if (trackers.Nodes.ContainsKey(childNode.Id))
+                {
+                    return;
+                }
+
+                trackers.Nodes.Add(childNode.Id, childNode);
+            }
+
+            var currentParent = childNode ?? parentNode;
 
             Traverse(syntaxNode, currentParent, semanticModel, documents, trackers, adcConfig);
         }
@@ -223,8 +235,9 @@ namespace RoslynScribe.Domain.Services
             return null;
         }
 
-        private static void ProcessInvocation(
+        private static ScribeNode ProcessInvocation(
             InvocationExpressionSyntax invocation,
+            SyntaxKind syntaxKind,
             ScribeNode parentNode,
             SemanticModel semanticModel,
             Dictionary<string, Document> documents,
@@ -234,17 +247,15 @@ namespace RoslynScribe.Domain.Services
             var invokedMethod = invocation.GetMethodSymbol(semanticModel);
             if (invokedMethod == null)
             {
-                return;
+                return null;
             }
 
-            var configuredNode = GetNodeFromConfiguration(invocation, parentNode, invokedMethod, adcConfig, semanticModel, trackers);
-            var currentParent = configuredNode ?? parentNode;
-
-            ExpandIntoMethod(semanticModel, documents, trackers, adcConfig, invokedMethod, currentParent);
+            return ProcessMethod(invocation, syntaxKind, invokedMethod, parentNode, semanticModel, documents, trackers, adcConfig);
         }
 
-        private static void ProcessDeclaration(
+        private static ScribeNode ProcessDeclaration(
             MethodDeclarationSyntax declaration,
+            SyntaxKind syntaxKind,
             ScribeNode parentNode,
             SemanticModel semanticModel,
             Dictionary<string, Document> documents,
@@ -254,30 +265,50 @@ namespace RoslynScribe.Domain.Services
             var declaredMethod = semanticModel.GetDeclaredSymbol(declaration);
             if (declaredMethod == null)
             {
-                return;
+                return null;
             }
 
-            var configuredNode = GetNodeFromConfiguration(declaration, parentNode, declaredMethod, adcConfig, semanticModel, trackers);
-            var currentParent = configuredNode ?? parentNode;
-
-            ExpandIntoMethod(semanticModel, documents, trackers, adcConfig, declaredMethod, currentParent);
-
+            return ProcessMethod(declaration, syntaxKind, declaredMethod, parentNode, semanticModel, documents, trackers, adcConfig);
         }
 
-        private static void ExpandIntoMethod(SemanticModel semanticModel, Dictionary<string, Document> documents, Trackers trackers, AdcConfig adcConfig, IMethodSymbol invokedMethod, ScribeNode currentParent)
+        private static ScribeNode ProcessMethod(
+            SyntaxNode syntaxNode,
+            SyntaxKind syntaxKind,
+            IMethodSymbol methodSymbol,
+            ScribeNode parentNode,
+            SemanticModel semanticModel,
+            Dictionary<string, Document> documents,
+            Trackers trackers,
+            AdcConfig adcConfig) 
+        {
+            var configuredNode = GetNodeFromConfiguration(syntaxNode, parentNode, methodSymbol, adcConfig, semanticModel, trackers);
+
+            // even if configuredNode is null we want to expand into method to process comments inside it
+            var currentParent = configuredNode ?? parentNode;
+            ExpandIntoMethod(syntaxNode, semanticModel, syntaxKind, documents, trackers, adcConfig, methodSymbol, currentParent);
+
+            // we can't return parentNode because it doesn't make sense
+            // if there was something to add it was added as child to parentNode
+            // if there was duplicate it won't be added to parent
+            return configuredNode;
+        }
+
+
+
+        private static void ExpandIntoMethod(SyntaxNode syntaxNode, SemanticModel semanticModel, SyntaxKind syntaxKind, Dictionary<string, Document> documents, Trackers trackers, AdcConfig adcConfig, IMethodSymbol methodSymbol, ScribeNode currentParent)
         {
             // Avoid infinite recursion
-            var methodKey = invokedMethod.GetMethodKey();
+            var methodKey = syntaxKind.ToString() + "_" + methodSymbol.GetMethodKey();
             if (!trackers.RecursionStack.Add(methodKey))
             {
                 return;
             }
 
             // Expand into the method so comments inside it become part of the tree under the configured node.
-            var syntaxReferences = invokedMethod.DeclaringSyntaxReferences;
+            var syntaxReferences = methodSymbol.DeclaringSyntaxReferences;
             for (int i = 0; i < syntaxReferences.Length; i++)
             {
-                var location = invokedMethod.Locations[i].GetLineSpan().Path;
+                var location = methodSymbol.Locations[i].GetLineSpan().Path;
                 if (string.IsNullOrWhiteSpace(location) || !documents.ContainsKey(location))
                 {
                     continue;
@@ -285,6 +316,11 @@ namespace RoslynScribe.Domain.Services
 
                 var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
                 var methodNode = syntaxReferences[i].GetSyntax();
+                if (syntaxNode == methodNode)
+                { 
+                    continue;
+                }
+
                 ProcessNode(methodNode, methodNode.Kind(), currentParent, contextSemanticModel, documents, trackers, adcConfig);
             }
 
@@ -310,7 +346,7 @@ namespace RoslynScribe.Domain.Services
         /// A configured ScribeNode representing the method invocation if a matching configuration is found; otherwise, null.
         /// </returns>
         private static ScribeNode GetNodeFromConfiguration(
-            CSharpSyntaxNode expression,
+            SyntaxNode expression,
             ScribeNode parentNode,
             IMethodSymbol methodSymbol,
             AdcConfig adcConfig,
@@ -477,17 +513,17 @@ namespace RoslynScribe.Domain.Services
             return false;
         }
 
-        private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, IMethodSymbol methodSymbol, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodContext context)
+        private static ScribeNode AddConfiguredNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, IMethodSymbol methodSymbol, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodContext context)
         {
             // if method declarations are not configured skip signatures without bodies
-            if (syntaxKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodSignatures && IsMethodSignature(expression))
+            if (syntaxKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodSignatures && IsMethodSignature(syntaxNode))
             {
                 return null;
             }
 
-            methodSymbol.EnrichMethodContext(context, expression, semanticModel, adcType, adcMethod);
+            methodSymbol.EnrichMethodContext(context, syntaxNode, semanticModel, adcType, adcMethod);
 
-            var line = expression.GetLocation().GetLineSpan().Span.Start.Line;
+            var line = syntaxNode.GetLocation().GetLineSpan().Span.Start.Line;
             var level = adcMethod?.SetDefaultLevel ?? adcType.SetDefaultLevel;
 
             var guideText = $"{context.ContainingType}.{context.MethodIdentifier}";
@@ -503,13 +539,13 @@ namespace RoslynScribe.Domain.Services
             var overrides = adcMethod?.SetGuidesOverrides ?? adcType.SetGuidesOverrides;
             guides = GuidesOverridesParser.Apply(overrides, guides, context);
 
-            var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
+            var configuredNode = AddChildNode(syntaxNode, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
             return configuredNode;
         }
 
-        private static bool IsMethodSignature(CSharpSyntaxNode expression)
+        private static bool IsMethodSignature(SyntaxNode syntaxNode)
         {
-            if (expression is MethodDeclarationSyntax methodDeclaration)
+            if (syntaxNode is MethodDeclarationSyntax methodDeclaration)
             {
                 return methodDeclaration.Body == null && methodDeclaration.ExpressionBody == null;
             }
@@ -539,7 +575,7 @@ namespace RoslynScribe.Domain.Services
         /// </returns>
         private static ScribeNode AddChildNode(SyntaxNode syntaxNode, SyntaxKind syntaxKind, ScribeNode parentNode, string[] value, ScribeGuides guides, SemanticModel semanticModel, int line, Trackers trackers)
         {
-            var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line, trackers.SolutionDirectory);
+            var metaInfo = GetMetaInfo(syntaxNode, syntaxKind, parentNode, semanticModel, line + 1, trackers.SolutionDirectory);
             var id = metaInfo.GetDeterministicId();
 
             if (parentNode.ChildNodes.Any(x => x.Id == id) || parentNode.Id == id)
@@ -548,6 +584,7 @@ namespace RoslynScribe.Domain.Services
             }
 
             // do not add to trackers here!
+            // If it's a comment it will block configured node => loosing complemntary data
             ScribeNode childNode = null;
             if (!trackers.Nodes.ContainsKey(id))
             {
@@ -629,6 +666,7 @@ namespace RoslynScribe.Domain.Services
                 case SyntaxKind.NamespaceDeclaration:
                     var namespaceSyntax = (syntaxNode as NamespaceDeclarationSyntax);
 
+                    metaInfo.SolutionName = parentNode.MetaInfo.SolutionName;
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
                     metaInfo.DocumentPath = parentNode.MetaInfo.DocumentPath;
@@ -639,6 +677,7 @@ namespace RoslynScribe.Domain.Services
                 case SyntaxKind.ClassDeclaration:
                     var classSyntax = (syntaxNode as ClassDeclarationSyntax);
 
+                    metaInfo.SolutionName = parentNode.MetaInfo.SolutionName;
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
                     metaInfo.DocumentPath = parentNode.MetaInfo.DocumentPath;
@@ -652,8 +691,15 @@ namespace RoslynScribe.Domain.Services
 
                     // methods can be called from other project thus copying data from parent won't work
                     var symbolInfo = semanticModel.GetDeclaredSymbol(methodSyntax);
-                    return GetMetaInfo(symbolInfo, line, solutionDirectory);
+                    return GetMetaInfo(symbolInfo, line, parentNode.MetaInfo.SolutionName, solutionDirectory);
+                case SyntaxKind.InvocationExpression:
+                    var invocationSyntax = (syntaxNode as InvocationExpressionSyntax);
+
+                    // methods can be called from other project thus copying data from parent won't work
+                    var invocationInfo = invocationSyntax.GetMethodSymbol(semanticModel);
+                    return GetMetaInfo(invocationInfo, line, parentNode.MetaInfo.SolutionName, solutionDirectory);
                 default:
+                    metaInfo.SolutionName = parentNode.MetaInfo.SolutionName;
                     metaInfo.ProjectName = parentNode.MetaInfo.ProjectName;
                     metaInfo.DocumentName = parentNode.MetaInfo.DocumentName;
                     metaInfo.DocumentPath = parentNode.MetaInfo.DocumentPath;
@@ -666,9 +712,10 @@ namespace RoslynScribe.Domain.Services
             return metaInfo;
         }
 
-        private static MetaInfo GetMetaInfo(IMethodSymbol symbolInfo, int line, string solutionDirectory)
+        private static MetaInfo GetMetaInfo(IMethodSymbol symbolInfo, int line, string solutionName, string solutionDirectory)
         {
             var metaInfo = new MetaInfo();
+            metaInfo.SolutionName = solutionName;
             metaInfo.ProjectName = symbolInfo.ContainingAssembly.Name;
 
             var location = symbolInfo.Locations[0].GetLineSpan().Path;

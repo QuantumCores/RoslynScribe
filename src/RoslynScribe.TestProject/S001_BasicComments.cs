@@ -11,7 +11,7 @@ namespace RoslynScribe.TestProject
             return start + 1;
         }
 
-        public int ZZZ_MethodShouldNotOverWriteNodeMetaInfo(int start)
+        public int ZZZ_LastMethodShouldNotOverWriteNodeMetaInfo(int start)
         {
             return start + 2;
         }

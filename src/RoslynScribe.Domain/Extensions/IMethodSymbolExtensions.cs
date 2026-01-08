@@ -16,7 +16,7 @@ namespace RoslynScribe.Domain.Extensions
             return symbol.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
         }
 
-        internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, CSharpSyntaxNode expression, SemanticModel semanticModel, AdcType adcType, AdcMethod adcMethod)
+        internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, SyntaxNode syntaxNode, SemanticModel semanticModel, AdcType adcType, AdcMethod adcMethod)
         {
             // enrich only if there are overrides to set
             if (adcMethod != null && adcMethod.SetGuidesOverrides != null && adcMethod.SetGuidesOverrides.Count != 0 ||
@@ -24,14 +24,14 @@ namespace RoslynScribe.Domain.Extensions
             {
                 methodContext.ContainingTypeGenericParameters = symbol.GetGenericTypeParameters();
                 methodContext.MethodParametersTypes = symbol.GetParameterTypes();
-                var kind = expression.Kind();
+                var kind = syntaxNode.Kind();
                 methodContext.ExpressionKind = kind == SyntaxKind.InvocationExpression
                     ? nameof(ExpressionKindsEnum.Invocation)
                     : nameof(ExpressionKindsEnum.Declaration);
 
                 if (kind == SyntaxKind.InvocationExpression)
                 {
-                    var invocation = expression as InvocationExpressionSyntax;
+                    var invocation = syntaxNode as InvocationExpressionSyntax;
                     methodContext.MethodArgumentsTypes = invocation.GetArgumentTypes(semanticModel);
                 }
 

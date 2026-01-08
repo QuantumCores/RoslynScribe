@@ -273,7 +273,7 @@ namespace RoslynScribe.Domain.Services
                 }
 
                 // collect data about userDefined IDs
-                var userId = root.Guides?.UserDefinedId;
+                var userId = root.Guides.UserDefinedId;
                 if (!string.IsNullOrWhiteSpace(userId))
                 {
                     if (!userIds.ContainsKey(userId))

@@ -459,8 +459,8 @@ namespace RoslynScribe.Domain.ScribeConsole
             }
             catch
             {
-                Console.WriteLine($"Warning: Failed to read config file '{configPath}'. Using empty config.", ConsoleColor.Yellow);
-                return new AdcConfig();
+                Console.WriteLine($"Warning: Failed to read config file '{configPath}'.", ConsoleColor.Red);
+                throw;
             }
         }
 
