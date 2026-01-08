@@ -10,6 +10,7 @@ class MermaidRenderer {
     constructor() {
         this.container = null;
         this.panZoomInstance = null;
+        this.renderId = 0;
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'loose',
@@ -40,7 +41,7 @@ class MermaidRenderer {
             this.logGraphDefinition(graphDef);
             throw new Error("Graph parsing failed");
         }
-        const { svg } = await mermaid.render('graphDiv', graphDef);
+        const { svg } = await mermaid.render(`graphDiv_${this.renderId++}`, graphDef);
         container.innerHTML = svg;
         const svgEl = container.querySelector('svg');
         if (svgEl) {

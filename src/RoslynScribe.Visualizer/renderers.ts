@@ -60,6 +60,7 @@ function getNodeKeyClass(id: string): string {
 class MermaidRenderer implements GraphRenderer {
     private container: HTMLElement | null = null;
     private panZoomInstance: any = null;
+    private renderId = 0;
 
     constructor() {
         mermaid.initialize({
@@ -94,7 +95,7 @@ class MermaidRenderer implements GraphRenderer {
             throw new Error("Graph parsing failed");
         }
 
-        const { svg } = await mermaid.render('graphDiv', graphDef);
+        const { svg } = await mermaid.render(`graphDiv_${this.renderId++}`, graphDef);
         container.innerHTML = svg;
 
         const svgEl = container.querySelector('svg');
