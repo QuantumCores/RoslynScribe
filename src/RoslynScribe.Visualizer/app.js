@@ -106,6 +106,8 @@ class MermaidRenderer {
                 return 'project';
             if (id.startsWith('folder_'))
                 return 'folder';
+            if (id.startsWith('type_'))
+                return 'type';
             return null;
         };
         const recordMembership = (subgraph, path) => {
@@ -117,6 +119,8 @@ class MermaidRenderer {
                 nextPath.projectId = subgraph.id;
             if (level === 'folder')
                 nextPath.folderId = subgraph.id;
+            if (level === 'type')
+                nextPath.typeId = subgraph.id;
             subgraph.nodeIds.forEach(nodeId => {
                 nodeMembership.set(nodeId, nextPath);
             });
@@ -140,7 +144,10 @@ class MermaidRenderer {
             const toPath = nodeMembership.get(edge.to);
             let targetSubgraphId = null;
             if (fromPath && toPath) {
-                if (fromPath.folderId && fromPath.folderId === toPath.folderId) {
+                if (fromPath.typeId && fromPath.typeId === toPath.typeId) {
+                    targetSubgraphId = fromPath.typeId;
+                }
+                else if (fromPath.folderId && fromPath.folderId === toPath.folderId) {
                     targetSubgraphId = fromPath.folderId;
                 }
                 else if (fromPath.projectId && fromPath.projectId === toPath.projectId) {
@@ -207,8 +214,6 @@ class MermaidRenderer {
         }
     }
     getMermaidDirection(direction) {
-        if (direction === 'TD')
-            return 'TB';
         return direction;
     }
     createSvgElement(tag) {
@@ -370,7 +375,8 @@ class ScribeApp {
         this.subgraphSettings = {
             solution: { visible: true, direction: 'LR', colors: {} },
             project: { visible: true, direction: 'LR', colors: {} },
-            folder: { visible: true, direction: 'LR', colors: {} }
+            folder: { visible: true, direction: 'LR', colors: {} },
+            type: { visible: true, direction: 'LR', colors: {} }
         };
         this.subgraphPalette = ['#e8f5e9', '#e3f2fd', '#fff3e0', '#f3e5f5', '#e0f7fa', '#fce4ec'];
         this.searchResults = [];
@@ -378,7 +384,8 @@ class ScribeApp {
         this.subgraphIdsByLevel = {
             solution: [],
             project: [],
-            folder: []
+            folder: [],
+            type: []
         };
         this.renderer = new MermaidRenderer();
         this.initializeEventListeners();
@@ -630,15 +637,18 @@ class ScribeApp {
         const nextSolution = this.readSubgraphControlsFromModal('solution');
         const nextProject = this.readSubgraphControlsFromModal('project');
         const nextFolder = this.readSubgraphControlsFromModal('folder');
-        if (!nextSolution || !nextProject || !nextFolder)
+        const nextType = this.readSubgraphControlsFromModal('type');
+        if (!nextSolution || !nextProject || !nextFolder || !nextType)
             return;
         const visibilityChanged = (nextSolution.visible !== this.subgraphSettings.solution.visible ||
             nextProject.visible !== this.subgraphSettings.project.visible ||
-            nextFolder.visible !== this.subgraphSettings.folder.visible);
+            nextFolder.visible !== this.subgraphSettings.folder.visible ||
+            nextType.visible !== this.subgraphSettings.type.visible);
         const directionChanged = (nextGraphDirection !== this.graphDirection ||
             nextSolution.direction !== this.subgraphSettings.solution.direction ||
             nextProject.direction !== this.subgraphSettings.project.direction ||
-            nextFolder.direction !== this.subgraphSettings.folder.direction);
+            nextFolder.direction !== this.subgraphSettings.folder.direction ||
+            nextType.direction !== this.subgraphSettings.type.direction);
         this.graphDirection = nextGraphDirection;
         this.subgraphSettings.solution.visible = nextSolution.visible;
         this.subgraphSettings.solution.direction = nextSolution.direction;
@@ -646,9 +656,12 @@ class ScribeApp {
         this.subgraphSettings.project.direction = nextProject.direction;
         this.subgraphSettings.folder.visible = nextFolder.visible;
         this.subgraphSettings.folder.direction = nextFolder.direction;
+        this.subgraphSettings.type.visible = nextType.visible;
+        this.subgraphSettings.type.direction = nextType.direction;
         const colorsChanged = (this.applySubgraphColorsFromModal('solution') ||
             this.applySubgraphColorsFromModal('project') ||
-            this.applySubgraphColorsFromModal('folder'));
+            this.applySubgraphColorsFromModal('folder') ||
+            this.applySubgraphColorsFromModal('type'));
         this.closeConfigModal();
         if (directionChanged || colorsChanged) {
             this.renderGraph();
@@ -662,6 +675,7 @@ class ScribeApp {
         this.setSubgraphControlValues('solution');
         this.setSubgraphControlValues('project');
         this.setSubgraphControlValues('folder');
+        this.setSubgraphControlValues('type');
     }
     setSubgraphControlValues(level) {
         const visibleInput = document.getElementById(`subgraph-${level}-visible`);
@@ -706,6 +720,7 @@ class ScribeApp {
         this.renderSubgraphColorList('solution');
         this.renderSubgraphColorList('project');
         this.renderSubgraphColorList('folder');
+        this.renderSubgraphColorList('type');
     }
     renderSubgraphColorList(level) {
         const list = document.getElementById(`subgraph-colors-${level}`);
@@ -770,6 +785,9 @@ class ScribeApp {
         if (level === 'project') {
             return this.normalizeGroupName(node.MetaInfo?.ProjectName);
         }
+        if (level === 'type') {
+            return this.normalizeGroupName(node.MetaInfo?.TypeName);
+        }
         return this.normalizeGroupName(this.getFirstLevelFolder(node.MetaInfo));
     }
     normalizeGroupName(name) {
@@ -822,7 +840,9 @@ class ScribeApp {
             return 'Solution';
         if (level === 'project')
             return 'Project';
-        return 'Folder';
+        if (level === 'folder')
+            return 'Folder';
+        return 'Type';
     }
     buildSubgraphHierarchy(nodesToRender) {
         const hierarchy = new Map();
@@ -835,6 +855,7 @@ class ScribeApp {
             const solution = this.getSubgraphGroup(node, 'solution');
             const project = this.getSubgraphGroup(node, 'project');
             const folder = this.getSubgraphGroup(node, 'folder');
+            const type = this.getSubgraphGroup(node, 'type');
             let projectMap = hierarchy.get(solution);
             if (!projectMap) {
                 projectMap = new Map();
@@ -845,12 +866,17 @@ class ScribeApp {
                 folderMap = new Map();
                 projectMap.set(project, folderMap);
             }
-            const list = folderMap.get(folder);
+            let typeMap = folderMap.get(folder);
+            if (!typeMap) {
+                typeMap = new Map();
+                folderMap.set(folder, typeMap);
+            }
+            const list = typeMap.get(type);
             if (list) {
                 list.push(id);
             }
             else {
-                folderMap.set(folder, [id]);
+                typeMap.set(type, [id]);
             }
         });
         return hierarchy;
@@ -888,9 +914,15 @@ class ScribeApp {
             const projectSubgraphs = [];
             projectEntries.forEach(([projectName, folderMap]) => {
                 const folderEntries = Array.from(folderMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-                const folderSubgraphs = folderEntries.map(([folderName, ids]) => {
+                const folderSubgraphs = [];
+                folderEntries.forEach(([folderName, typeMap]) => {
+                    const typeEntries = Array.from(typeMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+                    const typeSubgraphs = typeEntries.map(([typeName, ids]) => {
+                        const typeKey = `solution:${solutionName}|project:${projectName}|folder:${folderName}|type:${typeName}`;
+                        return createSubgraph('type', typeName, typeKey, ids, []);
+                    });
                     const folderKey = `solution:${solutionName}|project:${projectName}|folder:${folderName}`;
-                    return createSubgraph('folder', folderName, folderKey, ids, []);
+                    folderSubgraphs.push(createSubgraph('folder', folderName, folderKey, [], typeSubgraphs));
                 });
                 const projectKey = `solution:${solutionName}|project:${projectName}`;
                 projectSubgraphs.push(createSubgraph('project', projectName, projectKey, [], folderSubgraphs));
@@ -1085,7 +1117,7 @@ class ScribeApp {
         const svg = container?.querySelector('svg');
         if (!svg)
             return;
-        const levels = ['solution', 'project', 'folder'];
+        const levels = ['solution', 'project', 'folder', 'type'];
         levels.forEach(level => {
             const subgraphIds = this.subgraphIdsByLevel[level];
             subgraphIds.forEach(id => {
@@ -1115,7 +1147,8 @@ class ScribeApp {
         const idsByLevel = {
             solution: [],
             project: [],
-            folder: []
+            folder: [],
+            type: []
         };
         const visit = (subgraph) => {
             const level = this.getSubgraphLevelFromId(subgraph.id);
@@ -1134,6 +1167,8 @@ class ScribeApp {
             return 'project';
         if (id.startsWith('folder_'))
             return 'folder';
+        if (id.startsWith('type_'))
+            return 'type';
         return null;
     }
     renderMetaRow(label, value) {
@@ -1283,6 +1318,11 @@ class ScribeApp {
                     visible: this.subgraphSettings.folder.visible,
                     direction: this.subgraphSettings.folder.direction,
                     colors: this.subgraphSettings.folder.colors
+                },
+                type: {
+                    visible: this.subgraphSettings.type.visible,
+                    direction: this.subgraphSettings.type.direction,
+                    colors: this.subgraphSettings.type.colors
                 }
             },
             activeSearchTerm: document.getElementById('search-input').value
@@ -1338,6 +1378,7 @@ class ScribeApp {
                 applySubgraphConfig('solution', config.subgraphs.solution);
                 applySubgraphConfig('project', config.subgraphs.project);
                 applySubgraphConfig('folder', config.subgraphs.folder);
+                applySubgraphConfig('type', config.subgraphs.type);
             }
             if (config.activeSearchTerm) {
                 document.getElementById('search-input').value = config.activeSearchTerm;

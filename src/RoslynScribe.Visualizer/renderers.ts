@@ -3,7 +3,7 @@
 declare var mermaid: any;
 declare var svgPanZoom: any;
 
-type GraphDirection = 'TD' | 'BT' | 'LR' | 'RL';
+type GraphDirection = 'TB' | 'BT' | 'LR' | 'RL';
 type GraphNode = {
     id: string;
     label: string;
@@ -163,21 +163,23 @@ class MermaidRenderer implements GraphRenderer {
         const subgraphStyleLines: string[] = [];
         const edgesBySubgraph = new Map<string, GraphEdge[]>();
         const rootEdges: GraphEdge[] = [];
-        const nodeMembership = new Map<string, { solutionId?: string; projectId?: string; folderId?: string }>();
+        const nodeMembership = new Map<string, { solutionId?: string; projectId?: string; folderId?: string; typeId?: string }>();
 
-        const getSubgraphLevelFromId = (id: string): 'solution' | 'project' | 'folder' | null => {
+        const getSubgraphLevelFromId = (id: string): 'solution' | 'project' | 'folder' | 'type' | null => {
             if (id.startsWith('solution_')) return 'solution';
             if (id.startsWith('project_')) return 'project';
             if (id.startsWith('folder_')) return 'folder';
+            if (id.startsWith('type_')) return 'type';
             return null;
         };
 
-        const recordMembership = (subgraph: GraphSubgraph, path: { solutionId?: string; projectId?: string; folderId?: string }) => {
+        const recordMembership = (subgraph: GraphSubgraph, path: { solutionId?: string; projectId?: string; folderId?: string; typeId?: string }) => {
             const level = getSubgraphLevelFromId(subgraph.id);
             const nextPath = { ...path };
             if (level === 'solution') nextPath.solutionId = subgraph.id;
             if (level === 'project') nextPath.projectId = subgraph.id;
             if (level === 'folder') nextPath.folderId = subgraph.id;
+            if (level === 'type') nextPath.typeId = subgraph.id;
 
             subgraph.nodeIds.forEach(nodeId => {
                 nodeMembership.set(nodeId, nextPath);
@@ -207,7 +209,9 @@ class MermaidRenderer implements GraphRenderer {
             const toPath = nodeMembership.get(edge.to);
             let targetSubgraphId: string | null = null;
             if (fromPath && toPath) {
-                if (fromPath.folderId && fromPath.folderId === toPath.folderId) {
+                if (fromPath.typeId && fromPath.typeId === toPath.typeId) {
+                    targetSubgraphId = fromPath.typeId;
+                } else if (fromPath.folderId && fromPath.folderId === toPath.folderId) {
                     targetSubgraphId = fromPath.folderId;
                 } else if (fromPath.projectId && fromPath.projectId === toPath.projectId) {
                     targetSubgraphId = fromPath.projectId;
@@ -278,8 +282,7 @@ class MermaidRenderer implements GraphRenderer {
         }
     }
 
-    private getMermaidDirection(direction: GraphDirection): 'TB' | 'BT' | 'LR' | 'RL' {
-        if (direction === 'TD') return 'TB';
+    private getMermaidDirection(direction: GraphDirection): 'TB' | 'BT' | 'LR' | 'RL' {        
         return direction;
     }
 

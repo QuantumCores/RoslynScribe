@@ -50,6 +50,7 @@ interface ViewConfig {
         solution?: ViewSubgraphConfig;
         project?: ViewSubgraphConfig;
         folder?: ViewSubgraphConfig;
+        type?: ViewSubgraphConfig;
     };
     activeSearchTerm: string;
     tagColors?: Record<string, string>;
