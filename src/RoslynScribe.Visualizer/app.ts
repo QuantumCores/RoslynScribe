@@ -149,6 +149,7 @@ class ScribeApp {
             }
 
             this.data = json as ScribeResult;
+            this.warnAboutMissingNodeData();
             this.buildChildToParentMap();
             this.populateTreeSelect();
             
@@ -167,6 +168,23 @@ class ScribeApp {
         } finally {
             this.showLoading(false);
         }
+    }
+
+    private warnAboutMissingNodeData() {
+        if (!this.data) return;
+
+        const allTreeIds = this.collectTreeNodeIds(this.data.Trees);
+        const missingIds = Array.from(allTreeIds).filter(id => !this.data!.Nodes[id]);
+        if (missingIds.length === 0) return;
+
+        // Keep this non-fatal: render will show placeholders for missing nodes.
+        const preview = missingIds.slice(0, 20).join(', ');
+        console.warn('Loaded .adc.json references node IDs not present in Nodes:', missingIds);
+        alert(
+            `Warning: Loaded file references ${missingIds.length} node(s) that are missing from the Nodes dictionary.\n\n` +
+            `The graph will render with placeholders.\n\n` +
+            `Missing IDs (first ${Math.min(20, missingIds.length)}): ${preview}`
+        );
     }
 
     private enableControls() {

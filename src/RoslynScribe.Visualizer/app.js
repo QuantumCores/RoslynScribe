@@ -487,6 +487,7 @@ class ScribeApp {
                 throw new Error("Invalid File Format. Missing Nodes or Trees property.");
             }
             this.data = json;
+            this.warnAboutMissingNodeData();
             this.buildChildToParentMap();
             this.populateTreeSelect();
             if (this.data.Trees.length > 0) {
@@ -504,6 +505,19 @@ class ScribeApp {
         finally {
             this.showLoading(false);
         }
+    }
+    warnAboutMissingNodeData() {
+        if (!this.data)
+            return;
+        const allTreeIds = this.collectTreeNodeIds(this.data.Trees);
+        const missingIds = Array.from(allTreeIds).filter(id => !this.data.Nodes[id]);
+        if (missingIds.length === 0)
+            return;
+        const preview = missingIds.slice(0, 20).join(', ');
+        console.warn('Loaded .adc.json references node IDs not present in Nodes:', missingIds);
+        alert(`Warning: Loaded file references ${missingIds.length} node(s) that are missing from the Nodes dictionary.\n\n` +
+            `The graph will render with placeholders.\n\n` +
+            `Missing IDs (first ${Math.min(20, missingIds.length)}): ${preview}`);
     }
     enableControls() {
         const ids = ['tree-select', 'search-input', 'btn-reset', 'btn-save-config', 'btn-load-config', 'btn-edit-config', 'btn-download-mermaid'];
