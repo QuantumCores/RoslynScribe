@@ -45,11 +45,18 @@ interface ViewConfig {
     expandedNodeLevels?: Record<string, number>; // Node ID to max visible level
     expandedNodeIds?: string[]; // Legacy: list of IDs that are manually expanded
     collapsedNodeIds?: string[]; // Node IDs with retracted higher-level nodes
-    subgraphMode?: 'project' | 'folder' | 'none';
-    subgraphColors?: {
-        project?: Record<string, string>;
-        folder?: Record<string, string>;
+    graphDirection?: GraphDirection;
+    subgraphs?: {
+        solution?: ViewSubgraphConfig;
+        project?: ViewSubgraphConfig;
+        folder?: ViewSubgraphConfig;
     };
     activeSearchTerm: string;
     tagColors?: Record<string, string>;
+}
+
+interface ViewSubgraphConfig {
+    visible?: boolean;
+    direction?: GraphDirection;
+    colors?: Record<string, string>;
 }

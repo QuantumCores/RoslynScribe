@@ -3,7 +3,7 @@
 declare var mermaid: any;
 declare var svgPanZoom: any;
 
-type GraphDirection = 'TD' | 'LR';
+type GraphDirection = 'TD' | 'BT' | 'LR' | 'RL';
 type GraphNode = {
     id: string;
     label: string;
@@ -21,8 +21,10 @@ type GraphSubgraph = {
     id: string;
     label: string;
     nodeIds: string[];
-    className: string;
+    classNames: string[];
     styles: Record<string, string>;
+    direction: GraphDirection;
+    subgraphs?: GraphSubgraph[];
 };
 type GraphModel = {
     direction: GraphDirection;
@@ -80,8 +82,17 @@ class MermaidRenderer implements GraphRenderer {
         }
 
         const graphDef = this.buildGraphDefinition(model);
-        const isValid = await mermaid.parse(graphDef);
-        if (!isValid) throw new Error("Graph parsing failed");
+        let isValid = false;
+        try {
+            isValid = await mermaid.parse(graphDef);
+        } catch (error) {
+            this.logGraphDefinition(graphDef);
+            throw error;
+        }
+        if (!isValid) {
+            this.logGraphDefinition(graphDef);
+            throw new Error("Graph parsing failed");
+        }
 
         const { svg } = await mermaid.render('graphDiv', graphDef);
         container.innerHTML = svg;
@@ -137,7 +148,8 @@ class MermaidRenderer implements GraphRenderer {
     }
 
     private buildGraphDefinition(model: GraphModel): string {
-        let graphDef = `graph ${model.direction}\n`;
+        let graphDef = `flowchart ${this.getMermaidDirection(model.direction)}\n`;
+        const subgraphStyleLines: string[] = [];
 
         model.nodes.forEach(node => {
             const cleanLabel = this.sanitizeMermaidLabel(node.label);
@@ -147,20 +159,33 @@ class MermaidRenderer implements GraphRenderer {
             }
         });
 
-        model.subgraphs.forEach(subgraph => {
+        const appendSubgraph = (subgraph: GraphSubgraph, indent: string) => {
             const cleanLabel = this.sanitizeMermaidLabel(subgraph.label);
-            graphDef += `    subgraph ${subgraph.id}["${cleanLabel}"]\n`;
-            graphDef += `        direction TB\n`;
-            subgraph.nodeIds.forEach(id => {
-                graphDef += `        ${id}\n`;
+            graphDef += `${indent}subgraph ${subgraph.id}["${cleanLabel}"]\n`;
+            graphDef += `${indent}    direction ${this.getMermaidDirection(subgraph.direction)}\n`;
+            subgraph.subgraphs?.forEach(child => {
+                appendSubgraph(child, `${indent}    `);
             });
-            graphDef += `    end\n`;
-            graphDef += `    style ${subgraph.id} ${this.serializeStyles(subgraph.styles)}\n`;
-            graphDef += `    class ${subgraph.id} ${subgraph.className}\n`;
+            subgraph.nodeIds.forEach(id => {
+                graphDef += `${indent}    ${id}\n`;
+            });
+            graphDef += `${indent}end\n`;
+            if (subgraph.classNames.length > 0) {
+                subgraphStyleLines.push(`    class ${subgraph.id} ${subgraph.classNames.join(',')}`);
+            }
+            subgraphStyleLines.push(`    style ${subgraph.id} ${this.serializeStyles(subgraph.styles)}`);
+        };
+
+        model.subgraphs.forEach(subgraph => {
+            appendSubgraph(subgraph, '    ');
         });
 
         model.edges.forEach(edge => {
             graphDef += `    ${edge.from} --> ${edge.to}\n`;
+        });
+
+        subgraphStyleLines.forEach(line => {
+            graphDef += `${line}\n`;
         });
 
         graphDef += '\n';
@@ -169,6 +194,22 @@ class MermaidRenderer implements GraphRenderer {
         });
 
         return graphDef;
+    }
+
+    private logGraphDefinition(graphDef: string) {
+        const lines = graphDef.split(/\r?\n/);
+        const numbered = lines
+            .map((line, index) => `${String(index + 1).padStart(4, ' ')}| ${line}`)
+            .join('\n');
+        console.error('Mermaid definition:\n' + numbered);
+        if (typeof window !== 'undefined') {
+            (window as any).lastMermaidGraphDef = numbered;
+        }
+    }
+
+    private getMermaidDirection(direction: GraphDirection): 'TB' | 'BT' | 'LR' | 'RL' {
+        if (direction === 'TD') return 'TB';
+        return direction;
     }
 
     private createSvgElement<T extends keyof SVGElementTagNameMap>(tag: T): SVGElementTagNameMap[T] {

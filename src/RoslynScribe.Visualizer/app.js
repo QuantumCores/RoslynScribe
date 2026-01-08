@@ -28,9 +28,18 @@ class MermaidRenderer {
             this.panZoomInstance = null;
         }
         const graphDef = this.buildGraphDefinition(model);
-        const isValid = await mermaid.parse(graphDef);
-        if (!isValid)
+        let isValid = false;
+        try {
+            isValid = await mermaid.parse(graphDef);
+        }
+        catch (error) {
+            this.logGraphDefinition(graphDef);
+            throw error;
+        }
+        if (!isValid) {
+            this.logGraphDefinition(graphDef);
             throw new Error("Graph parsing failed");
+        }
         const { svg } = await mermaid.render('graphDiv', graphDef);
         container.innerHTML = svg;
         const svgEl = container.querySelector('svg');
@@ -76,7 +85,8 @@ class MermaidRenderer {
             .join(',');
     }
     buildGraphDefinition(model) {
-        let graphDef = `graph ${model.direction}\n`;
+        let graphDef = `flowchart ${this.getMermaidDirection(model.direction)}\n`;
+        const subgraphStyleLines = [];
         model.nodes.forEach(node => {
             const cleanLabel = this.sanitizeMermaidLabel(node.label);
             graphDef += `    ${node.id}["${cleanLabel}"]\n`;
@@ -84,25 +94,51 @@ class MermaidRenderer {
                 graphDef += `    class ${node.id} ${node.classes.join(',')}\n`;
             }
         });
-        model.subgraphs.forEach(subgraph => {
+        const appendSubgraph = (subgraph, indent) => {
             const cleanLabel = this.sanitizeMermaidLabel(subgraph.label);
-            graphDef += `    subgraph ${subgraph.id}["${cleanLabel}"]\n`;
-            graphDef += `        direction TB\n`;
-            subgraph.nodeIds.forEach(id => {
-                graphDef += `        ${id}\n`;
+            graphDef += `${indent}subgraph ${subgraph.id}["${cleanLabel}"]\n`;
+            graphDef += `${indent}    direction ${this.getMermaidDirection(subgraph.direction)}\n`;
+            subgraph.subgraphs?.forEach(child => {
+                appendSubgraph(child, `${indent}    `);
             });
-            graphDef += `    end\n`;
-            graphDef += `    style ${subgraph.id} ${this.serializeStyles(subgraph.styles)}\n`;
-            graphDef += `    class ${subgraph.id} ${subgraph.className}\n`;
+            subgraph.nodeIds.forEach(id => {
+                graphDef += `${indent}    ${id}\n`;
+            });
+            graphDef += `${indent}end\n`;
+            if (subgraph.classNames.length > 0) {
+                subgraphStyleLines.push(`    class ${subgraph.id} ${subgraph.classNames.join(',')}`);
+            }
+            subgraphStyleLines.push(`    style ${subgraph.id} ${this.serializeStyles(subgraph.styles)}`);
+        };
+        model.subgraphs.forEach(subgraph => {
+            appendSubgraph(subgraph, '    ');
         });
         model.edges.forEach(edge => {
             graphDef += `    ${edge.from} --> ${edge.to}\n`;
+        });
+        subgraphStyleLines.forEach(line => {
+            graphDef += `${line}\n`;
         });
         graphDef += '\n';
         model.classDefs.forEach(classDef => {
             graphDef += `    classDef ${classDef.name} ${this.serializeStyles(classDef.styles)};\n`;
         });
         return graphDef;
+    }
+    logGraphDefinition(graphDef) {
+        const lines = graphDef.split(/\r?\n/);
+        const numbered = lines
+            .map((line, index) => `${String(index + 1).padStart(4, ' ')}| ${line}`)
+            .join('\n');
+        console.error('Mermaid definition:\n' + numbered);
+        if (typeof window !== 'undefined') {
+            window.lastMermaidGraphDef = numbered;
+        }
+    }
+    getMermaidDirection(direction) {
+        if (direction === 'TD')
+            return 'TB';
+        return direction;
     }
     createSvgElement(tag) {
         return document.createElementNS(SVG_NS, tag);
@@ -259,14 +295,20 @@ class ScribeApp {
         this.collapsedNodeIds = new Set();
         this.activeTreeId = null;
         this.baseVisibleLevel = 1;
-        this.subgraphMode = 'project';
-        this.subgraphColors = {
-            project: {},
-            folder: {}
+        this.graphDirection = 'LR';
+        this.subgraphSettings = {
+            solution: { visible: true, direction: 'TD', colors: {} },
+            project: { visible: true, direction: 'LR', colors: {} },
+            folder: { visible: true, direction: 'LR', colors: {} }
         };
         this.subgraphPalette = ['#e8f5e9', '#e3f2fd', '#fff3e0', '#f3e5f5', '#e0f7fa', '#fce4ec'];
         this.searchResults = [];
         this.currentSearchIndex = -1;
+        this.subgraphIdsByLevel = {
+            solution: [],
+            project: [],
+            folder: []
+        };
         this.renderer = new MermaidRenderer();
         this.initializeEventListeners();
         window.scribeApp = {
@@ -315,10 +357,6 @@ class ScribeApp {
         });
         document.getElementById('btn-config-apply')?.addEventListener('click', () => {
             this.applyConfigModal();
-        });
-        document.getElementById('subgraph-mode-select')?.addEventListener('change', (e) => {
-            const select = e.target;
-            this.renderSubgraphColorList(select.value);
         });
         document.getElementById('btn-close-details')?.addEventListener('click', () => {
             this.hideNodeDetails();
@@ -496,11 +534,12 @@ class ScribeApp {
         if (!this.data)
             return;
         const modal = document.getElementById('config-modal');
-        const select = document.getElementById('subgraph-mode-select');
-        if (!modal || !select)
+        const graphDirectionSelect = document.getElementById('graph-direction-select');
+        if (!modal || !graphDirectionSelect)
             return;
-        select.value = this.subgraphMode;
-        this.renderSubgraphColorList(this.subgraphMode);
+        graphDirectionSelect.value = this.graphDirection;
+        this.applySubgraphControlsToModal();
+        this.renderSubgraphColorLists();
         modal.classList.add('open');
     }
     closeConfigModal() {
@@ -510,44 +549,96 @@ class ScribeApp {
         modal.classList.remove('open');
     }
     applyConfigModal() {
-        const select = document.getElementById('subgraph-mode-select');
-        if (!select)
+        const graphDirectionSelect = document.getElementById('graph-direction-select');
+        if (!graphDirectionSelect)
             return;
-        const mode = select.value;
-        this.subgraphMode = mode;
-        this.applySubgraphColorsFromModal(mode);
+        const nextGraphDirection = graphDirectionSelect.value;
+        const nextSolution = this.readSubgraphControlsFromModal('solution');
+        const nextProject = this.readSubgraphControlsFromModal('project');
+        const nextFolder = this.readSubgraphControlsFromModal('folder');
+        if (!nextSolution || !nextProject || !nextFolder)
+            return;
+        const visibilityChanged = (nextSolution.visible !== this.subgraphSettings.solution.visible ||
+            nextProject.visible !== this.subgraphSettings.project.visible ||
+            nextFolder.visible !== this.subgraphSettings.folder.visible);
+        const directionChanged = (nextGraphDirection !== this.graphDirection ||
+            nextSolution.direction !== this.subgraphSettings.solution.direction ||
+            nextProject.direction !== this.subgraphSettings.project.direction ||
+            nextFolder.direction !== this.subgraphSettings.folder.direction);
+        this.graphDirection = nextGraphDirection;
+        this.subgraphSettings.solution.visible = nextSolution.visible;
+        this.subgraphSettings.solution.direction = nextSolution.direction;
+        this.subgraphSettings.project.visible = nextProject.visible;
+        this.subgraphSettings.project.direction = nextProject.direction;
+        this.subgraphSettings.folder.visible = nextFolder.visible;
+        this.subgraphSettings.folder.direction = nextFolder.direction;
+        const colorsChanged = (this.applySubgraphColorsFromModal('solution') ||
+            this.applySubgraphColorsFromModal('project') ||
+            this.applySubgraphColorsFromModal('folder'));
         this.closeConfigModal();
-        this.renderGraph();
+        if (directionChanged || colorsChanged) {
+            this.renderGraph();
+            return;
+        }
+        if (visibilityChanged) {
+            this.applySubgraphVisibility();
+        }
     }
-    applySubgraphColorsFromModal(mode) {
-        if (mode === 'none')
-            return;
-        const list = document.getElementById('subgraph-colors-list');
+    applySubgraphControlsToModal() {
+        this.setSubgraphControlValues('solution');
+        this.setSubgraphControlValues('project');
+        this.setSubgraphControlValues('folder');
+    }
+    setSubgraphControlValues(level) {
+        const visibleInput = document.getElementById(`subgraph-${level}-visible`);
+        const directionSelect = document.getElementById(`subgraph-${level}-direction`);
+        if (visibleInput)
+            visibleInput.checked = this.subgraphSettings[level].visible;
+        if (directionSelect)
+            directionSelect.value = this.subgraphSettings[level].direction;
+    }
+    readSubgraphControlsFromModal(level) {
+        const visibleInput = document.getElementById(`subgraph-${level}-visible`);
+        const directionSelect = document.getElementById(`subgraph-${level}-direction`);
+        if (!visibleInput || !directionSelect)
+            return null;
+        return {
+            visible: visibleInput.checked,
+            direction: directionSelect.value
+        };
+    }
+    applySubgraphColorsFromModal(level) {
+        const list = document.getElementById(`subgraph-colors-${level}`);
         if (!list)
-            return;
+            return false;
         const inputs = Array.from(list.querySelectorAll('input[type="color"]'));
-        const map = { ...(this.subgraphColors[mode] || {}) };
+        const map = { ...(this.subgraphSettings[level].colors || {}) };
+        let changed = false;
         inputs.forEach(input => {
             const group = input.dataset.group;
             if (group) {
-                map[group] = input.value;
+                if (map[group] !== input.value) {
+                    map[group] = input.value;
+                    changed = true;
+                }
             }
         });
-        this.subgraphColors[mode] = map;
+        if (changed) {
+            this.subgraphSettings[level].colors = map;
+        }
+        return changed;
     }
-    renderSubgraphColorList(mode) {
-        const list = document.getElementById('subgraph-colors-list');
+    renderSubgraphColorLists() {
+        this.renderSubgraphColorList('solution');
+        this.renderSubgraphColorList('project');
+        this.renderSubgraphColorList('folder');
+    }
+    renderSubgraphColorList(level) {
+        const list = document.getElementById(`subgraph-colors-${level}`);
         if (!list)
             return;
         list.innerHTML = '';
-        if (mode === 'none') {
-            const empty = document.createElement('p');
-            empty.className = 'modal-note';
-            empty.textContent = 'Subgraphs are disabled.';
-            list.appendChild(empty);
-            return;
-        }
-        const groups = this.getSubgraphGroups(mode);
+        const groups = this.getSubgraphGroups(level);
         if (groups.length === 0) {
             const empty = document.createElement('p');
             empty.className = 'modal-note';
@@ -560,20 +651,20 @@ class ScribeApp {
             row.className = 'color-row';
             const label = document.createElement('label');
             const input = document.createElement('input');
-            const inputId = `subgraph-color-${mode}-${index}`;
+            const inputId = `subgraph-color-${level}-${index}`;
             label.setAttribute('for', inputId);
             label.textContent = group;
             input.type = 'color';
             input.id = inputId;
             input.dataset.group = group;
-            input.value = this.subgraphColors[mode]?.[group] ?? this.getDefaultSubgraphColor(group);
+            input.value = this.subgraphSettings[level].colors?.[group] ?? this.getDefaultSubgraphColor(group);
             row.appendChild(label);
             row.appendChild(input);
             list.appendChild(row);
         });
     }
-    getSubgraphGroups(mode) {
-        if (!this.data || mode === 'none')
+    getSubgraphGroups(level) {
+        if (!this.data)
             return [];
         const treesToRender = (this.activeTreeId === 'all')
             ? this.data.Trees
@@ -584,7 +675,7 @@ class ScribeApp {
             const node = this.data.Nodes[id];
             if (!node)
                 return;
-            const group = this.getSubgraphGroup(node, mode);
+            const group = this.getSubgraphGroup(node, level);
             groups.add(group);
         });
         return Array.from(groups).sort((a, b) => a.localeCompare(b));
@@ -598,14 +689,14 @@ class ScribeApp {
         trees.forEach(tree => traverse(tree));
         return ids;
     }
-    getSubgraphGroup(node, mode) {
-        if (mode === 'project') {
+    getSubgraphGroup(node, level) {
+        if (level === 'solution') {
+            return this.normalizeGroupName(node.MetaInfo?.SolutionName);
+        }
+        if (level === 'project') {
             return this.normalizeGroupName(node.MetaInfo?.ProjectName);
         }
-        if (mode === 'folder') {
-            return this.normalizeGroupName(this.getFirstLevelFolder(node.MetaInfo));
-        }
-        return '(None)';
+        return this.normalizeGroupName(this.getFirstLevelFolder(node.MetaInfo));
     }
     normalizeGroupName(name) {
         const trimmed = name?.trim();
@@ -632,16 +723,13 @@ class ScribeApp {
         const hash = this.hashString(group);
         return this.subgraphPalette[hash % this.subgraphPalette.length];
     }
-    getSubgraphColor(mode, group) {
-        if (mode === 'none') {
-            return this.getDefaultSubgraphColor(group);
-        }
-        const map = this.subgraphColors[mode] || {};
+    getSubgraphColor(level, group) {
+        const map = this.subgraphSettings[level].colors || {};
         if (map[group])
             return map[group];
         const color = this.getDefaultSubgraphColor(group);
         map[group] = color;
-        this.subgraphColors[mode] = map;
+        this.subgraphSettings[level].colors = map;
         return color;
     }
     hashString(value) {
@@ -652,48 +740,89 @@ class ScribeApp {
         }
         return Math.abs(hash);
     }
-    buildSubgraphGroups(nodesToRender, mode) {
-        const groups = new Map();
-        if (!this.data || mode === 'none')
-            return groups;
+    getSubgraphLevelClass(level) {
+        return `sg-level-${level}`;
+    }
+    getSubgraphLabelPrefix(level) {
+        if (level === 'solution')
+            return 'Solution';
+        if (level === 'project')
+            return 'Project';
+        return 'Folder';
+    }
+    buildSubgraphHierarchy(nodesToRender) {
+        const hierarchy = new Map();
+        if (!this.data)
+            return hierarchy;
         nodesToRender.forEach(id => {
             const node = this.data.Nodes[id];
             if (!node)
                 return;
-            const group = this.getSubgraphGroup(node, mode);
-            const list = groups.get(group);
+            const solution = this.getSubgraphGroup(node, 'solution');
+            const project = this.getSubgraphGroup(node, 'project');
+            const folder = this.getSubgraphGroup(node, 'folder');
+            let projectMap = hierarchy.get(solution);
+            if (!projectMap) {
+                projectMap = new Map();
+                hierarchy.set(solution, projectMap);
+            }
+            let folderMap = projectMap.get(project);
+            if (!folderMap) {
+                folderMap = new Map();
+                projectMap.set(project, folderMap);
+            }
+            const list = folderMap.get(folder);
             if (list) {
                 list.push(id);
             }
             else {
-                groups.set(group, [id]);
+                folderMap.set(folder, [id]);
             }
         });
-        return groups;
+        return hierarchy;
     }
-    buildSubgraphModels(groups, mode) {
+    buildSubgraphModels(hierarchy) {
         const subgraphs = [];
         const classDefs = [];
-        const entries = Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-        entries.forEach(([group, ids], index) => {
-            const labelPrefix = mode === 'project' ? 'Project' : 'Folder';
-            const label = `${labelPrefix}: ${group}`;
-            const subgraphId = `${mode}_${this.hashString(group)}_${index}`;
-            const className = `sg_${this.hashString(group)}_${index}`;
-            const color = this.getSubgraphColor(mode, group);
+        const definedClasses = new Set();
+        const createSubgraph = (level, group, key, nodeIds, children) => {
+            const label = `${this.getSubgraphLabelPrefix(level)}: ${group}`;
+            const className = `sg_${level}_${this.hashString(key)}`;
+            const color = this.getSubgraphColor(level, group);
             const styles = {
                 fill: color,
                 stroke: '#9e9e9e',
                 'stroke-width': '1px'
             };
-            subgraphs.push({
-                id: subgraphId,
+            if (!definedClasses.has(className)) {
+                definedClasses.add(className);
+                classDefs.push({ name: className, styles });
+            }
+            return {
+                id: `${level}_${this.hashString(key)}`,
                 label,
-                nodeIds: ids,
-                className,
-                styles
+                nodeIds,
+                classNames: [className, this.getSubgraphLevelClass(level)],
+                styles,
+                direction: this.subgraphSettings[level].direction,
+                subgraphs: children
+            };
+        };
+        const solutionEntries = Array.from(hierarchy.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+        solutionEntries.forEach(([solutionName, projectMap]) => {
+            const projectEntries = Array.from(projectMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+            const projectSubgraphs = [];
+            projectEntries.forEach(([projectName, folderMap]) => {
+                const folderEntries = Array.from(folderMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+                const folderSubgraphs = folderEntries.map(([folderName, ids]) => {
+                    const folderKey = `solution:${solutionName}|project:${projectName}|folder:${folderName}`;
+                    return createSubgraph('folder', folderName, folderKey, ids, []);
+                });
+                const projectKey = `solution:${solutionName}|project:${projectName}`;
+                projectSubgraphs.push(createSubgraph('project', projectName, projectKey, [], folderSubgraphs));
             });
-            classDefs.push({ name: className, styles });
+            const solutionKey = `solution:${solutionName}`;
+            subgraphs.push(createSubgraph('solution', solutionName, solutionKey, [], projectSubgraphs));
         });
         return { subgraphs, classDefs };
     }
@@ -759,7 +888,7 @@ class ScribeApp {
         const nodesToRender = this.computeVisibleSet(treesToRender);
         const edges = this.computeEdges(treesToRender, nodesToRender);
         const model = {
-            direction: 'TD',
+            direction: this.graphDirection,
             nodes: [],
             edges: [],
             subgraphs: [],
@@ -825,12 +954,11 @@ class ScribeApp {
         treesToRender.forEach(tree => {
             traverseNodes(tree);
         });
-        if (this.subgraphMode !== 'none') {
-            const subgraphGroups = this.buildSubgraphGroups(nodesToRender, this.subgraphMode);
-            const subgraphModels = this.buildSubgraphModels(subgraphGroups, this.subgraphMode);
-            model.subgraphs = subgraphModels.subgraphs;
-            model.classDefs.push(...subgraphModels.classDefs);
-        }
+        const subgraphHierarchy = this.buildSubgraphHierarchy(nodesToRender);
+        const subgraphModels = this.buildSubgraphModels(subgraphHierarchy);
+        model.subgraphs = subgraphModels.subgraphs;
+        model.classDefs.push(...subgraphModels.classDefs);
+        this.cacheSubgraphIdsByLevel(model.subgraphs);
         const edgeSet = new Set();
         for (const edge of edges) {
             const key = `${edge.from}-->${edge.to}`;
@@ -854,6 +982,7 @@ class ScribeApp {
         });
         try {
             await this.renderer.render(container, model, nodeDecorations);
+            this.applySubgraphVisibility();
         }
         catch (e) {
             console.error("Graph Render Error", e);
@@ -862,6 +991,62 @@ class ScribeApp {
         finally {
             this.showLoading(false);
         }
+    }
+    applySubgraphVisibility() {
+        const container = document.getElementById('mermaid-output');
+        const svg = container?.querySelector('svg');
+        if (!svg)
+            return;
+        const levels = ['solution', 'project', 'folder'];
+        levels.forEach(level => {
+            const subgraphIds = this.subgraphIdsByLevel[level];
+            subgraphIds.forEach(id => {
+                const selectors = [
+                    `g.cluster#${id}`,
+                    `g.cluster#cluster_${id}`,
+                    `g.cluster#cluster-${id}`,
+                    `#${id} g.cluster`,
+                    `#cluster_${id}`,
+                    `#cluster-${id}`
+                ];
+                const cluster = selectors
+                    .map(selector => svg.querySelector(selector))
+                    .find((element) => !!element);
+                if (!cluster)
+                    return;
+                if (this.subgraphSettings[level].visible) {
+                    cluster.classList.remove('sg-hidden');
+                }
+                else {
+                    cluster.classList.add('sg-hidden');
+                }
+            });
+        });
+    }
+    cacheSubgraphIdsByLevel(subgraphs) {
+        const idsByLevel = {
+            solution: [],
+            project: [],
+            folder: []
+        };
+        const visit = (subgraph) => {
+            const level = this.getSubgraphLevelFromId(subgraph.id);
+            if (level) {
+                idsByLevel[level].push(subgraph.id);
+            }
+            subgraph.subgraphs?.forEach(child => visit(child));
+        };
+        subgraphs.forEach(subgraph => visit(subgraph));
+        this.subgraphIdsByLevel = idsByLevel;
+    }
+    getSubgraphLevelFromId(id) {
+        if (id.startsWith('solution_'))
+            return 'solution';
+        if (id.startsWith('project_'))
+            return 'project';
+        if (id.startsWith('folder_'))
+            return 'folder';
+        return null;
     }
     renderMetaRow(label, value) {
         const isEmpty = value === undefined || value === null || value === '';
@@ -994,8 +1179,24 @@ class ScribeApp {
             activeTreeId: this.activeTreeId,
             expandedNodeLevels,
             collapsedNodeIds: Array.from(this.collapsedNodeIds),
-            subgraphMode: this.subgraphMode,
-            subgraphColors: this.subgraphColors,
+            graphDirection: this.graphDirection,
+            subgraphs: {
+                solution: {
+                    visible: this.subgraphSettings.solution.visible,
+                    direction: this.subgraphSettings.solution.direction,
+                    colors: this.subgraphSettings.solution.colors
+                },
+                project: {
+                    visible: this.subgraphSettings.project.visible,
+                    direction: this.subgraphSettings.project.direction,
+                    colors: this.subgraphSettings.project.colors
+                },
+                folder: {
+                    visible: this.subgraphSettings.folder.visible,
+                    direction: this.subgraphSettings.folder.direction,
+                    colors: this.subgraphSettings.folder.colors
+                }
+            },
             activeSearchTerm: document.getElementById('search-input').value
         };
         const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
@@ -1029,14 +1230,26 @@ class ScribeApp {
             if (config.collapsedNodeIds) {
                 config.collapsedNodeIds.forEach(id => this.collapsedNodeIds.add(id));
             }
-            if (config.subgraphMode) {
-                this.subgraphMode = config.subgraphMode;
+            if (config.graphDirection) {
+                this.graphDirection = config.graphDirection;
             }
-            if (config.subgraphColors) {
-                this.subgraphColors = {
-                    project: config.subgraphColors.project || {},
-                    folder: config.subgraphColors.folder || {}
+            if (config.subgraphs) {
+                const applySubgraphConfig = (level, subgraph) => {
+                    if (!subgraph)
+                        return;
+                    if (typeof subgraph.visible === 'boolean') {
+                        this.subgraphSettings[level].visible = subgraph.visible;
+                    }
+                    if (subgraph.direction) {
+                        this.subgraphSettings[level].direction = subgraph.direction;
+                    }
+                    if (subgraph.colors) {
+                        this.subgraphSettings[level].colors = subgraph.colors;
+                    }
                 };
+                applySubgraphConfig('solution', config.subgraphs.solution);
+                applySubgraphConfig('project', config.subgraphs.project);
+                applySubgraphConfig('folder', config.subgraphs.folder);
             }
             if (config.activeSearchTerm) {
                 document.getElementById('search-input').value = config.activeSearchTerm;

@@ -210,6 +210,36 @@ input[type="text"] {
     font-size: 0.9rem;
 }
 
+.subgraph-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+}
+
+.subgraph-row label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #444;
+}
+
+.subgraph-row select {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.subgraph-color-title {
+    margin: 14px 0 6px 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #444;
+}
+
 .modal-actions {
     padding: 12px 20px 16px;
     display: flex;
@@ -441,6 +471,14 @@ button.node-icon-btn svg {
     font-size: 10px;
     font-weight: 600;
     pointer-events: none;
+}
+
+g.cluster.sg-hidden > rect,
+g.cluster.sg-hidden > polygon,
+g.cluster.sg-hidden > path,
+g.cluster.sg-hidden > text,
+g.cluster.sg-hidden > g.cluster-label {
+    visibility: hidden;
 }
 
 /* Tree Selector */

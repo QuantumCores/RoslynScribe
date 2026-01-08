@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <!-- Dependencies -->
     <!-- Ideally, these are downloaded locally for offline support -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
     <script>
         // Fallback for local development if CDN fails or for strict offline setup
@@ -76,15 +76,51 @@
                 <button id="btn-config-close" class="panel-close" title="Close" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
-                <label class="modal-label" for="subgraph-mode-select">Subgraph Mode</label>
-                <select id="subgraph-mode-select">
-                    <option value="project">Project</option>
-                    <option value="folder">1st-Level Folder</option>
-                    <option value="none">None</option>
+                <label class="modal-label" for="graph-direction-select">Graph Direction</label>
+                <select id="graph-direction-select">
+                    <option value="LR">Left to Right</option>
+                    <option value="RL">Right to Left</option>
+                    <option value="TD">Top to Bottom</option>
+                    <option value="BT">Bottom to Top</option>
                 </select>
                 <div class="modal-section">
+                    <h4>Subgraphs</h4>
+                    <div class="subgraph-row">
+                        <label><input type="checkbox" id="subgraph-solution-visible"> Solution</label>
+                        <select id="subgraph-solution-direction">
+                            <option value="LR">LR</option>
+                            <option value="RL">RL</option>
+                            <option value="TD">TD</option>
+                            <option value="BT">BT</option>
+                        </select>
+                    </div>
+                    <div class="subgraph-row">
+                        <label><input type="checkbox" id="subgraph-project-visible"> Project</label>
+                        <select id="subgraph-project-direction">
+                            <option value="LR">LR</option>
+                            <option value="RL">RL</option>
+                            <option value="TD">TD</option>
+                            <option value="BT">BT</option>
+                        </select>
+                    </div>
+                    <div class="subgraph-row">
+                        <label><input type="checkbox" id="subgraph-folder-visible"> Folder (1st Level)</label>
+                        <select id="subgraph-folder-direction">
+                            <option value="LR">LR</option>
+                            <option value="RL">RL</option>
+                            <option value="TD">TD</option>
+                            <option value="BT">BT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-section">
                     <h4>Subgraph Colors</h4>
-                    <div id="subgraph-colors-list"></div>
+                    <div class="subgraph-color-title">Solution</div>
+                    <div id="subgraph-colors-solution"></div>
+                    <div class="subgraph-color-title">Project</div>
+                    <div id="subgraph-colors-project"></div>
+                    <div class="subgraph-color-title">Folder</div>
+                    <div id="subgraph-colors-folder"></div>
                 </div>
                 <p class="modal-note">Colors are saved when you export the config.</p>
             </div>
