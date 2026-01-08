@@ -27,6 +27,8 @@ class ScribeApp {
         type: { visible: true, direction: 'LR', colors: {} }
     };
     private readonly subgraphPalette = ['#e8f5e9', '#e3f2fd', '#fff3e0', '#f3e5f5', '#e0f7fa', '#fce4ec'];
+    private readonly folderSubgraphColor = '#fff3e0';
+    private readonly typeSubgraphColor = '#e8f5e9';
     
     // Search State
     private searchResults: string[] = [];
@@ -383,6 +385,7 @@ class ScribeApp {
     }
 
     private applySubgraphColorsFromModal(level: SubgraphLevel): boolean {
+        if (level === 'folder' || level === 'type') return false;
         const list = document.getElementById(`subgraph-colors-${level}`);
         if (!list) return false;
         const inputs = Array.from(list.querySelectorAll('input[type="color"]')) as HTMLInputElement[];
@@ -414,6 +417,23 @@ class ScribeApp {
         const list = document.getElementById(`subgraph-colors-${level}`);
         if (!list) return;
         list.innerHTML = '';
+        if (level === 'folder' || level === 'type') {
+            const row = document.createElement('div');
+            row.className = 'color-row';
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            const inputId = `subgraph-color-${level}-fixed`;
+            label.setAttribute('for', inputId);
+            label.textContent = level === 'folder' ? 'All folders' : 'All types';
+            input.type = 'color';
+            input.id = inputId;
+            input.value = level === 'folder' ? this.folderSubgraphColor : this.typeSubgraphColor;
+            input.disabled = true;
+            row.appendChild(label);
+            row.appendChild(input);
+            list.appendChild(row);
+            return;
+        }
         const groups = this.getSubgraphGroups(level);
         if (groups.length === 0) {
             const empty = document.createElement('p');
@@ -512,6 +532,8 @@ class ScribeApp {
     }
 
     private getSubgraphColor(level: SubgraphLevel, group: string): string {
+        if (level === 'folder') return this.folderSubgraphColor;
+        if (level === 'type') return this.typeSubgraphColor;
         const map = this.subgraphSettings[level].colors || {};
         if (map[group]) return map[group];
         const color = this.getDefaultSubgraphColor(group);
