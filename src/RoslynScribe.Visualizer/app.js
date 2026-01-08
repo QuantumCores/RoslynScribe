@@ -11,6 +11,7 @@ class MermaidRenderer {
         this.container = null;
         this.panZoomInstance = null;
         this.renderId = 0;
+        this.lastGraphDef = null;
         mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'loose',
@@ -29,6 +30,10 @@ class MermaidRenderer {
             this.panZoomInstance = null;
         }
         const graphDef = this.buildGraphDefinition(model);
+        this.lastGraphDef = graphDef;
+        if (typeof window !== 'undefined') {
+            window.lastMermaidGraphDefRaw = graphDef;
+        }
         let isValid = false;
         try {
             isValid = await mermaid.parse(graphDef);
@@ -77,6 +82,9 @@ class MermaidRenderer {
         this.panZoomInstance.pan({ x: newPanX, y: newPanY });
         this.panZoomInstance.setZoom(1.2);
     }
+    getLastGraphDefinition() {
+        return this.lastGraphDef;
+    }
     sanitizeMermaidLabel(value) {
         return value.replace(/[\r\n]+/g, ' ').replace(/"/g, '\\"');
     }
@@ -88,11 +96,71 @@ class MermaidRenderer {
     buildGraphDefinition(model) {
         let graphDef = `flowchart ${this.getMermaidDirection(model.direction)}\n`;
         const subgraphStyleLines = [];
+        const edgesBySubgraph = new Map();
+        const rootEdges = [];
+        const nodeMembership = new Map();
+        const getSubgraphLevelFromId = (id) => {
+            if (id.startsWith('solution_'))
+                return 'solution';
+            if (id.startsWith('project_'))
+                return 'project';
+            if (id.startsWith('folder_'))
+                return 'folder';
+            return null;
+        };
+        const recordMembership = (subgraph, path) => {
+            const level = getSubgraphLevelFromId(subgraph.id);
+            const nextPath = { ...path };
+            if (level === 'solution')
+                nextPath.solutionId = subgraph.id;
+            if (level === 'project')
+                nextPath.projectId = subgraph.id;
+            if (level === 'folder')
+                nextPath.folderId = subgraph.id;
+            subgraph.nodeIds.forEach(nodeId => {
+                nodeMembership.set(nodeId, nextPath);
+            });
+            subgraph.subgraphs?.forEach(child => recordMembership(child, nextPath));
+        };
+        model.subgraphs.forEach(subgraph => recordMembership(subgraph, {}));
+        const appendEdges = (edges, indent) => {
+            edges.forEach(edge => {
+                graphDef += `${indent}${edge.from} --> ${edge.to}\n`;
+            });
+        };
         model.nodes.forEach(node => {
             const cleanLabel = this.sanitizeMermaidLabel(node.label);
             graphDef += `    ${node.id}["${cleanLabel}"]\n`;
             if (node.classes.length > 0) {
                 graphDef += `    class ${node.id} ${node.classes.join(',')}\n`;
+            }
+        });
+        model.edges.forEach(edge => {
+            const fromPath = nodeMembership.get(edge.from);
+            const toPath = nodeMembership.get(edge.to);
+            let targetSubgraphId = null;
+            if (fromPath && toPath) {
+                if (fromPath.folderId && fromPath.folderId === toPath.folderId) {
+                    targetSubgraphId = fromPath.folderId;
+                }
+                else if (fromPath.projectId && fromPath.projectId === toPath.projectId) {
+                    targetSubgraphId = fromPath.projectId;
+                }
+                else if (fromPath.solutionId && fromPath.solutionId === toPath.solutionId) {
+                    targetSubgraphId = fromPath.solutionId;
+                }
+            }
+            if (targetSubgraphId) {
+                const list = edgesBySubgraph.get(targetSubgraphId);
+                if (list) {
+                    list.push(edge);
+                }
+                else {
+                    edgesBySubgraph.set(targetSubgraphId, [edge]);
+                }
+            }
+            else {
+                rootEdges.push(edge);
             }
         });
         const appendSubgraph = (subgraph, indent) => {
@@ -105,6 +173,10 @@ class MermaidRenderer {
             subgraph.nodeIds.forEach(id => {
                 graphDef += `${indent}    ${id}\n`;
             });
+            const localEdges = edgesBySubgraph.get(subgraph.id);
+            if (localEdges && localEdges.length > 0) {
+                appendEdges(localEdges, `${indent}    `);
+            }
             graphDef += `${indent}end\n`;
             if (subgraph.classNames.length > 0) {
                 subgraphStyleLines.push(`    class ${subgraph.id} ${subgraph.classNames.join(',')}`);
@@ -114,9 +186,7 @@ class MermaidRenderer {
         model.subgraphs.forEach(subgraph => {
             appendSubgraph(subgraph, '    ');
         });
-        model.edges.forEach(edge => {
-            graphDef += `    ${edge.from} --> ${edge.to}\n`;
-        });
+        appendEdges(rootEdges, '    ');
         subgraphStyleLines.forEach(line => {
             graphDef += `${line}\n`;
         });
@@ -298,7 +368,7 @@ class ScribeApp {
         this.baseVisibleLevel = 1;
         this.graphDirection = 'LR';
         this.subgraphSettings = {
-            solution: { visible: true, direction: 'TD', colors: {} },
+            solution: { visible: true, direction: 'LR', colors: {} },
             project: { visible: true, direction: 'LR', colors: {} },
             folder: { visible: true, direction: 'LR', colors: {} }
         };
@@ -344,6 +414,9 @@ class ScribeApp {
         document.getElementById('btn-save-config')?.addEventListener('click', () => this.saveConfig());
         document.getElementById('btn-load-config')?.addEventListener('click', () => {
             document.getElementById('config-input')?.click();
+        });
+        document.getElementById('btn-download-mermaid')?.addEventListener('click', () => {
+            this.downloadMermaidDefinition();
         });
         document.getElementById('config-input')?.addEventListener('change', (e) => {
             const file = e.target.files?.[0];
@@ -424,7 +497,7 @@ class ScribeApp {
         }
     }
     enableControls() {
-        const ids = ['tree-select', 'search-input', 'btn-reset', 'btn-save-config', 'btn-load-config', 'btn-edit-config'];
+        const ids = ['tree-select', 'search-input', 'btn-reset', 'btn-save-config', 'btn-load-config', 'btn-edit-config', 'btn-download-mermaid'];
         ids.forEach(id => {
             const el = document.getElementById(id);
             if (el)
@@ -992,6 +1065,20 @@ class ScribeApp {
         finally {
             this.showLoading(false);
         }
+    }
+    downloadMermaidDefinition() {
+        const definition = this.renderer.getLastGraphDefinition();
+        if (!definition) {
+            alert('No Mermaid definition available yet.');
+            return;
+        }
+        const blob = new Blob([definition], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'roslyn-scribe-graph.mmd';
+        a.click();
+        URL.revokeObjectURL(url);
     }
     applySubgraphVisibility() {
         const container = document.getElementById('mermaid-output');

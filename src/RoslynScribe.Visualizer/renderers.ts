@@ -45,6 +45,7 @@ type NodeDecoration = {
 interface GraphRenderer {
     render(container: HTMLElement, model: GraphModel, decorations: Map<string, NodeDecoration>): Promise<void>;
     focusNode(nodeId: string): void;
+    getLastGraphDefinition(): string | null;
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -61,6 +62,7 @@ class MermaidRenderer implements GraphRenderer {
     private container: HTMLElement | null = null;
     private panZoomInstance: any = null;
     private renderId = 0;
+    private lastGraphDef: string | null = null;
 
     constructor() {
         mermaid.initialize({
@@ -83,6 +85,10 @@ class MermaidRenderer implements GraphRenderer {
         }
 
         const graphDef = this.buildGraphDefinition(model);
+        this.lastGraphDef = graphDef;
+        if (typeof window !== 'undefined') {
+            (window as any).lastMermaidGraphDefRaw = graphDef;
+        }
         let isValid = false;
         try {
             isValid = await mermaid.parse(graphDef);
@@ -138,6 +144,10 @@ class MermaidRenderer implements GraphRenderer {
         this.panZoomInstance.setZoom(1.2);
     }
 
+    public getLastGraphDefinition(): string | null {
+        return this.lastGraphDef;
+    }
+
     private sanitizeMermaidLabel(value: string): string {
         return value.replace(/[\r\n]+/g, ' ').replace(/"/g, '\\"');
     }
@@ -151,12 +161,70 @@ class MermaidRenderer implements GraphRenderer {
     private buildGraphDefinition(model: GraphModel): string {
         let graphDef = `flowchart ${this.getMermaidDirection(model.direction)}\n`;
         const subgraphStyleLines: string[] = [];
+        const edgesBySubgraph = new Map<string, GraphEdge[]>();
+        const rootEdges: GraphEdge[] = [];
+        const nodeMembership = new Map<string, { solutionId?: string; projectId?: string; folderId?: string }>();
+
+        const getSubgraphLevelFromId = (id: string): 'solution' | 'project' | 'folder' | null => {
+            if (id.startsWith('solution_')) return 'solution';
+            if (id.startsWith('project_')) return 'project';
+            if (id.startsWith('folder_')) return 'folder';
+            return null;
+        };
+
+        const recordMembership = (subgraph: GraphSubgraph, path: { solutionId?: string; projectId?: string; folderId?: string }) => {
+            const level = getSubgraphLevelFromId(subgraph.id);
+            const nextPath = { ...path };
+            if (level === 'solution') nextPath.solutionId = subgraph.id;
+            if (level === 'project') nextPath.projectId = subgraph.id;
+            if (level === 'folder') nextPath.folderId = subgraph.id;
+
+            subgraph.nodeIds.forEach(nodeId => {
+                nodeMembership.set(nodeId, nextPath);
+            });
+
+            subgraph.subgraphs?.forEach(child => recordMembership(child, nextPath));
+        };
+
+        model.subgraphs.forEach(subgraph => recordMembership(subgraph, {}));
+
+        const appendEdges = (edges: GraphEdge[], indent: string) => {
+            edges.forEach(edge => {
+                graphDef += `${indent}${edge.from} --> ${edge.to}\n`;
+            });
+        };
 
         model.nodes.forEach(node => {
             const cleanLabel = this.sanitizeMermaidLabel(node.label);
             graphDef += `    ${node.id}["${cleanLabel}"]\n`;
             if (node.classes.length > 0) {
                 graphDef += `    class ${node.id} ${node.classes.join(',')}\n`;
+            }
+        });
+
+        model.edges.forEach(edge => {
+            const fromPath = nodeMembership.get(edge.from);
+            const toPath = nodeMembership.get(edge.to);
+            let targetSubgraphId: string | null = null;
+            if (fromPath && toPath) {
+                if (fromPath.folderId && fromPath.folderId === toPath.folderId) {
+                    targetSubgraphId = fromPath.folderId;
+                } else if (fromPath.projectId && fromPath.projectId === toPath.projectId) {
+                    targetSubgraphId = fromPath.projectId;
+                } else if (fromPath.solutionId && fromPath.solutionId === toPath.solutionId) {
+                    targetSubgraphId = fromPath.solutionId;
+                }
+            }
+
+            if (targetSubgraphId) {
+                const list = edgesBySubgraph.get(targetSubgraphId);
+                if (list) {
+                    list.push(edge);
+                } else {
+                    edgesBySubgraph.set(targetSubgraphId, [edge]);
+                }
+            } else {
+                rootEdges.push(edge);
             }
         });
 
@@ -170,6 +238,10 @@ class MermaidRenderer implements GraphRenderer {
             subgraph.nodeIds.forEach(id => {
                 graphDef += `${indent}    ${id}\n`;
             });
+            const localEdges = edgesBySubgraph.get(subgraph.id);
+            if (localEdges && localEdges.length > 0) {
+                appendEdges(localEdges, `${indent}    `);
+            }
             graphDef += `${indent}end\n`;
             if (subgraph.classNames.length > 0) {
                 subgraphStyleLines.push(`    class ${subgraph.id} ${subgraph.classNames.join(',')}`);
@@ -181,9 +253,7 @@ class MermaidRenderer implements GraphRenderer {
             appendSubgraph(subgraph, '    ');
         });
 
-        model.edges.forEach(edge => {
-            graphDef += `    ${edge.from} --> ${edge.to}\n`;
-        });
+        appendEdges(rootEdges, '    ');
 
         subgraphStyleLines.forEach(line => {
             graphDef += `${line}\n`;

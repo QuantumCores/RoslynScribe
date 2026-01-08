@@ -21,7 +21,7 @@ class ScribeApp {
     private readonly baseVisibleLevel = 1;
     private graphDirection: GraphDirection = 'LR';
     private subgraphSettings: SubgraphSettings = {
-        solution: { visible: true, direction: 'TD', colors: {} },
+        solution: { visible: true, direction: 'LR', colors: {} },
         project: { visible: true, direction: 'LR', colors: {} },
         folder: { visible: true, direction: 'LR', colors: {} }
     };
@@ -74,6 +74,9 @@ class ScribeApp {
         document.getElementById('btn-save-config')?.addEventListener('click', () => this.saveConfig());
         document.getElementById('btn-load-config')?.addEventListener('click', () => {
             document.getElementById('config-input')?.click();
+        });
+        document.getElementById('btn-download-mermaid')?.addEventListener('click', () => {
+            this.downloadMermaidDefinition();
         });
         document.getElementById('config-input')?.addEventListener('change', (e: Event) => {
             const file = (e.target as HTMLInputElement).files?.[0];
@@ -164,7 +167,7 @@ class ScribeApp {
     }
 
     private enableControls() {
-        const ids = ['tree-select', 'search-input', 'btn-reset', 'btn-save-config', 'btn-load-config', 'btn-edit-config'];
+        const ids = ['tree-select', 'search-input', 'btn-reset', 'btn-save-config', 'btn-load-config', 'btn-edit-config', 'btn-download-mermaid'];
         ids.forEach(id => {
             const el = document.getElementById(id);
             if (el) (el as any).disabled = false;
@@ -827,6 +830,21 @@ class ScribeApp {
         } finally {
             this.showLoading(false);
         }
+    }
+
+    private downloadMermaidDefinition() {
+        const definition = this.renderer.getLastGraphDefinition();
+        if (!definition) {
+            alert('No Mermaid definition available yet.');
+            return;
+        }
+        const blob = new Blob([definition], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'roslyn-scribe-graph.mmd';
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     private applySubgraphVisibility() {
