@@ -30,6 +30,10 @@ namespace RoslynScribe.Domain.Services
             var trackers = new Trackers();
             trackers.SolutionDirectory = GetSolutionDirectory(solution);
 
+            var solutionName = string.IsNullOrWhiteSpace(solution?.FilePath)
+                        ? null
+                        : Path.GetFileNameWithoutExtension(solution.FilePath);
+
             foreach (var project in solution.Projects)
             {
                 foreach (var document in project.Documents)
@@ -39,7 +43,7 @@ namespace RoslynScribe.Domain.Services
                         continue;
                     }
 
-                    var node = await Analyze(project, documents, document, trackers, adcConfig);
+                    var node = await Analyze(solutionName, project, documents, document, trackers, adcConfig);
                     if (node != null)
                     {
                         // skip artificial document nodes without any child nodes
@@ -71,10 +75,11 @@ namespace RoslynScribe.Domain.Services
             {
                 SolutionDirectory = GetSolutionDirectory(solution)
             };
-            return Analyze(project, documents, document, trackers, adcConfig);
+            return Analyze("Test", project, documents, document, trackers, adcConfig);
         }
 
         private static async Task<ScribeNode> Analyze(
+            string solutionName,
             Project project,
             Dictionary<string, Document> documents,
             Document document,
@@ -95,6 +100,7 @@ namespace RoslynScribe.Domain.Services
 
             var documentMeta = new MetaInfo
             {
+                SolutionName = solutionName,
                 ProjectName = project.Name,
                 DocumentName = document.Name,
                 DocumentPath = NormalizeDocumentPath(document.FilePath, trackers.SolutionDirectory),
@@ -319,6 +325,7 @@ namespace RoslynScribe.Domain.Services
             AdcType adcType = null;
             AdcMethod adcMethod = null;
             var expressionKind = expression.Kind();
+            var isMethodSignature = IsMethodSignature(expression);
             var originalContext = methodSymbol.GetMethodContext();
 
             // check if configured type is containing type and only then check if configured method is part of containing type
@@ -336,7 +343,7 @@ namespace RoslynScribe.Domain.Services
             {
                 foreach (var bType in containingType.GetAllBaseTypesWithGenerics())
                 {
-                    if (TryFindConfiguredTypeAndMethod(bType, containingType, adcConfig, originalContext, methodSymbol, expressionKind, out adcType, out adcMethod))
+                    if (TryFindConfiguredTypeAndMethod(bType, containingType, adcConfig, originalContext, methodSymbol, expressionKind, isMethodSignature, out adcType, out adcMethod))
                     {
                         return AddConfiguredNode(expression, expressionKind, parentNode, methodSymbol, semanticModel, trackers, adcType, adcMethod, originalContext);
                     }
@@ -344,7 +351,7 @@ namespace RoslynScribe.Domain.Services
 
                 foreach (var iface in containingType.GetAllInterfacesWithGenerics())
                 {
-                    if (TryFindConfiguredTypeAndMethod(iface, containingType, adcConfig, originalContext, methodSymbol, expressionKind, out adcType, out adcMethod))
+                    if (TryFindConfiguredTypeAndMethod(iface, containingType, adcConfig, originalContext, methodSymbol, expressionKind, isMethodSignature, out adcType, out adcMethod))
                     {
                         return AddConfiguredNode(expression, expressionKind, parentNode, methodSymbol, semanticModel, trackers, adcType, adcMethod, originalContext);
                     }
@@ -372,7 +379,7 @@ namespace RoslynScribe.Domain.Services
             return true;
         }
 
-        private static bool TryFindConfiguredTypeAndMethod(INamedTypeSymbol type, INamedTypeSymbol containingType, AdcConfig adcConfig, MethodContext originalContext, IMethodSymbol methodSymbol, SyntaxKind expressionKind, out AdcType adcType, out AdcMethod adcMethod)
+        private static bool TryFindConfiguredTypeAndMethod(INamedTypeSymbol type, INamedTypeSymbol containingType, AdcConfig adcConfig, MethodContext originalContext, IMethodSymbol methodSymbol, SyntaxKind expressionKind, bool isMethodSignature, out AdcType adcType, out AdcMethod adcMethod)
         {
             adcMethod = null;
             var typeFullName = type.ToDisplayString();
@@ -388,7 +395,7 @@ namespace RoslynScribe.Domain.Services
             }
 
             // now that we know that containing type implements the configured type check if configured method is part of the containing type
-            if (TryFindConfiguredMethod(containingType, adcConfig, adcType, methodSymbol.Name, expressionKind, out adcMethod))
+            if (TryFindConfiguredMethod(containingType, adcConfig, adcType, methodSymbol.Name, expressionKind, isMethodSignature, out adcMethod))
             {
                 return true;
             }
@@ -396,7 +403,7 @@ namespace RoslynScribe.Domain.Services
             // check if any of the implemented types has the configured method
             foreach (var member in type.GetMembers(methodSymbol.Name))
             {
-                if (TryFindConfiguredMethod(type, adcConfig, adcType, methodSymbol.Name, expressionKind, out adcMethod))
+                if (TryFindConfiguredMethod(type, adcConfig, adcType, methodSymbol.Name, expressionKind, isMethodSignature, out adcMethod))
                 {
                     return true;
                 }
@@ -405,7 +412,7 @@ namespace RoslynScribe.Domain.Services
             return false;
         }
 
-        private static bool TryFindConfiguredMethod(INamedTypeSymbol type, AdcConfig adcConfig, AdcType adcType, string methodSymbolName, SyntaxKind expressionKind, out AdcMethod adcMethod)
+        private static bool TryFindConfiguredMethod(INamedTypeSymbol type, AdcConfig adcConfig, AdcType adcType, string methodSymbolName, SyntaxKind expressionKind, bool isMethodSignature, out AdcMethod adcMethod)
         {
             adcMethod = null;
             foreach (var member in type.GetMembers(methodSymbolName))
@@ -418,7 +425,7 @@ namespace RoslynScribe.Domain.Services
                         var context = ifaceMethod.GetMethodContext();
                         if (TryFindConfiguredMethod(adcType, context, out adcMethod))
                         {
-                            if (expressionKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
+                            if (isMethodSignature && adcMethod != null && !adcMethod.IncludeMethodSignatures)
                             {
                                 return false;
                             }
@@ -472,8 +479,8 @@ namespace RoslynScribe.Domain.Services
 
         private static ScribeNode AddConfiguredNode(CSharpSyntaxNode expression, SyntaxKind syntaxKind, ScribeNode parentNode, IMethodSymbol methodSymbol, SemanticModel semanticModel, Trackers trackers, AdcType adcType, AdcMethod adcMethod, MethodContext context)
         {
-            // if method declarations are not configured skip them
-            if (syntaxKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodDeclaration)
+            // if method declarations are not configured skip signatures without bodies
+            if (syntaxKind == SyntaxKind.MethodDeclaration && adcMethod != null && !adcMethod.IncludeMethodSignatures && IsMethodSignature(expression))
             {
                 return null;
             }
@@ -498,6 +505,16 @@ namespace RoslynScribe.Domain.Services
 
             var configuredNode = AddChildNode(expression, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
             return configuredNode;
+        }
+
+        private static bool IsMethodSignature(CSharpSyntaxNode expression)
+        {
+            if (expression is MethodDeclarationSyntax methodDeclaration)
+            {
+                return methodDeclaration.Body == null && methodDeclaration.ExpressionBody == null;
+            }
+
+            return false;
         }
 
         /// <summary>

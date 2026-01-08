@@ -505,7 +505,7 @@ namespace RoslynScribe.Domain.Tests
                             // TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
                             GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodSignatures = true }
                             }
                         }
                     }
@@ -584,7 +584,7 @@ namespace RoslynScribe.Domain.Tests
                             // TypeFullName = "RoslynScribe.OtherTestProject.IHandler",
                             GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodDeclaration = false }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodSignatures = false }
                             }
                         }
                     }
@@ -645,7 +645,7 @@ namespace RoslynScribe.Domain.Tests
                             // TypeFullName = "RoslynScribe.OtherTestProject.IExpandedHandler",
                             GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "HandleWithResult", SetDefaultLevel = 2, IncludeMethodDeclaration = false }
+                                new AdcMethod { MethodName = "HandleWithResult", SetDefaultLevel = 2, IncludeMethodSignatures = false }
                             }
                         }
                     }
@@ -706,7 +706,7 @@ namespace RoslynScribe.Domain.Tests
                             // TypeFullName = "RoslynScribe.OtherTestProject.IGenericHandler<T123>",
                             GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodDeclaration = false }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 2, IncludeMethodSignatures = false }
                             }
                         }
                     }
@@ -767,7 +767,7 @@ namespace RoslynScribe.Domain.Tests
                             // TypeFullName = "RoslynScribe.NugetTestProject.Hanlders.INugetHandler<T>",
                             GetMethods = new AdcMethod[1]
                             {
-                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 3, IncludeMethodDeclaration = true }
+                                new AdcMethod { MethodName = "Handle", SetDefaultLevel = 3, IncludeMethodSignatures = true }
                             }
                         }
                     }
@@ -817,7 +817,7 @@ namespace RoslynScribe.Domain.Tests
                         {
                             GetMethods = new AdcMethod[]
                             {
-                                new AdcMethod { MethodName = "LoadSomething", SetDefaultLevel = 2, IncludeMethodDeclaration = true }
+                                new AdcMethod { MethodName = "LoadSomething", SetDefaultLevel = 2, IncludeMethodSignatures = true }
                             },
                         }
                     }

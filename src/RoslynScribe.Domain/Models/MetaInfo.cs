@@ -7,6 +7,8 @@ namespace RoslynScribe.Domain.Models
         private const int DefaultDeterministicIdLength = 8;
         private const string Base62Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+        public string SolutionName { get; set; }
+
         public string ProjectName { get; set; }
 
         public string DocumentName { get; set; }

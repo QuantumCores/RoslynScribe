@@ -134,7 +134,7 @@ namespace RoslynScribe.Domain.Tests
                                 new AdcMethod { 
                                     MethodName = "LoadSomething", 
                                     SetDefaultLevel = 2, 
-                                    IncludeMethodDeclaration = true,
+                                    IncludeMethodSignatures = true,
                                     GetAttributes = new HashSet<string> { "HttpPost" },
                                     SetGuidesOverrides = new Dictionary<string, string>
                                     {

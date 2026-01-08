@@ -59,7 +59,7 @@ namespace RoslynScribe.Domain.Configuration
 
     public class AdcMethod
     {
-        public bool IncludeMethodDeclaration { get; set; } = true;
+        public bool IncludeMethodSignatures { get; set; } = false;
 
         public string MethodName { get; set; }
 
