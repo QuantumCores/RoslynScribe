@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -9,19 +9,28 @@ namespace RoslynScribe.Domain.Extensions
 {
     internal class GuidesOverridesParser
     {
-        internal static ScribeGuides Apply(Dictionary<string, string> overrides, ScribeGuides guide, MethodContext context)
+        internal static ScribeGuides Apply(Dictionary<string, string> overrides, ScribeGuides guides, MethodContext context, SyntaxKind syntaxKind)
         {
             if (overrides == null || overrides.Count == 0)
             {
-                return guide;
+                return guides;
             }
 
             foreach (var overrideItem in overrides)
             {
-                ApplyGuideValue(overrideItem.Key, overrideItem.Value, guide, context);
+                ApplyGuideValue(overrideItem.Key, overrideItem.Value, guides, context);
             }
 
-            return guide;
+            if (syntaxKind == SyntaxKind.MethodDeclaration)
+            {
+                guides.DestinationUserIds = new string[0]; // method declarations can't have destination Uid
+            }
+            else if (syntaxKind == SyntaxKind.InvocationExpression)
+            {
+                guides.UserDefinedId = null; // invocations can't have Uid
+            }
+
+            return guides;
         }
 
         internal static string Parse(string value, MethodContext context)

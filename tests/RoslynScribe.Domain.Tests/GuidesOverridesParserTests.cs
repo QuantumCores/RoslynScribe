@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
@@ -77,8 +78,8 @@ namespace RoslynScribe.Domain.Tests
             var info = CreateMethodInfo();
             var guide = ScribeGuides.Default();
 
-            var resultNull = GuidesOverridesParser.Apply(null, guide, info);
-            var resultEmpty = GuidesOverridesParser.Apply(new Dictionary<string, string>(), guide, info);
+            var resultNull = GuidesOverridesParser.Apply(null, guide, info, SyntaxKind.InvocationExpression);
+            var resultEmpty = GuidesOverridesParser.Apply(new Dictionary<string, string>(), guide, info, SyntaxKind.InvocationExpression);
 
             Assert.That(resultNull, Is.SameAs(guide));
             Assert.That(resultEmpty, Is.SameAs(guide));
@@ -101,7 +102,7 @@ namespace RoslynScribe.Domain.Tests
                 [ScribeGuidesTokens.DestinationUserIds] = "dest1;dest2",
             };
 
-            GuidesOverridesParser.Apply(overrides, guide, info);
+            GuidesOverridesParser.Apply(overrides, guide, info, SyntaxKind.ExpressionElement);
 
             Assert.That(guide.Description, Is.EqualTo("desc DoWork"));
             Assert.That(guide.Text, Is.EqualTo("text My.Namespace.MyType"));
@@ -128,7 +129,7 @@ namespace RoslynScribe.Domain.Tests
                 ["DestinationUserIds"] = "d1;d2",
             };
 
-            GuidesOverridesParser.Apply(overrides, guide, info);
+            GuidesOverridesParser.Apply(overrides, guide, info, SyntaxKind.ExpressionElement);
 
             Assert.That(guide.Description, Is.EqualTo("A DoWork"));
             Assert.That(guide.Text, Is.EqualTo("B My.Namespace.MyType"));

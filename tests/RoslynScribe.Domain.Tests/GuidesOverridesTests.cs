@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using NUnit.Framework;
 using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
@@ -39,7 +40,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            GuidesOverridesParser.Apply(overrides, guides, context);
+            GuidesOverridesParser.Apply(overrides, guides, context, SyntaxKind.MethodDeclaration);
 
             // Assert
             Assert.AreEqual(typeParameter + "_handler", guides.UserDefinedId);
@@ -62,7 +63,7 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            GuidesOverridesParser.Apply(overrides, guides, context);
+            GuidesOverridesParser.Apply(overrides, guides, context, SyntaxKind.InvocationExpression);
 
             // Assert
             Assert.AreEqual(parameterType + "_handler", guides.DestinationUserIds[0]);
@@ -76,7 +77,7 @@ namespace RoslynScribe.Domain.Tests
             var attributeValue = "substitution";
             var overrides = new Dictionary<string, string>
             {
-                { ScribeGuidesTokens.UserDefinedId, $"{{{nameof(MethodContext.MethodAttributes)}[{attributeName}]}}_url" },
+                { ScribeGuidesTokens.DestinationUserIds, $"{{{nameof(MethodContext.MethodAttributes)}[{attributeName}]}}_url" },
             };
 
             var guides = new ScribeGuides();
@@ -86,10 +87,10 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            GuidesOverridesParser.Apply(overrides, guides, context);
+            GuidesOverridesParser.Apply(overrides, guides, context, SyntaxKind.InvocationExpression);
 
             // Assert
-            Assert.AreEqual(attributeValue + "_url", guides.UserDefinedId);
+            Assert.AreEqual(attributeValue + "_url", guides.DestinationUserIds[0]);
         }
 
         [Test]
@@ -100,7 +101,7 @@ namespace RoslynScribe.Domain.Tests
             var attributeValue = "substitution";
             var overrides = new Dictionary<string, string>
             {
-                { ScribeGuidesTokens.UserDefinedId, $"{{{nameof(MethodContext.ContainingTypeAttributes)}[{attributeName}]}}_url" },
+                { ScribeGuidesTokens.DestinationUserIds, $"{{{nameof(MethodContext.ContainingTypeAttributes)}[{attributeName}]}}_url" },
             };
 
             var guides = new ScribeGuides();
@@ -110,10 +111,10 @@ namespace RoslynScribe.Domain.Tests
             };
 
             // Act
-            GuidesOverridesParser.Apply(overrides, guides, context);
+            GuidesOverridesParser.Apply(overrides, guides, context, SyntaxKind.InvocationExpression);
 
             // Assert
-            Assert.AreEqual(attributeValue + "_url", guides.UserDefinedId);
+            Assert.AreEqual(attributeValue + "_url", guides.DestinationUserIds[0]);
         }
 
         [Test]
@@ -170,7 +171,7 @@ namespace RoslynScribe.Domain.Tests
                         {
                             SetGuidesOverrides = new Dictionary<string, string>
                             {
-                                { ScribeGuidesTokens.UserDefinedId, $"{{{nameof(MethodContext.MethodArgumentsTypes)}[0]}}_handler" },
+                                { ScribeGuidesTokens.DestinationUserIds, $"{{{nameof(MethodContext.MethodArgumentsTypes)}[0]}}_handler" },
                             }
                         }
                     }
@@ -183,7 +184,7 @@ namespace RoslynScribe.Domain.Tests
 
             // var json = JsonSerializer.Serialize(result);
             // Assert
-            Assert.AreEqual("RoslynScribe.TestProject.NugetMessage_handler", result.ChildNodes[0].Guides.UserDefinedId);
+            Assert.AreEqual("RoslynScribe.TestProject.NugetMessage_handler", result.ChildNodes[0].Guides.DestinationUserIds[0]);
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.MSBuild;
 using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Extensions;
@@ -29,6 +30,7 @@ namespace RoslynScribe.Domain.Services
                 .ToDictionary(x => x.FilePath, StringComparer.OrdinalIgnoreCase);
             var result = new List<ScribeNode>();
             var trackers = new Trackers();
+            trackers.Solution = solution;
             trackers.SolutionDirectory = GetSolutionDirectory(solution);
 
             var solutionName = string.IsNullOrWhiteSpace(solution?.FilePath)
@@ -74,6 +76,7 @@ namespace RoslynScribe.Domain.Services
             var document = project.Documents.Single(x => x.Name == documentName);
             var trackers = new Trackers
             {
+                Solution = solution,
                 SolutionDirectory = GetSolutionDirectory(solution)
             };
             return Analyze("Test", project, documents, document, trackers, adcConfig);
@@ -279,13 +282,16 @@ namespace RoslynScribe.Domain.Services
             SemanticModel semanticModel,
             Dictionary<string, Document> documents,
             Trackers trackers,
-            AdcConfig adcConfig) 
+            AdcConfig adcConfig)
         {
             var configuredNode = GetNodeFromConfiguration(syntaxNode, parentNode, methodSymbol, adcConfig, semanticModel, trackers);
 
             // even if configuredNode is null we want to expand into method to process comments inside it
             var currentParent = configuredNode ?? parentNode;
-            ExpandIntoMethod(syntaxNode, semanticModel, syntaxKind, documents, trackers, adcConfig, methodSymbol, currentParent);
+            var targetMethodSymbol = syntaxKind == SyntaxKind.InvocationExpression
+                ? ResolveImplementationMethodSymbol(methodSymbol, trackers)
+                : methodSymbol;
+            ExpandIntoMethod(syntaxNode, semanticModel, syntaxKind, documents, trackers, adcConfig, targetMethodSymbol, currentParent);
 
             // we can't return parentNode because it doesn't make sense
             // if there was something to add it was added as child to parentNode
@@ -293,7 +299,46 @@ namespace RoslynScribe.Domain.Services
             return configuredNode;
         }
 
+        private static IMethodSymbol ResolveImplementationMethodSymbol(IMethodSymbol methodSymbol, Trackers trackers)
+        {
+            if (methodSymbol == null || trackers.Solution == null)
+            {
+                return methodSymbol;
+            }
 
+            var key = methodSymbol.GetMethodKey();
+            if (trackers.ImplementationMethodCache.TryGetValue(key, out var cached))
+            {
+                return cached;
+            }
+
+            var searchSymbol = methodSymbol.OriginalDefinition;
+            IMethodSymbol implementation = null;
+
+            if (methodSymbol.ContainingType?.TypeKind == TypeKind.Interface)
+            {
+                var implementations = SymbolFinder.FindImplementationsAsync(searchSymbol, trackers.Solution)
+                    .GetAwaiter()
+                    .GetResult();
+                implementation = implementations
+                    .OfType<IMethodSymbol>()
+                    .OrderBy(x => x.GetMethodKey())
+                    .FirstOrDefault(m => m.DeclaringSyntaxReferences.Length != 0);
+            }
+            else if (methodSymbol.IsAbstract)
+            {
+                var overrides = SymbolFinder.FindOverridesAsync(searchSymbol, trackers.Solution)
+                    .GetAwaiter()
+                    .GetResult();
+                implementation = overrides
+                    .OfType<IMethodSymbol>()
+                    .FirstOrDefault(m => !m.IsAbstract && m.DeclaringSyntaxReferences.Length != 0);
+            }
+
+            var resolved = implementation ?? methodSymbol;
+            trackers.ImplementationMethodCache[key] = resolved;
+            return resolved;
+        }
 
         private static void ExpandIntoMethod(SyntaxNode syntaxNode, SemanticModel semanticModel, SyntaxKind syntaxKind, Dictionary<string, Document> documents, Trackers trackers, AdcConfig adcConfig, IMethodSymbol methodSymbol, ScribeNode currentParent)
         {
@@ -317,7 +362,7 @@ namespace RoslynScribe.Domain.Services
                 var contextSemanticModel = GetSemanticModel(location, semanticModel, documents, trackers.SemanticModelCache);
                 var methodNode = syntaxReferences[i].GetSyntax();
                 if (syntaxNode == methodNode)
-                { 
+                {
                     continue;
                 }
 
@@ -365,9 +410,9 @@ namespace RoslynScribe.Domain.Services
             var originalContext = methodSymbol.GetMethodContext();
 
             // check if configured type is containing type and only then check if configured method is part of containing type
-            if (TryFindConfiguredType(adcConfig, originalContext.ContainingType, out adcType))
+            if (TryGetConfiguredType(adcConfig, originalContext.ContainingType, out adcType))
             {
-                if (TryFindConfiguredMethod(adcType, originalContext, out adcMethod))
+                if (TryGetConfiguredMethod(adcType, originalContext, out adcMethod))
                 {
                     return AddConfiguredNode(expression, expressionKind, parentNode, methodSymbol, semanticModel, trackers, adcType, adcMethod, originalContext);
                 }
@@ -397,7 +442,7 @@ namespace RoslynScribe.Domain.Services
             return null;
         }
 
-        private static bool TryFindConfiguredType(AdcConfig adcConfig, string typeFullName, out AdcType adcType)
+        private static bool TryGetConfiguredType(AdcConfig adcConfig, string typeFullName, out AdcType adcType)
         {
             adcType = null;
 
@@ -419,7 +464,7 @@ namespace RoslynScribe.Domain.Services
         {
             adcMethod = null;
             var typeFullName = type.ToDisplayString();
-            if (!TryFindConfiguredType(adcConfig, typeFullName, out adcType))
+            if (!TryGetConfiguredType(adcConfig, typeFullName, out adcType))
             {
                 return false;
             }
@@ -459,7 +504,7 @@ namespace RoslynScribe.Domain.Services
                     //if (SymbolEqualityComparer.Default.Equals(impl, invokedMethod))
                     {
                         var context = ifaceMethod.GetMethodContext();
-                        if (TryFindConfiguredMethod(adcType, context, out adcMethod))
+                        if (TryGetConfiguredMethod(adcType, context, out adcMethod))
                         {
                             if (isMethodSignature && adcMethod != null && !adcMethod.IncludeMethodSignatures)
                             {
@@ -475,7 +520,7 @@ namespace RoslynScribe.Domain.Services
             return false;
         }
 
-        private static bool TryFindConfiguredMethod(AdcType adcType, MethodContext candidate, out AdcMethod adcMethod)
+        private static bool TryGetConfiguredMethod(AdcType adcType, MethodContext candidate, out AdcMethod adcMethod)
         {
             adcMethod = null;
             if (adcType.GetMethods == null || adcType.GetMethods.Length == 0)
@@ -537,7 +582,7 @@ namespace RoslynScribe.Domain.Services
                 Text = guideText,
             };
             var overrides = adcMethod?.SetGuidesOverrides ?? adcType.SetGuidesOverrides;
-            guides = GuidesOverridesParser.Apply(overrides, guides, context);
+            guides = GuidesOverridesParser.Apply(overrides, guides, context, syntaxKind);
 
             var configuredNode = AddChildNode(syntaxNode, syntaxKind, parentNode, value, guides, semanticModel, line, trackers);
             return configuredNode;

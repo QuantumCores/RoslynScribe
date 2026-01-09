@@ -4,6 +4,7 @@ using RoslynScribe.Domain.Extensions;
 using RoslynScribe.Domain.Models;
 using RoslynScribe.Domain.Services;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -534,7 +535,8 @@ namespace RoslynScribe.Domain.Tests
                                         {
                                             new ScribeNode
                                             {
-                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IHandler.Handle(object)`,L:`2`]" },
+                                                // interface invocation should point to implementation
+                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.Handler.Handle(object)`,L:`2`]" },
                                             },
                                         },
                                     },
@@ -609,6 +611,14 @@ namespace RoslynScribe.Domain.Tests
                                     new ScribeNode
                                     {
                                         Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IHandler.Handle(object)`,L:`2`]" },
+                                        ChildNodes = new List<ScribeNode>
+                                        {
+                                            new ScribeNode
+                                            {
+                                                // declaration
+                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.Handler.Handle(object)`,L:`2`]" },
+                                            },
+                                        },
                                     },
                                     new ScribeNode
                                     {
@@ -684,6 +694,14 @@ namespace RoslynScribe.Domain.Tests
                                     new ScribeNode
                                     {
                                         Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IExpandedHandler.HandleWithResult(object)`,L:`2`]" },
+                                        ChildNodes = new List<ScribeNode>()
+                                        {
+                                            new ScribeNode
+                                            {
+                                                // declaration
+                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S013_Adc_ExtendedInterface.ExpandedHandler.HandleWithResult(object)`,L:`2`]" },
+                                            }
+                                        }
                                     },
                                     new ScribeNode
                                     {
@@ -712,6 +730,10 @@ namespace RoslynScribe.Domain.Tests
 
             // Act
             var result = await ScribeAnalyzer.Analyze(TestFixture.GetSolution(), "RoslynScribe.TestProject", "S014_Adc_ExtendedInterfaceWithResult.cs", adcConfig);
+
+            var sb = new StringBuilder();
+            result.ToString(sb, 1);
+            var str = sb.ToString();
 
             // var json = JsonSerializer.Serialize(result);
             // Assert

@@ -10,10 +10,26 @@ namespace RoslynScribe.Domain.Extensions
 {
     internal static class IMethodSymbolExtensions
     {
+        /// <summary>
+        /// Returns a unique string key that identifies the specified method original containing type, symbol, including its generic arity and
+        /// signature.
+        /// </summary>
+        /// <remarks>The returned key is stable across calls and includes generic type information, making
+        /// it suitable for scenarios where method identity must be preserved, such as symbol analysis or
+        /// caching.</remarks>
+        /// <param name="symbol">The method symbol for which to generate a unique key. Cannot be null.</param>
+        /// <returns>A string that uniquely represents the method's definition, suitable for use as a key in collections or
+        /// comparisons.</returns>
         internal static string GetMethodKey(this IMethodSymbol symbol)
         {
             // Using OriginalDefinition keeps generic arity and signature stable across calls
             return symbol.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
+        }
+
+        private static string GetMethodIdentifier(this IMethodSymbol symbol)
+        {
+            var key = symbol.GetMethodKey();
+            return key.Replace(symbol.OriginalDefinition.ContainingType.ToDisplayString() + ".", string.Empty);
         }
 
         internal static void EnrichMethodContext(this IMethodSymbol symbol, MethodContext methodContext, SyntaxNode syntaxNode, SemanticModel semanticModel, AdcType adcType, AdcMethod adcMethod)
@@ -70,12 +86,6 @@ namespace RoslynScribe.Domain.Extensions
             return symbol.Parameters
                 .Select(p => MethodContext.NormalizeTypeFullName(p.Type.ToDisplayString()))
                 .ToArray();
-        }
-
-        private static string GetMethodIdentifier(this IMethodSymbol symbol)
-        {
-            var key = symbol.GetMethodKey();
-            return key.Replace(symbol.OriginalDefinition.ContainingType.ToDisplayString() + ".", string.Empty);
         }
 
         private static string[] GetGenericTypeParameters(this IMethodSymbol symbol)

@@ -1,6 +1,7 @@
 ﻿using RoslynScribe.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace RoslynScribe.Domain.Extensions
 {
@@ -64,6 +65,16 @@ namespace RoslynScribe.Domain.Extensions
             }
 
             return (true, null);
+        }
+
+        public static void ToString(this ScribeNode node, StringBuilder sb, int indent)
+        {
+            sb.AppendLine($"{new string(' ', indent + 2)} {node.ToString()}");
+            indent += 2;
+            foreach (var child in node.ChildNodes)
+            {
+                child.ToString(sb, indent);
+            }
         }
 
         private static string Text(ScribeNode leftNode, ScribeNode rightNode, string property, string additionalText)
