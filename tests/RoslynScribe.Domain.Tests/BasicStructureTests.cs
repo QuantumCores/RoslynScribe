@@ -616,7 +616,7 @@ namespace RoslynScribe.Domain.Tests
                                             new ScribeNode
                                             {
                                                 // declaration
-                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.Handler.Handle(object)`,L:`2`]" },
+                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S013_Adc_ExtendedInterface.ExpandedHandler.Handle(object)`,L:`2`]" },
                                             },
                                         },
                                     },
@@ -699,7 +699,7 @@ namespace RoslynScribe.Domain.Tests
                                             new ScribeNode
                                             {
                                                 // declaration
-                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S013_Adc_ExtendedInterface.ExpandedHandler.HandleWithResult(object)`,L:`2`]" },
+                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.S014_Adc_ExtendedInterfaceWithResult.ExpandedHandler.HandleWithResult(object)`,L:`2`]" },
                                             }
                                         }
                                     },
@@ -781,6 +781,14 @@ namespace RoslynScribe.Domain.Tests
                                     new ScribeNode
                                     {
                                         Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.OtherTestProject.IGenericHandler<RoslynScribe.TestProject.Message>.Handle(T123)`,L:`2`]" },
+                                        ChildNodes = new List<ScribeNode>
+                                        {
+                                            new ScribeNode
+                                            {
+                                                // declaration
+                                                Value = new string[] { $"// {ScribeAnalyzer.CommentLabel}[T:`RoslynScribe.TestProject.GenericHandler<T>.Handle(T)`,L:`2`]" },
+                                            }
+                                        },
                                     },
                                     new ScribeNode
                                     {

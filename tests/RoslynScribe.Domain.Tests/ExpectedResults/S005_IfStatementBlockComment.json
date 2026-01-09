@@ -11,13 +11,14 @@
     "TypeName": "S005_IfStatementBlockComment",
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S005_IfStatementBlockComment.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "2oL6EbxK",
       "Value": [
-        "// [ADC][T:\u0060Check condition value\u0060]"
+        "// [ADC][T:`Check condition value`]"
       ],
       "Guides": {
         "Uid": null,
@@ -37,13 +38,14 @@
         "TypeName": "S005_IfStatementBlockComment",
         "MemberName": null,
         "Identifier": null,
-        "Line": 6
+        "Line": 6,
+        "SolutionName": "Test"
       },
       "ChildNodes": [
         {
           "Id": "3kPb8pjv",
           "Value": [
-            "// [ADC][T:\u0060S005 If condition is one then 1\u0060]"
+            "// [ADC][T:`S005 If condition is one then 1`]"
           ],
           "Guides": {
             "Uid": null,
@@ -63,14 +65,15 @@
             "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
             "Identifier": null,
-            "Line": 9
+            "Line": 9,
+            "SolutionName": "Test"
           },
           "ChildNodes": []
         },
         {
           "Id": "yyA3YjJ7",
           "Value": [
-            "// [ADC][T:\u0060S005 If condition is two then 2\u0060]"
+            "// [ADC][T:`S005 If condition is two then 2`]"
           ],
           "Guides": {
             "Uid": null,
@@ -90,14 +93,15 @@
             "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
             "Identifier": null,
-            "Line": 14
+            "Line": 14,
+            "SolutionName": "Test"
           },
           "ChildNodes": []
         },
         {
           "Id": "zuEYSx5i",
           "Value": [
-            "// [ADC][T:\u0060S005 If condition is other then -1\u0060]"
+            "// [ADC][T:`S005 If condition is other then -1`]"
           ],
           "Guides": {
             "Uid": null,
@@ -117,7 +121,8 @@
             "TypeName": "S005_IfStatementBlockComment",
             "MemberName": null,
             "Identifier": null,
-            "Line": 19
+            "Line": 19,
+            "SolutionName": "Test"
           },
           "ChildNodes": []
         }

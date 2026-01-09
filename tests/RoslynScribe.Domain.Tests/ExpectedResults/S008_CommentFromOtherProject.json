@@ -11,13 +11,14 @@
     "TypeName": "S008_CommentFromOtherProject",
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S008_CommentFromOtherProject.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "Yd4u54dt",
       "Value": [
-        "// [ADC][T:\u0060S008 Nodes shared comment\u0060]"
+        "// [ADC][T:`S008 Nodes shared comment`]"
       ],
       "Guides": {
         "Uid": null,
@@ -37,14 +38,15 @@
         "TypeName": "S008_CommentFromOtherProject",
         "MemberName": null,
         "Identifier": null,
-        "Line": 8
+        "Line": 8,
+        "SolutionName": "Test"
       },
       "ChildNodes": []
     },
     {
       "Id": "Q9lkWeQa",
       "Value": [
-        "// [ADC][T:\u0060OtherLogic Multiply two numbers\u0060,L:\u00602\u0060,D:\u0060IrrelevantDescription\u0060]"
+        "// [ADC][T:`OtherLogic Multiply two numbers`,L:`2`,D:`IrrelevantDescription`]"
       ],
       "Guides": {
         "Uid": null,
@@ -64,13 +66,14 @@
         "TypeName": "OtherLogic",
         "MemberName": "Multiply",
         "Identifier": "RoslynScribe.OtherTestProject.OtherLogic.Multiply(int, int)",
-        "Line": 5
+        "Line": 5,
+        "SolutionName": "Test"
       },
       "ChildNodes": [
         {
           "Id": "vieY1Tdg",
           "Value": [
-            "// [ADC][T:\u0060OtherLogic This is multiplication result\u0060]"
+            "// [ADC][T:`OtherLogic This is multiplication result`]"
           ],
           "Guides": {
             "Uid": null,
@@ -90,7 +93,8 @@
             "TypeName": "OtherLogic",
             "MemberName": "Multiply",
             "Identifier": null,
-            "Line": 8
+            "Line": 8,
+            "SolutionName": "Test"
           },
           "ChildNodes": []
         }

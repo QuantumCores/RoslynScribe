@@ -11,13 +11,14 @@
     "TypeName": null,
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S001_BasicComments.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "bBuRaQdn",
       "Value": [
-        "// [ADC][T:\u0060S001 namespace comment\u0060]"
+        "// [ADC][T:`S001 namespace comment`]"
       ],
       "Guides": {
         "Uid": null,
@@ -37,13 +38,14 @@
         "TypeName": "S001_BasicComments",
         "MemberName": null,
         "Identifier": "RoslynScribe.TestProject",
-        "Line": 0
+        "Line": 0,
+        "SolutionName": "Test"
       },
       "ChildNodes": [
         {
           "Id": "fvhJqu8y",
           "Value": [
-            "// [ADC][T:\u0060S001 BasicTestClass\u0060]"
+            "// [ADC][T:`S001 BasicTestClass`]"
           ],
           "Guides": {
             "Uid": null,
@@ -63,13 +65,14 @@
             "TypeName": "S001_BasicComments",
             "MemberName": null,
             "Identifier": "S001_BasicComments",
-            "Line": 3
+            "Line": 3,
+            "SolutionName": "Test"
           },
           "ChildNodes": [
             {
               "Id": "aQjdhHUT",
               "Value": [
-                "// [ADC][T:\u0060S001 BasicMethod\u0060]"
+                "// [ADC][T:`S001 BasicMethod`]"
               ],
               "Guides": {
                 "Uid": null,
@@ -89,13 +92,14 @@
                 "TypeName": "S001_BasicComments",
                 "MemberName": "S001_BasicMethod",
                 "Identifier": "RoslynScribe.TestProject.S001_BasicComments.S001_BasicMethod(int)",
-                "Line": 6
+                "Line": 6,
+                "SolutionName": "Test"
               },
               "ChildNodes": [
                 {
                   "Id": "X99tWySj",
                   "Value": [
-                    "// [ADC][T:\u0060S001 result\u0060]"
+                    "// [ADC][T:`S001 result`]"
                   ],
                   "Guides": {
                     "Uid": null,
@@ -115,7 +119,8 @@
                     "TypeName": "S001_BasicComments",
                     "MemberName": "S001_BasicMethod",
                     "Identifier": null,
-                    "Line": 9
+                    "Line": 9,
+                    "SolutionName": "Test"
                   },
                   "ChildNodes": []
                 }

@@ -11,13 +11,14 @@
     "TypeName": "S004_TestClass",
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S004_CommentFromOtherClassMethod.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "2VdZPi2Z",
       "Value": [
-        "// [ADC][T:\u0060S004 return addition\u0060]"
+        "// [ADC][T:`S004 return addition`]"
       ],
       "Guides": {
         "Uid": null,
@@ -37,13 +38,14 @@
         "TypeName": "S004_TestClass",
         "MemberName": "S004_SecondMethod",
         "Identifier": "RoslynScribe.TestProject.S004_TestClass.S004_SecondMethod(int)",
-        "Line": 4
+        "Line": 4,
+        "SolutionName": "Test"
       },
       "ChildNodes": [
         {
           "Id": "YvicELCd",
           "Value": [
-            "// [ADC][T:\u0060S004 Nodes shared comment get logic data\u0060]"
+            "// [ADC][T:`S004 Nodes shared comment get logic data`]"
           ],
           "Guides": {
             "Uid": null,
@@ -63,14 +65,15 @@
             "TypeName": "S004_TestClass",
             "MemberName": "S004_SecondMethod",
             "Identifier": null,
-            "Line": 7
+            "Line": 7,
+            "SolutionName": "Test"
           },
           "ChildNodes": []
         },
         {
           "Id": "AvXavq06",
           "Value": [
-            "// [ADC][T:\u0060Logic Add two numbers\u0060,L:\u00602\u0060]"
+            "// [ADC][T:`Logic Add two numbers`,L:`2`]"
           ],
           "Guides": {
             "Uid": null,
@@ -90,13 +93,14 @@
             "TypeName": "Logic",
             "MemberName": "Add",
             "Identifier": "RoslynScribe.TestProject.Logic.Add(int, int)",
-            "Line": 4
+            "Line": 4,
+            "SolutionName": "Test"
           },
           "ChildNodes": [
             {
               "Id": "7romtLtN",
               "Value": [
-                "// [ADC][T:\u0060Logic This is add result\u0060]"
+                "// [ADC][T:`Logic This is add result`]"
               ],
               "Guides": {
                 "Uid": null,
@@ -116,7 +120,8 @@
                 "TypeName": "Logic",
                 "MemberName": "Add",
                 "Identifier": null,
-                "Line": 7
+                "Line": 7,
+                "SolutionName": "Test"
               },
               "ChildNodes": []
             }

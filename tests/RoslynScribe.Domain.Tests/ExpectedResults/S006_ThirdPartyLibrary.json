@@ -11,13 +11,14 @@
     "TypeName": "S006_ThirdPartyLibrary",
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S006_ThirdPartyLibrary.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "sHQAVHis",
       "Value": [
-        "// [ADC][T:\u0060S006 call external method to add days\u0060]"
+        "// [ADC][T:`S006 call external method to add days`]"
       ],
       "Guides": {
         "Uid": null,
@@ -37,7 +38,8 @@
         "TypeName": "S006_ThirdPartyLibrary",
         "MemberName": null,
         "Identifier": null,
-        "Line": 7
+        "Line": 7,
+        "SolutionName": "Test"
       },
       "ChildNodes": []
     }

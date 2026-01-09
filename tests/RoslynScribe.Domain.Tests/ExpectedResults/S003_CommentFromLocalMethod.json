@@ -11,13 +11,14 @@
     "TypeName": "S003_TestClass",
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S003_CommentFromLocalMethod.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "sEB5E87J",
       "Value": [
-        "// [ADC][T:\u0060S003 basicMethod\u0060]"
+        "// [ADC][T:`S003 basicMethod`]"
       ],
       "Guides": {
         "Uid": null,
@@ -37,13 +38,14 @@
         "TypeName": "S003_TestClass",
         "MemberName": "S003_BasicMethod",
         "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)",
-        "Line": 4
+        "Line": 4,
+        "SolutionName": "Test"
       },
       "ChildNodes": [
         {
           "Id": "EjAPzTU1",
           "Value": [
-            "// [ADC][T:\u0060S003 basic result\u0060]"
+            "// [ADC][T:`S003 basic result`]"
           ],
           "Guides": {
             "Uid": null,
@@ -63,7 +65,8 @@
             "TypeName": "S003_TestClass",
             "MemberName": "S003_BasicMethod",
             "Identifier": null,
-            "Line": 7
+            "Line": 7,
+            "SolutionName": "Test"
           },
           "ChildNodes": []
         }
@@ -72,7 +75,7 @@
     {
       "Id": "zALCCOcV",
       "Value": [
-        "// [ADC][T:\u0060S003 second method\u0060]"
+        "// [ADC][T:`S003 second method`]"
       ],
       "Guides": {
         "Uid": null,
@@ -92,13 +95,14 @@
         "TypeName": "S003_TestClass",
         "MemberName": "S003_SecondMethod",
         "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_SecondMethod(int)",
-        "Line": 11
+        "Line": 11,
+        "SolutionName": "Test"
       },
       "ChildNodes": [
         {
           "Id": "cFjuGZyD",
           "Value": [
-            "// [ADC][T:\u0060S003 call basicMethod\u0060]"
+            "// [ADC][T:`S003 call basicMethod`]"
           ],
           "Guides": {
             "Uid": null,
@@ -118,13 +122,14 @@
             "TypeName": "S003_TestClass",
             "MemberName": "S003_SecondMethod",
             "Identifier": null,
-            "Line": 14
+            "Line": 14,
+            "SolutionName": "Test"
           },
           "ChildNodes": [
             {
               "Id": "sEB5E87J",
               "Value": [
-                "// [ADC][T:\u0060S003 basicMethod\u0060]"
+                "// [ADC][T:`S003 basicMethod`]"
               ],
               "Guides": {
                 "Uid": null,
@@ -144,13 +149,14 @@
                 "TypeName": "S003_TestClass",
                 "MemberName": "S003_BasicMethod",
                 "Identifier": "RoslynScribe.TestProject.S003_TestClass.S003_BasicMethod(int)",
-                "Line": 4
+                "Line": 4,
+                "SolutionName": "Test"
               },
               "ChildNodes": [
                 {
                   "Id": "EjAPzTU1",
                   "Value": [
-                    "// [ADC][T:\u0060S003 basic result\u0060]"
+                    "// [ADC][T:`S003 basic result`]"
                   ],
                   "Guides": {
                     "Uid": null,
@@ -170,7 +176,8 @@
                     "TypeName": "S003_TestClass",
                     "MemberName": "S003_BasicMethod",
                     "Identifier": null,
-                    "Line": 7
+                    "Line": 7,
+                    "SolutionName": "Test"
                   },
                   "ChildNodes": []
                 }

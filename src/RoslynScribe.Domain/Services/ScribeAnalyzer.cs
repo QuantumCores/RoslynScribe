@@ -1,7 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.MSBuild;
 using RoslynScribe.Domain.Configuration;
 using RoslynScribe.Domain.Extensions;
@@ -289,7 +288,7 @@ namespace RoslynScribe.Domain.Services
             // even if configuredNode is null we want to expand into method to process comments inside it
             var currentParent = configuredNode ?? parentNode;
             var targetMethodSymbol = syntaxKind == SyntaxKind.InvocationExpression
-                ? ResolveImplementationMethodSymbol(methodSymbol, trackers)
+                ? ImplementationResolver.ResolveImplementationMethodSymbol(methodSymbol, syntaxNode as InvocationExpressionSyntax, semanticModel, documents, adcConfig, trackers)
                 : methodSymbol;
             ExpandIntoMethod(syntaxNode, semanticModel, syntaxKind, documents, trackers, adcConfig, targetMethodSymbol, currentParent);
 
@@ -299,49 +298,13 @@ namespace RoslynScribe.Domain.Services
             return configuredNode;
         }
 
-        private static IMethodSymbol ResolveImplementationMethodSymbol(IMethodSymbol methodSymbol, Trackers trackers)
-        {
-            if (methodSymbol == null || trackers.Solution == null)
-            {
-                return methodSymbol;
-            }
-
-            var key = methodSymbol.GetMethodKey();
-            if (trackers.ImplementationMethodCache.TryGetValue(key, out var cached))
-            {
-                return cached;
-            }
-
-            var searchSymbol = methodSymbol.OriginalDefinition;
-            IMethodSymbol implementation = null;
-
-            if (methodSymbol.ContainingType?.TypeKind == TypeKind.Interface)
-            {
-                var implementations = SymbolFinder.FindImplementationsAsync(searchSymbol, trackers.Solution)
-                    .GetAwaiter()
-                    .GetResult();
-                implementation = implementations
-                    .OfType<IMethodSymbol>()
-                    .OrderBy(x => x.GetMethodKey())
-                    .FirstOrDefault(m => m.DeclaringSyntaxReferences.Length != 0);
-            }
-            else if (methodSymbol.IsAbstract)
-            {
-                var overrides = SymbolFinder.FindOverridesAsync(searchSymbol, trackers.Solution)
-                    .GetAwaiter()
-                    .GetResult();
-                implementation = overrides
-                    .OfType<IMethodSymbol>()
-                    .FirstOrDefault(m => !m.IsAbstract && m.DeclaringSyntaxReferences.Length != 0);
-            }
-
-            var resolved = implementation ?? methodSymbol;
-            trackers.ImplementationMethodCache[key] = resolved;
-            return resolved;
-        }
-
         private static void ExpandIntoMethod(SyntaxNode syntaxNode, SemanticModel semanticModel, SyntaxKind syntaxKind, Dictionary<string, Document> documents, Trackers trackers, AdcConfig adcConfig, IMethodSymbol methodSymbol, ScribeNode currentParent)
         {
+            if (methodSymbol == null)
+            {
+                return;
+            }
+
             // Avoid infinite recursion
             var methodKey = syntaxKind.ToString() + "_" + methodSymbol.GetMethodKey();
             if (!trackers.RecursionStack.Add(methodKey))

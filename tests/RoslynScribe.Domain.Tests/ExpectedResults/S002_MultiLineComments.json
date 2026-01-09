@@ -11,14 +11,15 @@
     "TypeName": null,
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S002_MultiLineComments.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "VuEuFKHr",
       "Value": [
-        "// [ADC][T:\u0060S002 namespace comment\u0060]",
-        "// [ADC][T:\u0060S002 second namespace comment\u0060]"
+        "// [ADC][T:`S002 namespace comment`]",
+        "// [ADC][T:`S002 second namespace comment`]"
       ],
       "Guides": {
         "Uid": null,
@@ -38,14 +39,15 @@
         "TypeName": "S002_MultiLineComments",
         "MemberName": null,
         "Identifier": "RoslynScribe.TestProject",
-        "Line": 0
+        "Line": 0,
+        "SolutionName": "Test"
       },
       "ChildNodes": [
         {
           "Id": "p1jwHMYz",
           "Value": [
-            "// [ADC][T:\u0060S002 class comment\u0060]",
-            "// [ADC][T:\u0060S002 second class comment\u0060]"
+            "// [ADC][T:`S002 class comment`]",
+            "// [ADC][T:`S002 second class comment`]"
           ],
           "Guides": {
             "Uid": null,
@@ -65,14 +67,15 @@
             "TypeName": "S002_MultiLineComments",
             "MemberName": null,
             "Identifier": "S002_MultiLineComments",
-            "Line": 4
+            "Line": 4,
+            "SolutionName": "Test"
           },
           "ChildNodes": [
             {
               "Id": "gnPeiZ9Z",
               "Value": [
-                "// [ADC][T:\u0060S002 BasicMethod\u0060]",
-                "// [ADC][T:\u0060S002 second method comment\u0060]"
+                "// [ADC][T:`S002 BasicMethod`]",
+                "// [ADC][T:`S002 second method comment`]"
               ],
               "Guides": {
                 "Uid": null,
@@ -92,14 +95,15 @@
                 "TypeName": "S002_MultiLineComments",
                 "MemberName": "S002_BasicMethod",
                 "Identifier": "RoslynScribe.TestProject.S002_MultiLineComments.S002_BasicMethod(int)",
-                "Line": 8
+                "Line": 8,
+                "SolutionName": "Test"
               },
               "ChildNodes": [
                 {
                   "Id": "MqljbC6e",
                   "Value": [
-                    "// [ADC][T:\u0060S002 result\u0060]",
-                    "// [ADC][T:\u0060S002 seconod result\u0060]"
+                    "// [ADC][T:`S002 result`]",
+                    "// [ADC][T:`S002 seconod result`]"
                   ],
                   "Guides": {
                     "Uid": null,
@@ -119,7 +123,8 @@
                     "TypeName": "S002_MultiLineComments",
                     "MemberName": "S002_BasicMethod",
                     "Identifier": null,
-                    "Line": 12
+                    "Line": 12,
+                    "SolutionName": "Test"
                   },
                   "ChildNodes": []
                 }

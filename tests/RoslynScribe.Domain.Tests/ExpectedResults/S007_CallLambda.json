@@ -11,13 +11,14 @@
     "TypeName": "S007_CallLambda",
     "MemberName": null,
     "Identifier": "src\\RoslynScribe.TestProject\\S007_CallLambda.cs",
-    "Line": 0
+    "Line": 0,
+    "SolutionName": "Test"
   },
   "ChildNodes": [
     {
       "Id": "pb7fDS1D",
       "Value": [
-        "// [ADC][T:\u0060S007 prepare lambda\u0060]"
+        "// [ADC][T:`S007 prepare lambda`]"
       ],
       "Guides": {
         "Uid": null,
@@ -37,14 +38,15 @@
         "TypeName": "S007_CallLambda",
         "MemberName": null,
         "Identifier": null,
-        "Line": 6
+        "Line": 6,
+        "SolutionName": "Test"
       },
       "ChildNodes": []
     },
     {
       "Id": "vScxEeL0",
       "Value": [
-        "// [ADC][T:\u0060S007 add one in lambda expression\u0060]"
+        "// [ADC][T:`S007 add one in lambda expression`]"
       ],
       "Guides": {
         "Uid": null,
@@ -64,7 +66,8 @@
         "TypeName": "S007_CallLambda",
         "MemberName": null,
         "Identifier": null,
-        "Line": 10
+        "Line": 10,
+        "SolutionName": "Test"
       },
       "ChildNodes": []
     }
